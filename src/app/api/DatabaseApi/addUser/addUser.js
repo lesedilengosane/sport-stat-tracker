@@ -11,10 +11,10 @@ export async function createUser(userData) {
   const { data, error } = await supabase
     .from('users')
     .insert([{
-      auth_user_id: userData.auth_user_id,
-      first_name: userData.first_name,
-      last_name: userData.last_name,
-      role: userData.role
+      auth_user_id: String(userData.auth_user_id),
+      first_name: String(userData.first_name),
+      last_name: String(userData.last_name),
+      role: String(userData.role)
     }])
     .select()
 
