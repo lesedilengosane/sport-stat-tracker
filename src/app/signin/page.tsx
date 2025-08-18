@@ -58,7 +58,7 @@ export default function SignIn() {
             {/* Heading */}
             <h2 className="text-3xl font-bold mb-4 text-black">WELCOME BACK</h2>
             <p className="text-gray-500 mb-8">
-              Use your existing Google Account to log in
+              Use your existing Google Account to Log In
             </p>
 
             {/* Google Button */}

@@ -48,12 +48,18 @@ export async function POST(request: Request) {
       { status: 201 }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
       {
-        error: "Internal server error",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined,
-      },
+      error: "Internal server error",
+      details: process.env.NODE_ENV === 'development' 
+        ? error instanceof Error 
+          ? error.message 
+          : typeof error === 'string'
+            ? error
+            : 'Unknown error'
+        : undefined,
+    },
       { status: 500 }
     );
   }
