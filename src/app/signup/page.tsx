@@ -23,7 +23,7 @@ export default function SignUp() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="max-h-screen">
           {/* Background Image */}
           <div className="absolute inset-0">
             <Image
@@ -62,17 +62,17 @@ export default function SignUp() {
                 </p>
 
                 <div className="mb-6 text-left">
-                  <label className="block text-sm font-medium text-black mb-2">
+                  <label className="block text-sm font-medium text-gray-500 mb-2">
                     Role:
                   </label>
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value as "Coach" | "Analyst" | "Fan")}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-orange-400 text-black bg-white"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-orange-400 text-sm font-medium text-gray-500 mb-2 bg-white"
                   >
-                    <option value="Coach">Coach</option>
-                    <option value="Analyst">Analyst</option>
-                    <option value="Fan">Fan</option>
+                    <option value="Coach" className="block text-sm font-medium text-gray-500 mb-2">Coach</option>
+                    <option value="Analyst" className="block text-sm font-medium text-gray-500 mb-2">Analyst</option>
+                    <option value="Fan" className="block text-sm font-medium text-gray-500 mb-2">Fan</option>
                     </select>
                 </div>
     

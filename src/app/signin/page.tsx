@@ -22,15 +22,15 @@ export default function SignIn() {
   };
 
   return (
-    <div className="relative min-h-screen">
+    <div className="max-h-screen">
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <div className="max-h-screen absolute inset-0">
         <Image
           src="/bg.jpg" // put your background image in public/
           alt="Background"
           className="w-full h-full object-cover"
           fill={true} // Fill the parent container
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          sizes="100vw"
           quality={80}
           priority
         />
@@ -82,6 +82,6 @@ export default function SignIn() {
         </div>
       </div>
     </div>
-    
+     
   );
 }
