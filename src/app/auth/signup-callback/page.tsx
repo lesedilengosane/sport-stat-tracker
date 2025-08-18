@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "../../api/DatabaseApi/supabaseClient";
 
 export default function CallbackPage() {
   const router = useRouter();
-  const params = useSearchParams();
-  const roleParam = (params.get("role") ?? "Fan") as "Coach" | "Analyst" | "Fan";
+  const [roleParam, setRoleParam] = useState<"Coach" | "Analyst" | "Fan">("Fan");
 
   useEffect(() => {
-    (async () => {
-      // Get the authenticated user after redirect
-      const { data: { user }, error } = await supabase.auth.getUser();
+    // Grab query params safely on client
+    const params = new URLSearchParams(window.location.search);
+    setRoleParam((params.get("role") ?? "Fan") as "Coach" | "Analyst" | "Fan");
+  }, []);
+  
+  useEffect(() => {
+    if (!roleParam) return; // Wait until roleParam is set
 
+    (async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
-        console.error("Callback user fetch error:", error?.message);
         alert("Authentication failed. Please try again.");
         router.push("/");
         return;
@@ -24,7 +28,6 @@ export default function CallbackPage() {
       const fullName = user.user_metadata?.full_name || "";
       const [firstName = "", lastName = ""] = fullName.split(" ");
 
-      // Call your API route
       const res = await fetch("/api/DatabaseApi/addUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -36,9 +39,7 @@ export default function CallbackPage() {
         }),
       });
 
-      // Read result and branch
       if (res.status === 409) {
-        // Existing user → sign out and go back to landing (or /login)
         await supabase.auth.signOut();
         alert("An account with this email already exists.\nPlease sign in instead.");
         router.push("/");
@@ -54,7 +55,6 @@ export default function CallbackPage() {
         return;
       }
 
-      // Success → go to dashboard
       router.push("/dashboard");
     })();
   }, [router, roleParam]);
