@@ -58,5 +58,54 @@ git push
 
 ## Project rules and conventions
 
+### Must know beforehand:
+* We are working on 2 main branches,namely `Dev` and `minidev`
+* `Dev` is the production enviroment while `minidev` is the preview enviroment that is tested thoroughly before deployment
+* `Dev` ruleset is that it gets updated by `minidev` after 2 reviews and major changes have been incorporated,this will be done twice a week atmost
+* `minidev` ruleset is that You need atleast 1 approval from any memeber to merge Your feature in
+* You will always pull fromm`minidev` and then branch out,that is create Your working branch according to the convention to be spevified below
+* You will then merge changes to this `minidev` upon an approval
+* Make sure Your PR message is as descriptive as possible we do not want to decode some encryptic language that you speak with your maidee here.
+
+### Adding a branch
+* Branch names should follow a clear format depending on the type of work being done.  
+Use **lowercase letters** with **hyphens (`-`)** to separate words.
+### Format
+type/scope-description
+
+
+- **type** → what you are doing (`style`, `build`, `fix`, `integration`)  
+- **scope** → the component, file, or area of the codebase  
+- **description** → short and clear description of the change  
+
+---
+
+### Examples
+
+#### 1. Styling
+`style/navbar-colors`
+`style/login-form-spacing`
+
+#### 2. Building a Component
+`build/signup-form`
+`build/dashboard-widget`
+
+
+#### 3. Fixing a Bug
+
+
+`fix/navbar-overlap`
+`fix/order-list-pagination`
+
+
+#### 4. Integrating with Another File/Component
+`integration/auth-api`
+`integration/payment-service`
+
+
+---
+
+### Variables 
+
 ## Project structure 
 ## Project stack
