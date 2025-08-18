@@ -22,14 +22,66 @@ export default function SignIn() {
   };
 
   return (
-    <div className={styles.container}>
-      <Image src="/bgrs.jpeg" alt="Background" fill priority className={styles.bgImage} />
-      <div className={styles.overlay}>
-        <h1 className={styles.title}>Sports Stat Tracker</h1>
-        <button onClick={handleGoogleSignIn} className={styles.btn}>
-          Sign In with Google
-        </button>
+    <div className="relative min-h-screen">
+      {/* Background Image */}
+      <div className="absolute inset-0">
+        <Image
+          src="/bg.jpg" // put your background image in public/
+          alt="Background"
+          className="w-full h-full object-cover"
+          fill={true} // Fill the parent container
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          quality={80}
+          priority
+        />
+        <div
+          className="absolute inset-0 backdrop-blur-sm"
+          style={{ backgroundColor: "rgba(11, 19, 43, 0.6)" }}
+          ></div>
+      </div>
+
+      {/* Overlay Section */}
+      <div className="relative m-16 min-h-[calc(100vh-128px)] flex rounded-2xl overflow-hidden shadow-lg">
+        {/* Left Side */}
+        <div className="w-1/2 relative">
+        <Image
+            fill
+            src="/bg.jpg" // replace with your ball+hoop image
+            alt="Basketball"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Right Side */}
+         <div className="w-1/2 bg-white flex items-center justify-center">
+          <div className="max-w-md w-full text-center p-8">
+            {/* Heading */}
+            <h2 className="text-3xl font-bold mb-4 text-black">WELCOME BACK</h2>
+            <p className="text-gray-500 mb-8">
+              Use your existing Google Account to log in
+            </p>
+
+            {/* Google Button */}
+            <button
+              onClick={handleGoogleSignIn}
+              type="button"
+              className="w-full border border-gray-300 py-3 rounded-lg flex items-center justify-center gap-3 hover:bg-gray-50 transition"
+            >
+              <Image
+                width={5}
+                height={5}
+                src="/google-icon.svg" // add google icon to public/
+                alt="Google"
+                className="h-5 w-5"
+              />
+              <span className="font-medium text-gray-700">
+                Sign in with Google
+              </span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
+    
   );
 }
