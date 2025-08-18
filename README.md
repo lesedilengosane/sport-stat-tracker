@@ -1,7 +1,19 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Getting Started
+## How to Contribute
 
+### Setting things up locally
+
+* First start a new folder on Your machine and clone this repository with the command:
+```bash
+git clone <repo-url>
+```
+* Navigate to the project and then open it in VScode
+* Install all project dependencies by running the command.
+  (NB:You need to make sure all dependencies are properly installed otherwise it will crash)
+```bash
+npm run install
+```
+### Getting things started with the app or main branch
 First, run the development server:
 
 ```bash
@@ -14,23 +26,37 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see all updates and current state of the product or app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Working on a feature or fixing a bug
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* Create a new branch that You will be working on
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-## Learn More
+* To test Your feature's behaviour do follow the above instructions under [Getting things started with the app or main branch](https://github.com/Cipher-Pol-Aigis-Zero/sport-stat-tracker/edit/Dev/README.md#working-on-a-feature-or-fixing-a-bug)
 
-To learn more about Next.js, take a look at the following resources:
+* To commit the code written You can then follow this sequence of git commands:
+```bash
+git add .
+git commit -m <commit message>
+git push
+```
+* Navigate to the repo on github then make a Pull-Request for Your branch
+* Upon receiving appropriate approval Your features will be merged into the main branch where it will be automatically get deployed into the production enviroment
+* Visit the production app by clicking [here](https://sport-stat-tracker-syg3.vercel.app
+)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Project rules and conventions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure 
+## Project stack
