@@ -53,8 +53,30 @@ export default function SignInCallback() {
   }, [router]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Processing authentication...</p>
+  <div className="flex items-center justify-center min-h-screen bg-black">
+    <div className="text-center">
+      {/* Bouncing basketball */}
+      <div className="mx-auto mb-6 w-12 h-12 rounded-full bg-orange-500 relative animate-bounce-ball"></div>
+
+      <h1 className="text-2xl font-bold text-orange-500 mb-2">
+        Just checking your shot...
+      </h1>
+      <p className="text-gray-300">
+        Getting you in the game — hold tight, we’re setting up your court.
+      </p>
     </div>
-  );
+
+    {/* Animation styling */}
+    <style jsx>{`
+      @keyframes bounce-ball {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-40px); }
+      }
+      .animate-bounce-ball {
+        animation: bounce-ball 0.6s ease-in-out infinite;
+      }
+    `}</style>
+  </div>
+);
+
 }
