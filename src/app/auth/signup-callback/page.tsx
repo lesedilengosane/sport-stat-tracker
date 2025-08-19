@@ -6,7 +6,7 @@ import { supabase } from "../../api/DatabaseApi/supabaseClient";
 
 export default function CallbackPage() {
   const router = useRouter();
-  const [roleParam, setRoleParam] = useState<"Coach" | "Analyst" | "Fan">("Fan");
+  const [roleParam, setRoleParam] = useState<"Coach" | "Analyst" | "Fan" | null>(null)
 
   useEffect(() => {
     // Grab query params safely on client
