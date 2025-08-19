@@ -71,7 +71,7 @@ export default function Home() {
               showText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
             }`}
           >
-            THE BRIGHTEST LIGHTS. THE LOUDEST CROWDS. THE BIGGEST GAMES. GET THE STATS THAT DEFINE THE MOMENTS YOU'LL
+            THE BRIGHTEST LIGHTS. THE LOUDEST CROWDS. THE BIGGEST GAMES. GET THE STATS THAT DEFINE THE MOMENTS YOU&apos;LL
             NEVER FORGET.
           </p>
 
