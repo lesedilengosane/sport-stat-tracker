@@ -122,50 +122,54 @@ export default function BasketballTimeline() {
         <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-orange-500 transform -translate-x-1/2"></div>
 
         <div className="space-y-6">
-          {sortedEvents.map((event) => (
-            <div key={event.id} className="grid grid-cols-2 gap-8 relative">
-              {/* Home side (left) */}
-              <div className="flex justify-end pr-8">
-                {event.team === "home" && (
-                  <div className="flex items-center space-x-3 text-left max-w-[250px]">
-                    <span className="text-gray-600 text-sm font-mono">{event.minute}'</span>
-                    <div className={`${getEventColor(event.type)} flex-shrink-0`}>
-                      {getEventIcon(event.type)}
-                    </div>
-                    <div>
-                      <div className="font-semibold">
-                        {event.player && <span className="text-gray-600">{event.player} </span>}
-                        <span className={getEventColor(event.type)}>{event.description}</span>
-                        {event.points && <span className="ml-2 text-green-600 font-bold">+{event.points}</span>}
-                      </div>
-                      <div className="text-xs text-gray-500">Q{event.quarter}</div>
-                    </div>
-                  </div>
-                )}
-              </div>
+  {sortedEvents.map((event) => (
+    <div key={event.id} className="grid grid-cols-2 gap-8 relative items-center">
+      {/* Center time label */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white px-2 rounded text-gray-700 text-sm font-mono">
+        {event.minute}'
+      </div>
 
-              {/* Away side (right) */}
-              <div className="flex justify-start pl-8">
-                {event.team === "away" && (
-                  <div className="flex items-center space-x-3 text-right max-w-[250px]">
-                    <div>
-                      <div className="font-semibold">
-                        {event.player && <span className="text-gray-600">{event.player} </span>}
-                        <span className={getEventColor(event.type)}>{event.description}</span>
-                        {event.points && <span className="ml-2 text-green-600 font-bold">+{event.points}</span>}
-                      </div>
-                      <div className="text-xs text-gray-500">Q{event.quarter}</div>
-                    </div>
-                    <div className={`${getEventColor(event.type)} flex-shrink-0`}>
-                      {getEventIcon(event.type)}
-                    </div>
-                    <span className="text-gray-600 text-sm font-mono">{event.minute}'</span>
-                  </div>
-                )}
-              </div>
+      {/* Home side (left) */}
+      <div className="flex justify-end pr-8">
+        {event.team === "home" && (
+          <div className="flex items-center space-x-3 text-left max-w-[250px]">
+            <div className={`${getEventColor(event.type)} flex-shrink-0`}>
+              {getEventIcon(event.type)}
             </div>
-          ))}
-        </div>
+            <div>
+              <div className="font-semibold">
+                {event.player && <span className="text-gray-600">{event.player} </span>}
+                <span className={getEventColor(event.type)}>{event.description}</span>
+                {event.points && <span className="ml-2 text-green-600 font-bold">+{event.points}</span>}
+              </div>
+              <div className="text-xs text-gray-500">Q{event.quarter}</div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Away side (right) */}
+      <div className="flex justify-start pl-8">
+        {event.team === "away" && (
+          <div className="flex items-center space-x-3 text-right max-w-[250px]">
+            <div>
+              <div className="font-semibold">
+                {event.player && <span className="text-gray-600">{event.player} </span>}
+                <span className={getEventColor(event.type)}>{event.description}</span>
+                {event.points && <span className="ml-2 text-green-600 font-bold">+{event.points}</span>}
+              </div>
+              <div className="text-xs text-gray-500">Q{event.quarter}</div>
+            </div>
+            <div className={`${getEventColor(event.type)} flex-shrink-0`}>
+              {getEventIcon(event.type)}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  ))}
+</div>
+
       </div>
 
       {/* Final Score */}
