@@ -1,15 +1,16 @@
+// app/api/DatabaseApi/checkUser/checkUser.ts
 import { supabase } from "../supabaseClient";
 
 /**
- * Checks if a user exists in the database
+ * Checks if a user exists in the database and retrieves role + first_name
  * @param identifier - Can be either auth_user_id or email
  * @param by - Field to check by ('auth_user_id' or 'email')
- * @returns Promise<{ exists: boolean, error?: string }>
+ * @returns Promise<{ exists: boolean, role?: string, first_name?: string, error?: string }>
  */
 export async function checkUser(
   identifier: string,
   by: 'auth_user_id' | 'email' = 'auth_user_id'
-): Promise<{ exists: boolean, error?: string }> {
+): Promise<{ exists: boolean; role?: string; first_name?: string; error?: string }> {
   try {
     // Validate input
     if (!identifier) {
@@ -19,10 +20,10 @@ export async function checkUser(
       };
     }
 
-    // Query the database
+    // Query the database for role + first_name too
     const { data, error } = await supabase
       .from('users')
-      .select(by)
+      .select(`${by}, role, first_name`)
       .eq(by, identifier)
       .maybeSingle();
 
@@ -34,9 +35,19 @@ export async function checkUser(
       };
     }
 
-    // Return existence status
+    if (!data) {
+      return { 
+        exists: false, 
+        role: undefined, 
+        first_name: undefined 
+      };
+    }
+
+    // Return existence + user details
     return {
-      exists: !!data
+      exists: true,
+      role: data.role,
+      first_name: data.first_name
     };
 
   } catch (error) {
