@@ -1,6 +1,6 @@
 import { AppWindowIcon, CodeIcon } from "lucide-react"
 import LastGames, { type Game, type GameResult } from './last5games';
-
+import BasketballTimeline from "@/components/basketball-timeline"
 import {
   Tabs,
   TabsContent,
@@ -50,6 +50,7 @@ export function Tabspage() {
         <TabsContent value="summary">
           <div>
             <h1>This is the game summary</h1>
+            <BasketballTimeline />
           </div>
         </TabsContent>
       </Tabs>
