@@ -1,5 +1,5 @@
 // components/Header.js
-
+import { Tabspage } from '@/components/line-up-page';
 import Image from 'next/image';
 
 const Admindashboard = () => {
@@ -33,6 +33,7 @@ const Admindashboard = () => {
   };
 
   return (
+    <div>
     <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center">
       {/* Top Row: Last Timeout */}
       <div className="text-sm mb-2">{matchup.lastTimeout}</div>
@@ -71,12 +72,15 @@ const Admindashboard = () => {
         </div>
       </div>
       
+      
 
       {/* Add Stats Button */}
       <button className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
         ADD STATS
       </button>
     </header>
+    <Tabspage/>
+    </div>
   );
 };
 

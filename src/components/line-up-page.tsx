@@ -35,21 +35,19 @@ export function Tabspage() {
         </TabsList>
 
         <TabsContent value="lineups">
-          <div>
-            <h1>This is the lineups page</h1>
-          </div>
+
         </TabsContent>
 
         <TabsContent value="lastgames">
           <div>
-            <h1>This is the last 5 games tab</h1>
+            
             <LastGames />
           </div>
         </TabsContent>
 
         <TabsContent value="summary">
           <div>
-            <h1>This is the game summary</h1>
+            
             <BasketballTimeline />
           </div>
         </TabsContent>
