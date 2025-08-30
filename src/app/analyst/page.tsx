@@ -1,5 +1,5 @@
 // components/Header.js
-import GameSummary from '@/components/game-summary';
+
 import Image from 'next/image';
 
 const Admindashboard = () => {
