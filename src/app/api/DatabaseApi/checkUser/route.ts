@@ -1,34 +1,40 @@
 // app/api/DatabaseApi/checkUser/route.ts
-import { NextResponse } from 'next/server';
-import { checkUser } from './checkUser'; // <- your checkUser function
+import { NextRequest, NextResponse } from 'next/server';
+import { checkUser } from './checkUser';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { auth_user_id } = body as { auth_user_id: string };
 
     if (!auth_user_id) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required field: auth_user_id" },
         { status: 400 }
       );
     }
 
-    const { exists, error } = await checkUser(auth_user_id);
+    const result = await checkUser(auth_user_id, 'auth_user_id');
 
-    if (error) {
+    if (result.error) {
       return NextResponse.json(
-        { error },
+        { error: result.error },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { exists }, // ✅ always return exists = true/false
+      { 
+        exists: result.exists, 
+        role: result.role, 
+        first_name: result.first_name 
+      },
       { status: 200 }
     );
 
   } catch (error: unknown) {
+    console.error('Error in POST /api/DatabaseApi/checkUser:', error);
+    
     return NextResponse.json(
       {
         error: "Internal server error",
@@ -43,6 +49,35 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+}
+
+// Export other HTTP methods if needed, or return 405 for unsupported methods
+export async function GET() {
+  return NextResponse.json(
+    { error: "Method not allowed. Use POST instead." },
+    { status: 405 }
+  );
+}
+
+export async function PUT() {
+  return NextResponse.json(
+    { error: "Method not allowed. Use POST instead." },
+    { status: 405 }
+  );
+}
+
+export async function DELETE() {
+  return NextResponse.json(
+    { error: "Method not allowed. Use POST instead." },
+    { status: 405 }
+  );
+}
+
+export async function PATCH() {
+  return NextResponse.json(
+    { error: "Method not allowed. Use POST instead." },
+    { status: 405 }
+  );
 }
 
 export const dynamic = "force-dynamic";
