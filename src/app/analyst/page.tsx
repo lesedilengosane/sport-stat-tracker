@@ -1,14 +1,17 @@
-// components/Header.js
+"use client";
+
 import { Tabspage } from '@/components/line-up-page';
 import Image from 'next/image';
+import { useRouter } from "next/navigation";
 
 const Admindashboard = () => {
+  const router = useRouter();
   // Sample data based on the image – you can make this dynamic via props or API
   const matchup = {
     date: '12 September 2025',
     homeTeam: {
       name: 'Los Angeles Lakers',
-      logo: '/images/lakers-logo.png', // Replace with your actual logo path
+      logo: '/Los_Angeles_Lakers.svg', // Replace with your actual logo path
       lineup: [
         { position: 'PG', player: 'Luka Dončić' },
         { position: 'SG', player: 'Austin Reaves' },
@@ -75,7 +78,7 @@ const Admindashboard = () => {
       
 
       {/* Add Stats Button */}
-      <button className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+      <button onClick={() => router.push("/analyst/tracker")} className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
         ADD STATS
       </button>
     </header>
