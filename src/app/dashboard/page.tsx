@@ -27,6 +27,12 @@ interface Match {
   away_team_id: string;
 }
 
+interface Player {
+  position: string;
+  player: string;
+  jerseyNumber?: number;
+}
+
 interface Game {
   id: string;
   date: string;
@@ -38,6 +44,8 @@ interface Game {
     name: string;
     logo: string;
   };
+  homeLineup?: Player[];
+  awayLineup?: Player[];
   isSampleData?: boolean;
 }
 
@@ -54,6 +62,20 @@ const sampleGames: Game[] = [
       name: "Warriors",
       logo: "/Golden_State_Warriors.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+    ],
     isSampleData: true,
   },
   {
@@ -67,6 +89,20 @@ const sampleGames: Game[] = [
       name: "Mavs",
       logo: "/Dallas_Mavericks.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "Kyle Lowry", jerseyNumber: 7 },
+      { position: "SG", player: "Tyler Herro", jerseyNumber: 14 },
+      { position: "SF", player: "Jimmy Butler", jerseyNumber: 22 },
+      { position: "PF", player: "Kevin Love", jerseyNumber: 42 },
+      { position: "C", player: "Bam Adebayo", jerseyNumber: 13 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Luka Dončić", jerseyNumber: 77 },
+      { position: "SG", player: "Kyrie Irving", jerseyNumber: 11 },
+      { position: "SF", player: "Tim Hardaway Jr.", jerseyNumber: 10 },
+      { position: "PF", player: "Grant Williams", jerseyNumber: 33 },
+      { position: "C", player: "Dereck Lively II", jerseyNumber: 2 },
+    ],
     isSampleData: true,
   },
   {
@@ -80,6 +116,20 @@ const sampleGames: Game[] = [
       name: "Warriors",
       logo: "/Golden_State_Warriors.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "Ben Simmons", jerseyNumber: 10 },
+      { position: "SG", player: "Mikal Bridges", jerseyNumber: 1 },
+      { position: "SF", player: "Cameron Johnson", jerseyNumber: 2 },
+      { position: "PF", player: "Dorian Finney-Smith", jerseyNumber: 28 },
+      { position: "C", player: "Nic Claxton", jerseyNumber: 33 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+    ],
     isSampleData: true,
   },
   {
@@ -93,6 +143,20 @@ const sampleGames: Game[] = [
       name: "Warriors",
       logo: "/Golden_State_Warriors.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+    ],
     isSampleData: true,
   },
   {
@@ -106,6 +170,20 @@ const sampleGames: Game[] = [
       name: "Warriors",
       logo: "/Golden_State_Warriors.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+    ],
     isSampleData: true,
   },
   {
@@ -119,6 +197,20 @@ const sampleGames: Game[] = [
       name: "Warriors",
       logo: "/Golden_State_Warriors.svg",
     },
+    homeLineup: [
+      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+    ],
+    awayLineup: [
+      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+    ],
     isSampleData: true,
   },
 ];
@@ -227,11 +319,9 @@ export default function Dashboard() {
       setIsLoading(true);
       setUsingSampleData(false);
       setDebugInfo("Fetching matches from API...");
-      console.log("Starting to fetch matches from API...");
 
       // Get all matches
       const matchesData = await apiClient.getMatches();
-      console.log("Matches data from API:", matchesData);
       setDebugInfo(`Found ${matchesData?.length || 0} matches`);
 
       let databaseGames: Game[] = [];
@@ -245,13 +335,13 @@ export default function Dashboard() {
           ]),
         ];
 
-        console.log("Team IDs to fetch:", teamIds);
-        setDebugInfo(`Fetching ${teamIds.length} teams...`);
+        setDebugInfo(`Fetching ${teamIds.length} teams and players...`);
 
         // Fetch all teams
         const teamsData = await apiClient.getTeamsByIds(teamIds);
-        console.log("Teams data from API:", teamsData);
-        setDebugInfo(`Found ${teamsData?.length || 0} teams`);
+
+        // Fetch all players for these teams
+        const playersMap = await apiClient.getPlayersByTeamIds(teamIds);
 
         // Create a map of team_id to team data
         const teamsMap = new Map();
@@ -259,48 +349,109 @@ export default function Dashboard() {
           teamsMap.set(team.team_id, team);
         });
 
-        console.log("Teams map size:", teamsMap.size);
-        console.log("Teams map contents:", Array.from(teamsMap.entries()));
-
         // Format the data
-        databaseGames = matchesData.map((match: any) => {
-          const homeTeam = teamsMap.get(match.home_team_id) || {};
-          const awayTeam = teamsMap.get(match.away_team_id) || {};
+        databaseGames = await Promise.all(
+          matchesData.map(async (match: any) => {
+            const homeTeam = teamsMap.get(match.home_team_id) || {};
+            const awayTeam = teamsMap.get(match.away_team_id) || {};
 
-          console.log("Processing match:", match.match_id);
-          console.log(
-            "Home team ID:",
-            match.home_team_id,
-            "Team data:",
-            homeTeam
-          );
-          console.log(
-            "Away team ID:",
-            match.away_team_id,
-            "Team data:",
-            awayTeam
-          );
+            // Get players for each team
+            const homePlayers = playersMap.get(match.home_team_id) || [];
+            const awayPlayers = playersMap.get(match.away_team_id) || [];
 
-          return {
-            id: match.match_id,
-            date: new Date(match.match_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-            homeTeam: {
-              name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-              logo: homeTeam.icon_url || "/default_team.svg",
-            },
-            awayTeam: {
-              name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-              logo: awayTeam.icon_url || "/default_team.svg",
-            },
-            isSampleData: false,
-          };
-        });
+            // Format lineup data - get first 5 players for each team
+            const homeLineup = homePlayers.slice(0, 5).map((player: any) => ({
+              position: player.position,
+              player: `${player.first_name} ${player.last_name}`,
+              jerseyNumber: player.jersey_number,
+            }));
 
-        console.log("Formatted matches data:", databaseGames);
+            const awayLineup = awayPlayers.slice(0, 5).map((player: any) => ({
+              position: player.position,
+              player: `${player.first_name} ${player.last_name}`,
+              jerseyNumber: player.jersey_number,
+            }));
+
+            return {
+              id: match.match_id,
+              date: new Date(match.match_date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }),
+              homeTeam: {
+                name: homeTeam.name || homeTeam.team_name || "Unknown Team",
+                logo: homeTeam.icon_url || "/default_team.svg",
+              },
+              awayTeam: {
+                name: awayTeam.name || awayTeam.team_name || "Unknown Team",
+                logo: awayTeam.icon_url || "/default_team.svg",
+              },
+              homeLineup:
+                homeLineup.length > 0
+                  ? homeLineup
+                  : [
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Center",
+                        player: "Starting Center",
+                        jerseyNumber: 0,
+                      },
+                    ],
+              awayLineup:
+                awayLineup.length > 0
+                  ? awayLineup
+                  : [
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Center",
+                        player: "Starting Center",
+                        jerseyNumber: 0,
+                      },
+                    ],
+              isSampleData: false,
+            };
+          })
+        );
+
         setMatches(databaseGames);
         setDebugInfo(
           `Successfully loaded ${databaseGames.length} games from database`
@@ -317,7 +468,6 @@ export default function Dashboard() {
       setError("Failed to load matches from database. Using sample data.");
       setMatches([]);
       setUsingSampleData(true);
-      // If there's an error, just show sample data
       setAllGames(sampleGames);
     } finally {
       setIsLoading(false);
@@ -465,13 +615,6 @@ export default function Dashboard() {
           </div>
         ) : (
           <div>
-            {/* <h2 className="text-xl font-bold text-white mb-4">
-              Available Games ({allGames.length})
-              <span className="text-sm font-normal ml-2">
-                ({matches.length} from database, {sampleGames.length} sample
-                games)
-              </span>
-            </h2> */}
             <GamesGrid games={allGames} />
           </div>
         )}
