@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import type { GameEvent, PlayerStats, GameData } from "../types/basketball"
+import type { GameEvent, PlayerStats, GameData } from "@/types/basketball"
 import TeamPlayerCard from "./ui/team-player-card"
 import GameHistory from "./ui/game-history"
 import ActionButtons from "./ui/action-buttons"
@@ -201,7 +201,7 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
                 <div className="flex items-center gap-6">
                   <img src="/generic-basketball-logo.png" alt="Lakers Logo" className="w-16 h-16 drop-shadow-md" />
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-blue-600 mb-3 tracking-tight">Lakers</h2>
+                    <h2 className="text-3xl font-bold text-blue-600 mb-3 tracking-tight">{gameData.homeTeam.name}</h2>
                     <div className="w-24 h-20 bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-300 rounded-xl flex items-center justify-center shadow-lg">
                       <span className="text-4xl font-bold text-blue-800">{gameScore.home}</span>
                     </div>
@@ -217,7 +217,7 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
                 {/* Away Team */}
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-red-600 mb-3 tracking-tight">Heat</h2>
+                    <h2 className="text-3xl font-bold text-red-600 mb-3 tracking-tight">{gameData.awayTeam.name}</h2>
                     <div className="w-24 h-20 bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-300 rounded-xl flex items-center justify-center shadow-lg">
                       <span className="text-4xl font-bold text-red-800">{gameScore.away}</span>
                     </div>
@@ -242,7 +242,9 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
               <div className="flex-1 min-w-0">
                 <div className="grid grid-cols-2 gap-10 h-full">
                   <div className="border-r-2 border-slate-200 pr-8">
-                    <h3 className="text-xl font-bold text-blue-600 mb-6 text-center">Lakers Players</h3>
+                    <h3 className="text-xl font-bold text-blue-600 mb-6 text-center">
+                      {gameData.homeTeam.name} Players
+                    </h3>
                     <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4">
                       <TeamPlayerCard
                         team={gameData.homeTeam}
@@ -255,7 +257,9 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
                   </div>
 
                   <div className="pl-8">
-                    <h3 className="text-xl font-bold text-red-600 mb-6 text-center">Heat Players</h3>
+                    <h3 className="text-xl font-bold text-red-600 mb-6 text-center">
+                      {gameData.awayTeam.name} Players
+                    </h3>
                     <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4">
                       <TeamPlayerCard
                         team={gameData.awayTeam}
