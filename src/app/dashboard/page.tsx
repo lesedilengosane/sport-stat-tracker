@@ -175,7 +175,7 @@ const sampleGames: Game[] = [
     homeLineup: [
       { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
       { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
-      { position: "SF", user: "Rui Hachimura", jerseyNumber: 28 },
+      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
       { position: "PF", player: "LeBron James", jerseyNumber: 23 },
       { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
     ],
