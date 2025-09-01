@@ -1,90 +1,38 @@
-// app/admin-dashboard/page.tsx
+// app/analyst/page.tsx
+"use client";
+
+import { Tabspage } from "@/components/line-up-page";
 import Image from "next/image";
-import { Tabspage } from "@/components/Line-up-table/line-up-page";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Player_details } from "./column";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 
-async function getData(): Promise<Player_details[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      name: "Michael",
-      surname: "Jordan",
-      position: "Shooting Guard",
-      avatarUrl: "/avatars/player3.jpg",
-    },
-    {
-      id: "9a12bc34",
-      name: "Alice",
-      surname: "Smith",
-      position: "Point Guard",
-      avatarUrl: "/avatars/player2.jpg",
-    },
-    {
-      id: "c67de89f",
-      name: "Bob",
-      surname: "Johnson",
-      position: "Center",
-      avatarUrl: "/avatars/player3.jpg",
-    },
-    {
-      id: "ef34ab56",
-      name: "Carol",
-      surname: "Davis",
-      position: "Small Forward",
-      avatarUrl: "/avatars/player4.jpg",
-    },
-    {
-      id: "12cd34ef",
-      name: "Dave",
-      surname: "Wilson",
-      position: "Power Forward",
-      avatarUrl: "/avatars/player5.jpg",
-    },
-  ];
-}
+const AnalystPage = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
-export default async function AdminDashboard() {
-  const my_data = await getData();
+  // Get ALL data from URL parameters
+  const gameId = searchParams.get("id") || "";
+  const gameDate = searchParams.get("date") || "Date not specified";
+  const homeTeamName = searchParams.get("homeTeam") || "Home Team";
+  const homeTeamLogo = searchParams.get("homeLogo") || "/placeholder.svg";
+  const awayTeamName = searchParams.get("awayTeam") || "Away Team";
+  const awayTeamLogo = searchParams.get("awayLogo") || "/placeholder.svg";
+  const homeLineupParam = searchParams.get("homeLineup");
+  const awayLineupParam = searchParams.get("awayLineup");
 
-  const matchup = {
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Los Angeles Lakers",
-      logo: "/images/lakers-logo.png",
-    },
-    awayTeam: {
-      name: "Golden State Warriors",
-      logo: "/images/warriors-logo.png",
-    },
-    lastTimeout: "Last Time Out: 109-113",
-  };
+  // Parse lineup data
+  const homeLineup = homeLineupParam ? JSON.parse(homeLineupParam) : [];
+  const awayLineup = awayLineupParam ? JSON.parse(awayLineupParam) : [];
 
-  // Define sample lineup data since we're not getting it from URL params
-  const homeLineup = [
-    { position: "PG", player: "D'Angelo Russell" },
-    { position: "SG", player: "Austin Reaves" },
-    { position: "SF", player: "Rui Hachimura" },
-    { position: "PF", player: "LeBron James" },
-    { position: "C", player: "Anthony Davis" },
-  ];
-
-  const awayLineup = [
-    { position: "PG", player: "Stephen Curry" },
-    { position: "SG", player: "Klay Thompson" },
-    { position: "SF", player: "Andrew Wiggins" },
-    { position: "PF", player: "Draymond Green" },
-    { position: "C", player: "Kevon Looney" },
-  ];
-
-  // Convert lineup data to Player_details format for the data table
+  // Convert lineup data to Player_details format
   const convertLineupToPlayerDetails = (
     lineup: any[],
     team: string
   ): Player_details[] => {
     return lineup.map((player, index) => {
-      const nameParts = player.player.split(" ");
+      const nameParts = player.player?.split(" ") || ["Player", "Unknown"];
       const name = nameParts[0] || "Player";
       const surname = nameParts.slice(1).join(" ") || "Unknown";
 
@@ -92,66 +40,75 @@ export default async function AdminDashboard() {
         id: `${team}-player-${index}`,
         name: name,
         surname: surname,
-        position: player.position,
-        avatarUrl: "/avatars/player3.jpg",
+        position: player.position || "Unknown",
+        avatarUrl: player.avatarUrl || "/avatars/player3.jpg",
       };
     });
   };
 
   const homeTeamPlayers = convertLineupToPlayerDetails(homeLineup, "home");
   const awayTeamPlayers = convertLineupToPlayerDetails(awayLineup, "away");
+  const allPlayers = [...homeTeamPlayers, ...awayTeamPlayers];
+
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">
       <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center">
-        <div className="text-sm mb-2">{matchup.lastTimeout}</div>
+        <div className="text-sm mb-2">Last Time Out: 109-113</div>
 
         <div className="flex items-center justify-between w-full max-w-4xl">
           {/* Home Team */}
           <div className="flex flex-col items-center">
             <Image
-              src={matchup.homeTeam.logo}
-              alt={`${matchup.homeTeam.name} Logo`}
+              src={homeTeamLogo}
+              alt={`${homeTeamName} Logo`}
               width={80}
               height={80}
               className="mb-2"
             />
-            <span className="text-lg font-bold font-bebas">
-              {matchup.homeTeam.name}
-            </span>
+            <span className="text-lg font-bold font-bebas">{homeTeamName}</span>
           </div>
 
           {/* Date */}
           <div className="text-center">
-            <div className="text-2xl font-bold">{matchup.date}</div>
+            <div className="text-2xl font-bold">{gameDate}</div>
           </div>
 
           {/* Away Team */}
           <div className="flex flex-col items-center">
             <Image
-              src={matchup.awayTeam.logo}
-              alt={`${matchup.awayTeam.name} Logo`}
+              src={awayTeamLogo}
+              alt={`${awayTeamName} Logo`}
               width={80}
               height={80}
               className="mb-2"
             />
-            <span className="text-lg font-bold font-bebas">
-              {matchup.awayTeam.name}
-            </span>
+            <span className="text-lg font-bold font-bebas">{awayTeamName}</span>
           </div>
         </div>
 
-        {/* Use Link instead of button with onClick for server components */}
-        <Link
-          href="/analyst/tracker"
-          className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors"
+        <button
+          onClick={() => router.push("/analyst/tracker")}
+          className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
         >
           ADD STATS
-        </Link>
+        </button>
       </header>
 
-      {/* Use the Tabspage component with the lineup data */}
-      <Tabspage data={[...homeTeamPlayers, ...awayTeamPlayers]} />
+      <Tabspage data={allPlayers} />
     </div>
   );
-}
+};
+
+export default AnalystPage;
