@@ -1,8 +1,8 @@
-// app/admin-dashboard/page.tsx (or wherever your dashboard lives)
-
+// app/admin-dashboard/page.tsx
 import Image from "next/image";
 import { Tabspage } from "@/components/Line-up-table/line-up-page";
-import { columns, Player_details } from "./match-lineup/column";
+import { Player_details } from "./column";
+import Link from "next/link";
 
 async function getData(): Promise<Player_details[]> {
   // Fetch data from your API here.
@@ -61,9 +61,48 @@ export default async function AdminDashboard() {
     lastTimeout: "Last Time Out: 109-113",
   };
 
+  // Define sample lineup data since we're not getting it from URL params
+  const homeLineup = [
+    { position: "PG", player: "D'Angelo Russell" },
+    { position: "SG", player: "Austin Reaves" },
+    { position: "SF", player: "Rui Hachimura" },
+    { position: "PF", player: "LeBron James" },
+    { position: "C", player: "Anthony Davis" },
+  ];
+
+  const awayLineup = [
+    { position: "PG", player: "Stephen Curry" },
+    { position: "SG", player: "Klay Thompson" },
+    { position: "SF", player: "Andrew Wiggins" },
+    { position: "PF", player: "Draymond Green" },
+    { position: "C", player: "Kevon Looney" },
+  ];
+
+  // Convert lineup data to Player_details format for the data table
+  const convertLineupToPlayerDetails = (
+    lineup: any[],
+    team: string
+  ): Player_details[] => {
+    return lineup.map((player, index) => {
+      const nameParts = player.player.split(" ");
+      const name = nameParts[0] || "Player";
+      const surname = nameParts.slice(1).join(" ") || "Unknown";
+
+      return {
+        id: `${team}-player-${index}`,
+        name: name,
+        surname: surname,
+        position: player.position,
+        avatarUrl: "/avatars/player3.jpg",
+      };
+    });
+  };
+
+  const homeTeamPlayers = convertLineupToPlayerDetails(homeLineup, "home");
+  const awayTeamPlayers = convertLineupToPlayerDetails(awayLineup, "away");
+
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header Section */}
+    <div className="min-h-screen bg-gray-900">
       <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center">
         <div className="text-sm mb-2">{matchup.lastTimeout}</div>
 
@@ -102,15 +141,17 @@ export default async function AdminDashboard() {
           </div>
         </div>
 
-        <button className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+        {/* Use Link instead of button with onClick for server components */}
+        <Link
+          href="/analyst/tracker"
+          className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 transition-colors"
+        >
           ADD STATS
-        </button>
+        </Link>
       </header>
 
-      {/* Body Section (Tabs + Tables) */}
-      <main className="px-4">
-        <Tabspage data={my_data} />
-      </main>
+      {/* Use the Tabspage component with the lineup data */}
+      <Tabspage data={[...homeTeamPlayers, ...awayTeamPlayers]} />
     </div>
   );
 }
