@@ -1,150 +1,55 @@
-// components/line-up-page.tsx
-import LastGames from "./last5games";
-import BasketballTimeline from "@/components/basketball-timeline";
+// src/components/line-up-page.tsx
+"use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
+import { DataTable } from "./Line-up-table/LineUp-table";
+import { columns, Player_details } from "@/app/analyst/column";
 
-interface Player {
-  position: string;
-  player: string;
+interface lineupProps {
+  data: Player_details[];
 }
 
-interface TabspageProps {
-  homeTeam?: string;
-  homeLogo?: string;
-  awayTeam?: string;
-  awayLogo?: string;
-  date?: string;
-  homeLineup?: Player[];
-  awayLineup?: Player[];
-}
+export function Tabspage({ data }: lineupProps) {
+  const homeTeamPlayers = data.filter((player) => player.id.includes("home"));
+  const awayTeamPlayers = data.filter((player) => player.id.includes("away"));
 
-export function Tabspage({
-  homeTeam = "Home Team",
-  homeLogo = "/placeholder.svg",
-  awayTeam = "Away Team",
-  awayLogo = "/placeholder.svg",
-  date = "Date not specified",
-  homeLineup = [
-    { position: "Guard", player: "Starting Guard" },
-    { position: "Guard", player: "Starting Guard" },
-    { position: "Forward", player: "Starting Forward" },
-    { position: "Forward", player: "Starting Forward" },
-    { position: "Center", player: "Starting Center" },
-  ],
-  awayLineup = [
-    { position: "Guard", player: "Starting Guard" },
-    { position: "Guard", player: "Starting Guard" },
-    { position: "Forward", player: "Starting Forward" },
-    { position: "Forward", player: "Starting Forward" },
-    { position: "Center", player: "Starting Center" },
-  ],
-}: TabspageProps) {
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-6 mx-auto">
-      <Tabs defaultValue="lineups" className="w-full">
-        {/* Center tabs */}
-        <TabsList className="flex justify-center border-b border-gray-200">
-          <TabsTrigger
-            value="lineups"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
-          >
-            Lineups
-          </TabsTrigger>
-          <TabsTrigger
-            value="lastgames"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
-          >
-            Last 5 Games
-          </TabsTrigger>
-          <TabsTrigger
-            value="summary"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
-          >
-            Game Summary
-          </TabsTrigger>
+    <div className="flex w-full max-w-7xl flex-col gap-6 mx-auto p-6">
+      <Tabs defaultValue="lineups">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="lineups">Lineups</TabsTrigger>
+          <TabsTrigger value="lastgames">Last 5 games</TabsTrigger>
+          <TabsTrigger value="summary">Game summary</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="lineups" className="pt-6">
-          {/* Lineups Content */}
-          <div className="bg-slate-800 rounded-lg p-6">
-            <h3 className="text-2xl font-bold text-center mb-8 text-white">
-              Lineups - {date}
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Home Team Lineup */}
-              <div className="bg-slate-700 rounded-lg p-6">
-                <div className="flex items-center justify-center mb-6">
-                  <Image
-                    src={homeLogo}
-                    alt={`${homeTeam} Logo`}
-                    width={60}
-                    height={60}
-                    className="mr-4"
-                  />
-                  <h4 className="text-xl font-bold text-white">{homeTeam}</h4>
-                </div>
-
-                <div className="space-y-3">
-                  {homeLineup.map((player, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-slate-600 p-3 rounded"
-                    >
-                      <span className="text-orange-400 font-bold text-sm w-16">
-                        {player.position}
-                      </span>
-                      <span className="text-white font-medium flex-1 text-center">
-                        {player.player}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Away Team Lineup */}
-              <div className="bg-slate-700 rounded-lg p-6">
-                <div className="flex items-center justify-center mb-6">
-                  <Image
-                    src={awayLogo}
-                    alt={`${awayTeam} Logo`}
-                    width={60}
-                    height={60}
-                    className="mr-4"
-                  />
-                  <h4 className="text-xl font-bold text-white">{awayTeam}</h4>
-                </div>
-
-                <div className="space-y-3">
-                  {awayLineup.map((player, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-slate-600 p-3 rounded"
-                    >
-                      <span className="text-orange-400 font-bold text-sm w-16">
-                        {player.position}
-                      </span>
-                      <span className="text-white font-medium flex-1 text-center">
-                        {player.player}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+        <TabsContent value="lineups" className="w-full">
+          <div className="flex w-full gap-6">
+            <div className="w-1/2">
+              <h3 className="text-lg font-bold mb-4 text-center text-white">
+                Home Team
+              </h3>
+              <DataTable columns={columns} data={homeTeamPlayers} />
+            </div>
+            <div className="w-1/2">
+              <h3 className="text-lg font-bold mb-4 text-center text-white">
+                Away Team
+              </h3>
+              <DataTable columns={columns} data={awayTeamPlayers} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="lastgames">
-          <div>
-            <LastGames />
+          <div className="text-center text-white p-8">
+            <h2 className="text-xl font-bold">Last 5 Games</h2>
+            <p className="mt-4">Game statistics will be displayed here</p>
           </div>
         </TabsContent>
 
         <TabsContent value="summary">
-          <div>
-            <BasketballTimeline />
+          <div className="text-center text-white p-8">
+            <h2 className="text-xl font-bold">Game Summary</h2>
+            <p className="mt-4">Game summary will be displayed here</p>
           </div>
         </TabsContent>
       </Tabs>

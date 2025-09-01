@@ -4,6 +4,7 @@
 import { Tabspage } from "@/components/line-up-page";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
+import { columns, Player_details } from "./column";
 
 const Admindashboard = () => {
   const searchParams = useSearchParams();
@@ -40,8 +41,31 @@ const Admindashboard = () => {
         { position: "C", player: "Center" },
       ];
 
+  // Convert lineup data to Player_details format for the data table
+  const convertLineupToPlayerDetails = (
+    lineup: any[],
+    team: string
+  ): Player_details[] => {
+    return lineup.map((player, index) => {
+      const nameParts = player.player.split(" ");
+      const name = nameParts[0] || "Player";
+      const surname = nameParts.slice(1).join(" ") || "Unknown";
+
+      return {
+        id: `${team}-player-${index}`,
+        name: name,
+        surname: surname,
+        position: player.position,
+        avatarUrl: "/avatars/player3.jpg",
+      };
+    });
+  };
+
+  const homeTeamPlayers = convertLineupToPlayerDetails(homeLineup, "home");
+  const awayTeamPlayers = convertLineupToPlayerDetails(awayLineup, "away");
+
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900">
       <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center">
         {/* Top Row: Last Timeout */}
         <div className="text-sm mb-2">Last Time Out: 109-113</div>
@@ -87,15 +111,8 @@ const Admindashboard = () => {
         </button>
       </header>
 
-      <Tabspage
-        homeTeam={homeTeamName}
-        homeLogo={homeTeamLogo}
-        awayTeam={awayTeamName}
-        awayLogo={awayTeamLogo}
-        date={gameDate}
-        homeLineup={homeLineup}
-        awayLineup={awayLineup}
-      />
+      {/* Use the Tabspage component with the lineup data */}
+      <Tabspage data={[...homeTeamPlayers, ...awayTeamPlayers]} />
     </div>
   );
 };
