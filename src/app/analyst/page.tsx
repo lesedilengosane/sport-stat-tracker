@@ -1,7 +1,6 @@
 // app/analyst/page.tsx
 "use client";
 
-import { Tabspage } from "@/components/line-up-page";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 
@@ -82,15 +81,6 @@ const Admindashboard = () => {
           ADD STATS
         </button>
       </header>
-      <Tabspage
-        homeTeam={homeTeamName}
-        homeLogo={homeTeamLogo}
-        awayTeam={awayTeamName}
-        awayLogo={awayTeamLogo}
-        date={gameDate}
-        homeLineup={homeLineup}
-        awayLineup={awayLineup}
-      />
     </div>
   );
 };
