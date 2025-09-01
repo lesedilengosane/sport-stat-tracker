@@ -2,10 +2,11 @@
 "use client";
 
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 
 const Admindashboard = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   // Get team data from URL parameters
   const homeTeamName = searchParams.get("homeTeam") || "Home Team";
@@ -77,10 +78,14 @@ const Admindashboard = () => {
         </div>
 
         {/* Add Stats Button */}
-        <button className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+        <button
+          onClick={() => router.push("/analyst/tracker")}
+          className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+        >
           ADD STATS
         </button>
       </header>
+
     </div>
   );
 };
