@@ -1,61 +1,65 @@
-'use client'
+'use client';
 
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/app/api/DatabaseApi/supabaseClient";
+import Image from "next/image";
+
+interface League {
+  league_key: string;
+  league_name: string;
+}
+
+interface Team {
+  team_key: string;
+  team_name: string;
+  league_key: string;
+  team_logo?: string;
+}
 
 const Profile = () => {
   const [userEmail, setUserEmail] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [role, setRole] = useState<string>("");
-  const [error, setError] = useState<string>("");
 
-  const [teams, setTeams] = useState<any[]>([]);
-  const [leagues, setLeagues] = useState<any[]>([]);
-  const [standings, setStandings] = useState<any[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
   const [selectedLeague, setSelectedLeague] = useState<string>("");
 
-  // Separate loading states
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
   const [loadingLeagues, setLoadingLeagues] = useState<boolean>(true);
   const [loadingTeams, setLoadingTeams] = useState<boolean>(true);
-  const [loadingStandings, setLoadingStandings] = useState<boolean>(true);
 
   // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoadingUser(true);
-        setError("");
 
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) throw new Error(userError.message);
         if (!user) throw new Error("No user logged in");
 
         setUserEmail(user.email || "No email");
         setUserName(user.user_metadata?.full_name || user.user_metadata?.name || "No name");
 
-        const response = await fetch('/api/DatabaseApi/checkUser', {
+        const res = await fetch('/api/DatabaseApi/checkUser', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ auth_user_id: user.id }),
         });
-        const result = await response.json();
+        const result = await res.json();
         if (result.error) setRole("Error");
         else if (result.exists) setRole(result.role || "No role assigned");
         else setRole("User not found");
 
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Failed to load user data");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to load user data";
+        console.error(message);
         setRole("Error");
       } finally {
         setLoadingUser(false);
       }
     };
-
     fetchUserData();
   }, []);
 
@@ -66,7 +70,7 @@ const Profile = () => {
         setLoadingLeagues(true);
         const res = await fetch("/api/sports/leagues");
         const data = await res.json();
-        const leagueList = Array.isArray(data.result) ? data.result : [];
+        const leagueList: League[] = Array.isArray(data.result) ? data.result : [];
         setLeagues(leagueList);
         if (leagueList.length > 0) setSelectedLeague(leagueList[0].league_key);
       } catch (err) {
@@ -79,34 +83,26 @@ const Profile = () => {
     fetchLeagues();
   }, []);
 
-  // Fetch teams
   // Fetch teams whenever selectedLeague changes
-useEffect(() => {
-  if (!selectedLeague) return;
+  useEffect(() => {
+    if (!selectedLeague) return;
 
-  const fetchTeams = async () => {
-    try {
-      setLoadingTeams(true);
-      const res = await fetch(`/api/sports/teams?league_id=${selectedLeague}`);
-      const data = await res.json();
-      const teamsList = Array.isArray(data.result) ? data.result : [];
-      setTeams(teamsList);
-    } catch (err) {
-      console.error("Error fetching teams:", err);
-      setTeams([]);
-    } finally {
-      setLoadingTeams(false);
-    }
-  };
-
-  fetchTeams();
-}, [selectedLeague]);
-
-
-  // Filter teams by selected league
-  const filteredTeams = Array.isArray(teams) 
-    ? teams.filter(team => team.league_key === selectedLeague) 
-    : [];
+    const fetchTeams = async () => {
+      try {
+        setLoadingTeams(true);
+        const res = await fetch(`/api/sports/teams?league_id=${selectedLeague}`);
+        const data = await res.json();
+        const teamsList: Team[] = Array.isArray(data.result) ? data.result : [];
+        setTeams(teamsList);
+      } catch (err) {
+        console.error("Error fetching teams:", err);
+        setTeams([]);
+      } finally {
+        setLoadingTeams(false);
+      }
+    };
+    fetchTeams();
+  }, [selectedLeague]);
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">
@@ -120,9 +116,7 @@ useEffect(() => {
         <section className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md mb-6">
           <div className="text-center">
             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">
-                {userName.charAt(0).toUpperCase()}
-              </span>
+              <span className="text-white text-2xl font-bold">{userName.charAt(0).toUpperCase()}</span>
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">User Information</h2>
             <div className="space-y-3 text-left">
@@ -150,9 +144,8 @@ useEffect(() => {
         </section>
       )}
 
-      {/* Leagues, Teams, Standings */}
+      {/* Leagues & Teams */}
       <section className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-3xl">
-        {/* Leagues */}
         <h2 className="text-xl font-semibold text-gray-800 mb-2">Leagues</h2>
         {loadingLeagues ? (
           <p>Loading leagues...</p>
@@ -162,7 +155,7 @@ useEffect(() => {
             onChange={(e) => setSelectedLeague(e.target.value)}
             className="border border-gray-300 rounded-md px-3 py-2 mb-4 w-full"
           >
-            {leagues.map((league: any) => (
+            {leagues.map((league) => (
               <option key={league.league_key} value={league.league_key}>
                 {league.league_name}
               </option>
@@ -172,29 +165,29 @@ useEffect(() => {
           <p>No leagues available</p>
         )}
 
-        {/* Teams */}
-<h2 className="text-xl font-semibold text-gray-800 mt-4 mb-2">Teams</h2>
-{loadingTeams ? (
-  <p>Loading teams...</p>
-) : teams.length > 0 ? (
-  <ul className="list-disc list-inside">
-    {teams.map((team: any) => (
-      <li key={team.team_key}>
-        {team.team_name}
-        {team.team_logo && (
-          <img
-            src={team.team_logo}
-            alt={team.team_name}
-            className="inline-block w-6 h-6 ml-2 rounded-full"
-          />
+        <h2 className="text-xl font-semibold text-gray-800 mt-4 mb-2">Teams</h2>
+        {loadingTeams ? (
+          <p>Loading teams...</p>
+        ) : teams.length > 0 ? (
+          <ul className="list-disc list-inside">
+            {teams.map((team) => (
+              <li key={team.team_key} className="flex items-center">
+                {team.team_name}
+                {team.team_logo && (
+                  <Image
+                    src={team.team_logo}
+                    alt={team.team_name}
+                    width={24}
+                    height={24}
+                    className="ml-2 rounded-full"
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No teams available for this league</p>
         )}
-      </li>
-    ))}
-  </ul>
-) : (
-  <p>No teams available for this league</p>
-)}
-
       </section>
     </main>
   );

@@ -34,6 +34,7 @@ export default function SignInCallback() {
         // 3. Redirect based on existence
         if (exists) {
           // ✅ user exists → go to dashboard
+          console.log("User exists:", session.user);
           router.push("/dashboard");
         } else {
           // ❌ user does not exist → sign them out and send to signup
