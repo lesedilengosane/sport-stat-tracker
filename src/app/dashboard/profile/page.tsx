@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/app/api/DatabaseApi/supabaseClient";
 import Image from "next/image";
+import Historicaldata from "@/components/historicaldata";
+import Booked_Games from "@/components/Booked_Games";
 
 interface League {
   league_key: string;
@@ -143,6 +145,9 @@ const Profile = () => {
           </div>
         </section>
       )}
+
+      <Historicaldata team={""} league={""} />
+      <Booked_Games />
 
       {/* Leagues & Teams */}
       <section className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-3xl">
