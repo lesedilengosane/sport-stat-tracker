@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "../api/DatabaseApi/supabaseClient";
 import { GamesGrid } from "@/components/games-grid";
 import { apiClient } from "../utils/apiClient";
+import { Player_details } from "@/app/analyst/column";
 
 // Define TypeScript interfaces based on your schema
 interface Team {
@@ -38,184 +39,197 @@ interface Player {
 interface Game {
   id: string;
   date: string;
-  homeTeam: {
-    name: string;
-    logo: string;
-  };
-  awayTeam: {
-    name: string;
-    logo: string;
-  };
+  homeTeam: { id: string; name: string; logo: string };
+  awayTeam: { id: string; name: string; logo: string };
   homeLineup?: Player[];
   awayLineup?: Player[];
   isSampleData?: boolean;
 }
 
 // Sample game data - fallback if database is empty
-const sampleGames: Game[] = [
-  {
-    id: "sample-1",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Lakers",
-      logo: "/Los_Angeles_Lakers.svg",
-    },
-    awayTeam: {
-      name: "Warriors",
-      logo: "/Golden_State_Warriors.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
-      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
-      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
-      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
-      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
-      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
-      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
-      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
-      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
-    ],
-    isSampleData: true,
-  },
-  {
-    id: "sample-2",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Heat",
-      logo: "/Miami_Heat.svg",
-    },
-    awayTeam: {
-      name: "Mavs",
-      logo: "/Dallas_Mavericks.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "Kyle Lowry", jerseyNumber: 7 },
-      { position: "SG", player: "Tyler Herro", jerseyNumber: 14 },
-      { position: "SF", player: "Jimmy Butler", jerseyNumber: 22 },
-      { position: "PF", player: "Kevin Love", jerseyNumber: 42 },
-      { position: "C", player: "Bam Adebayo", jerseyNumber: 13 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Luka Dončić", jerseyNumber: 77 },
-      { position: "SG", player: "Kyrie Irving", jerseyNumber: 11 },
-      { position: "SF", player: "Tim Hardaway Jr.", jerseyNumber: 10 },
-      { position: "PF", player: "Grant Williams", jerseyNumber: 33 },
-      { position: "C", player: "Dereck Lively II", jerseyNumber: 2 },
-    ],
-    isSampleData: true,
-  },
-  {
-    id: "sample-3",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Nets",
-      logo: "/Brooklyn_Nets.svg",
-    },
-    awayTeam: {
-      name: "Warriors",
-      logo: "/Golden_State_Warriors.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "Ben Simmons", jerseyNumber: 10 },
-      { position: "SG", player: "Mikal Bridges", jerseyNumber: 1 },
-      { position: "SF", player: "Cameron Johnson", jerseyNumber: 2 },
-      { position: "PF", player: "Dorian Finney-Smith", jerseyNumber: 28 },
-      { position: "C", player: "Nic Claxton", jerseyNumber: 33 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
-      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
-      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
-      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
-      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
-    ],
-    isSampleData: true,
-  },
-  {
-    id: "sample-4",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Lakers",
-      logo: "/Los_Angeles_Lakers.svg",
-    },
-    awayTeam: {
-      name: "Warriors",
-      logo: "/Golden_State_Warriors.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
-      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
-      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
-      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
-      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
-      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
-      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
-      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
-      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
-    ],
-    isSampleData: true,
-  },
-  {
-    id: "sample-5",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Lakers",
-      logo: "/Los_Angeles_Lakers.svg",
-    },
-    awayTeam: {
-      name: "Warriors",
-      logo: "/Golden_State_Warriors.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
-      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
-      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
-      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
-      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
-      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
-      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
-      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
-      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
-    ],
-    isSampleData: true,
-  },
-  {
-    id: "sample-6",
-    date: "12 September 2025",
-    homeTeam: {
-      name: "Lakers",
-      logo: "/Los_Angeles_Lakers.svg",
-    },
-    awayTeam: {
-      name: "Warriors",
-      logo: "/Golden_State_Warriors.svg",
-    },
-    homeLineup: [
-      { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
-      { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
-      { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
-      { position: "PF", player: "LeBron James", jerseyNumber: 23 },
-      { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
-    ],
-    awayLineup: [
-      { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
-      { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
-      { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
-      { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
-      { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
-    ],
-    isSampleData: true,
-  },
-];
+// const sampleGames: Game[] = [
+//   {
+//     id: "sample-1",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       id: "sample-team-1",
+//       name: "Lakers",
+//       logo: "/Los_Angeles_Lakers.svg",
+//     },
+//     awayTeam: {
+//       id: "sample-team-2",
+//       name: "Warriors",
+//       logo: "/Golden_State_Warriors.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+//       { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+//       { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+//       { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+//       { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+//       { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+//       { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+//       { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+//       { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+//     ],
+//     isSampleData: true,
+//   },
+//   {
+//     id: "sample-2",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       id: "sample-team-3",
+//       name: "Heat",
+//       logo: "/Miami_Heat.svg",
+//     },
+//     awayTeam: {
+//       id: "sample-team-4",
+//       name: "Mavs",
+//       logo: "/Dallas_Mavericks.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "Kyle Lowry", jerseyNumber: 7 },
+//       { position: "SG", player: "Tyler Herro", jerseyNumber: 14 },
+//       { position: "SF", player: "Jimmy Butler", jerseyNumber: 22 },
+//       { position: "PF", player: "Kevin Love", jerseyNumber: 42 },
+//       { position: "C", player: "Bam Adebayo", jerseyNumber: 13 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Luka Dončić", jerseyNumber: 77 },
+//       { position: "SG", player: "Kyrie Irving", jerseyNumber: 11 },
+//       { position: "SF", player: "Tim Hardaway Jr.", jerseyNumber: 10 },
+//       { position: "PF", player: "Grant Williams", jerseyNumber: 33 },
+//       { position: "C", player: "Dereck Lively II", jerseyNumber: 2 },
+//     ],
+//     isSampleData: true,
+//   },
+//   {
+//     id: "sample-3",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       name: "Nets",
+//       logo: "/Brooklyn_Nets.svg",
+//     },
+//     awayTeam: {
+//       name: "Warriors",
+//       logo: "/Golden_State_Warriors.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "Ben Simmons", jerseyNumber: 10 },
+//       { position: "SG", player: "Mikal Bridges", jerseyNumber: 1 },
+//       { position: "SF", player: "Cameron Johnson", jerseyNumber: 2 },
+//       { position: "PF", player: "Dorian Finney-Smith", jerseyNumber: 28 },
+//       { position: "C", player: "Nic Claxton", jerseyNumber: 33 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+//       { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+//       { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+//       { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+//       { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+//     ],
+//     isSampleData: true,
+//   },
+//   {
+//     id: "sample-4",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       name: "Lakers",
+//       logo: "/Los_Angeles_Lakers.svg",
+//     },
+//     awayTeam: {
+//       name: "Warriors",
+//       logo: "/Golden_State_Warriors.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+//       { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+//       { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+//       { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+//       { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+//       { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+//       { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+//       { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+//       { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+//     ],
+//     isSampleData: true,
+//   },
+//   {
+//     id: "sample-5",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       name: "Lakers",
+//       logo: "/Los_Angeles_Lakers.svg",
+//     },
+//     awayTeam: {
+//       name: "Warriors",
+//       logo: "/Golden_State_Warriors.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+//       { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+//       { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+//       { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+//       { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+//       { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+//       { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+//       { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+//       { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+//     ],
+//     isSampleData: true,
+//   },
+//   {
+//     id: "sample-6",
+//     date: "12 September 2025",
+//     homeTeam: {
+//       name: "Lakers",
+//       logo: "/Los_Angeles_Lakers.svg",
+//     },
+//     awayTeam: {
+//       name: "Warriors",
+//       logo: "/Golden_State_Warriors.svg",
+//     },
+//     homeLineup: [
+//       { position: "PG", player: "D'Angelo Russell", jerseyNumber: 1 },
+//       { position: "SG", player: "Austin Reaves", jerseyNumber: 15 },
+//       { position: "SF", player: "Rui Hachimura", jerseyNumber: 28 },
+//       { position: "PF", player: "LeBron James", jerseyNumber: 23 },
+//       { position: "C", player: "Anthony Davis", jerseyNumber: 3 },
+//     ],
+//     awayLineup: [
+//       { position: "PG", player: "Stephen Curry", jerseyNumber: 30 },
+//       { position: "SG", player: "Klay Thompson", jerseyNumber: 11 },
+//       { position: "SF", player: "Andrew Wiggins", jerseyNumber: 22 },
+//       { position: "PF", player: "Draymond Green", jerseyNumber: 23 },
+//       { position: "C", player: "Kevon Looney", jerseyNumber: 5 },
+//     ],
+//     isSampleData: true,
+//   },
+// ];
+
+const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
+  return lineup.map((player, index) => {
+    const nameParts = player.player?.split(" ") || ["Player", "Unknown"];
+    const name = nameParts[0] || "Player";
+    const surname = nameParts.slice(1).join(" ") || "Unknown";
+
+    return {
+      id: `${team}-player-${index}`,
+      name,
+      surname,
+      position: player.position || "Unknown",
+    };
+  });
+};
 
 export default function Dashboard() {
   const router = useRouter();
@@ -347,7 +361,7 @@ export default function Dashboard() {
 
         // Create a map of team_id to team data
         const teamsMap = new Map();
-        teamsData?.forEach((team: Team) => {
+        teamsData?.forEach((team: any) => {
           teamsMap.set(team.team_id, team);
         });
 
@@ -362,17 +376,23 @@ export default function Dashboard() {
             const awayPlayers = playersMap.get(match.away_team_id) || [];
 
             // Format lineup data - get first 5 players for each team
-            const homeLineup = homePlayers.slice(0, 5).map((player: any) => ({
-              position: player.position,
-              player: `${player.first_name} ${player.last_name}`,
-              jerseyNumber: player.jersey_number,
-            }));
+            const homeLineup: Player_details[] = homePlayers
+              .slice(0, 5)
+              .map((p: any, index: number) => ({
+                id: `home-${index}`,
+                name: p.first_name,
+                surname: p.last_name,
+                position: p.position || "Unknown",
+              }));
 
-            const awayLineup = awayPlayers.slice(0, 5).map((player: any) => ({
-              position: player.position,
-              player: `${player.first_name} ${player.last_name}`,
-              jerseyNumber: player.jersey_number,
-            }));
+            const awayLineup: Player_details[] = awayPlayers
+              .slice(0, 5)
+              .map((p: any, index: number) => ({
+                id: `away-${index}`,
+                name: p.first_name,
+                surname: p.last_name,
+                position: p.position || "Unknown",
+              }));
 
             return {
               id: match.match_id,
@@ -382,10 +402,12 @@ export default function Dashboard() {
                 day: "numeric",
               }),
               homeTeam: {
+                id: match.home_team_id, // ✅ keep the raw team_id
                 name: homeTeam.name || homeTeam.team_name || "Unknown Team",
                 logo: homeTeam.icon_url || "/default_team.svg",
               },
               awayTeam: {
+                id: match.away_team_id, // ✅ keep the raw team_id
                 name: awayTeam.name || awayTeam.team_name || "Unknown Team",
                 logo: awayTeam.icon_url || "/default_team.svg",
               },
@@ -464,13 +486,14 @@ export default function Dashboard() {
       }
 
       // Combine database games with sample games
-      setAllGames([...databaseGames, ...sampleGames]);
+      //setAllGames([...databaseGames, ...sampleGames]);
+      setAllGames([...databaseGames]);
     } catch (err: any) {
       console.error("Error fetching matches:", err);
       setError("Failed to load matches from database. Using sample data.");
       setMatches([]);
       setUsingSampleData(true);
-      setAllGames(sampleGames);
+      //setAllGames(sampleGames);
     } finally {
       setIsLoading(false);
     }
@@ -587,7 +610,19 @@ export default function Dashboard() {
         ) : (
           /* Games grid display when data is loaded */
           <div className="max-w-6xl mx-auto">
-            <GamesGrid games={allGames} />
+            <GamesGrid
+              games={allGames.map((game) => ({
+                ...game,
+                homeLineup: convertToPlayerDetails(
+                  game.homeLineup || [],
+                  "home"
+                ),
+                awayLineup: convertToPlayerDetails(
+                  game.awayLineup || [],
+                  "away"
+                ),
+              }))}
+            />
           </div>
         )}
 

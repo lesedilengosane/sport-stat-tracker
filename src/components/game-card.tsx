@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface Team {
+  id: string; // ← Add this property
   name: string;
   logo: string;
 }
@@ -15,8 +16,8 @@ interface Player {
 
 interface GameCardProps {
   date: string;
-  homeTeam: Team;
-  awayTeam: Team;
+  homeTeam: Team; // ← Now includes id
+  awayTeam: Team; // ← Now includes id
   homeLineup?: Player[];
   awayLineup?: Player[];
 }
@@ -31,8 +32,10 @@ export function GameCard({
   const router = useRouter();
 
   const handleClick = () => {
-    // Pass team data as URL parameters
+    // Pass team data as URL parameters - ADD TEAM IDs
     const queryParams = new URLSearchParams({
+      homeTeamId: homeTeam.id, // ← Add this
+      awayTeamId: awayTeam.id, // ← Add this
       homeTeam: homeTeam.name,
       homeLogo: homeTeam.logo,
       awayTeam: awayTeam.name,
