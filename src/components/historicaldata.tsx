@@ -44,16 +44,18 @@ interface PlayerDetails {
 }
 
 interface PlayerStat {
-  stat_id: string;
+  id: string;
   match_id: string;
   player_id: string;
   points: number;
-  three_points_made: number;
-  three_points_attempted: number;
-  free_throws_made: number;
-  free_throws_attempted: number;
-  rebounds_offensive: number;
-  rebounds_defensive: number;
+  twoPointsMade: number;
+  twoPointsAttempted: number;
+  threePointsMade: number;
+  threePointsAttempted: number;
+  freeThrowsMade: number;
+  freeThrowsAttempted: number;
+  rebounds: number;
+  
   assists: number;
   steals: number;
   blocks: number;
@@ -175,7 +177,7 @@ const mergedPlayerStats = playerStats.map((stat) => {
                   onChange={(e) => setLimit(Number(e.target.value))}
                   className="border rounded px-2 py-1"
                 >
-                  {[3, 5, 10, 20].map((n) => (
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
                     <option key={n} value={n}>{n} games</option>
                   ))}
                 </select>
@@ -231,7 +233,7 @@ const mergedPlayerStats = playerStats.map((stat) => {
                 <th className="p-2 border">Points</th>
                 <th className="p-2 border">3PM / 3PA</th>
                 <th className="p-2 border">FTM / FTA</th>
-                <th className="p-2 border">Rebounds (O/D)</th>
+                <th className="p-2 border">Rebounds </th>
                 <th className="p-2 border">Assists</th>
                 <th className="p-2 border">Steals</th>
                 <th className="p-2 border">Blocks</th>
@@ -239,7 +241,7 @@ const mergedPlayerStats = playerStats.map((stat) => {
             </thead>
             <tbody>
               {playerStats.map((stat: any) => (
-                <tr key={stat.stat_id} className="text-center">
+                <tr key={stat.id} className="text-center">
                   <td className="p-2 border font-medium">
                     {stat.players?.first_name} {stat.players?.last_name}{" "}
                     <span className="text-gray-500">
@@ -248,13 +250,13 @@ const mergedPlayerStats = playerStats.map((stat) => {
                   </td>
                   <td className="p-2 border">{stat.points}</td>
                   <td className="p-2 border">
-                    {stat.three_points_made} / {stat.three_points_attempted}
+                    {stat.threePointsMade} / {stat.threePointsAttempted}
                   </td>
                   <td className="p-2 border">
-                    {stat.free_throws_made} / {stat.free_throws_attempted}
+                    {stat.freeThrowsMade} / {stat.freeThrowsAttempted}
                   </td>
                   <td className="p-2 border">
-                    {stat.rebounds_offensive} / {stat.rebounds_defensive}
+                    {stat.rebounds} 
                   </td>
                   <td className="p-2 border">{stat.assists}</td>
                   <td className="p-2 border">{stat.steals}</td>
