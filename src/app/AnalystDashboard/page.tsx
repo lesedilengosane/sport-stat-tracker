@@ -11,9 +11,8 @@ import { supabase } from "../api/DatabaseApi/supabaseClient";
 import { GamesGrid } from "@/components/games-grid";
 import { apiClient } from "../utils/apiClient";
 import { Navbar } from "@/components/ui/NavBar/NavBar";
-import { TabBar } from "@/components/ui/TabBar/TabBar";
+import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 
-// Define TypeScript interfaces based on your schema
 interface Team {
   team_id: string;
   name: string;
@@ -546,10 +545,15 @@ export default function Dashboard() {
   
         {/* Loading state */}
         {isLoading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-400"></div>
-            <p className="mt-4 text-white">Loading games...</p>
-          </div>
+         <div className="w-full max-w-6xl mx-auto p-6">
+         <h2 className="text-2xl font-bold text-white mb-6">AVAILABLE GAMES</h2>
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+           {Array.from({ length: 12 }).map((_, index) => (
+             <GameCardSkeleton key={index} />
+           ))}
+         </div>
+       </div>
+
         ) : (
           <div className="max-w-6xl mx-auto">
             <GamesGrid games={allGames} />
