@@ -56,6 +56,16 @@ export const apiClient = {
     return response.json();
   },
 
+  //Team Logo Fetcher
+  getTeamLogo: async (teamId: string): Promise<string> => {
+    const response = await fetch(`/api/teams/team-logos?teamId=${teamId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch team logo');
+    }
+    const data = await response.json();
+    return data.logoUrl; // expect your API to return { logoUrl: "https://..." }
+  },
+
   // Player methods
   getPlayersByTeamId: async (teamId: string): Promise<any[]> => {
     const response = await fetch(`/api/players?teamId=${teamId}`);
@@ -64,6 +74,7 @@ export const apiClient = {
     }
     return response.json();
   },
+  
 
   // Alternative getPlayersByTeamIds method
 // app/utils/apiClient.ts - Update getPlayersByTeamIds method

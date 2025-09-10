@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Calendar, Clock, Check } from "lucide-react";
 
 interface Team {
   id: string; // ← Add this property
@@ -10,29 +11,38 @@ interface Team {
 }
 
 interface Player {
-  position: string;
-  player: string;
+  id: string;
+  name: string;
+  position?: string;
 }
 
 interface GameCardProps {
   date: string;
-  homeTeam: Team; // ← Now includes id
-  awayTeam: Team; // ← Now includes id
+  time: string;
+  homeTeam: Team;
+  awayTeam: Team;
+  location: string;
+  isBooked?: boolean;
   homeLineup?: Player[];
   awayLineup?: Player[];
+
 }
 
 export function GameCard({
   date,
+  time,
   homeTeam,
   awayTeam,
-  homeLineup,
-  awayLineup,
+  location,
+  isBooked = false,
 }: GameCardProps) {
   const router = useRouter();
 
   const handleClick = () => {
+
+    if (isBooked) return; // prevent navigation if booked
     // Pass team data as URL parameters - ADD TEAM IDs
+
     const queryParams = new URLSearchParams({
       homeTeamId: homeTeam.id, // ← Add this
       awayTeamId: awayTeam.id, // ← Add this
@@ -40,9 +50,9 @@ export function GameCard({
       homeLogo: homeTeam.logo,
       awayTeam: awayTeam.name,
       awayLogo: awayTeam.logo,
-      date: date,
-      homeLineup: JSON.stringify(homeLineup || []),
-      awayLineup: JSON.stringify(awayLineup || []),
+      date,
+      time,
+      location,
     }).toString();
 
     router.push(`/analyst?${queryParams}`);
@@ -51,13 +61,28 @@ export function GameCard({
   return (
     <Card
       onClick={handleClick}
-      className="bg-slate-800 border-slate-700 p-4 text-white transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-xl hover:shadow-slate-900/50 hover:bg-slate-750 cursor-pointer"
+      className={`bg-slate-800 border-slate-700 p-3 text-white transition-all duration-300 ease-in-out ${
+        isBooked
+          ? "opacity-80 cursor-not-allowed"
+          : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/50 cursor-pointer"
+      }`}
     >
-      <div className="text-sm text-slate-400 mb-4">{date}</div>
+      {/* Date + Time */}
+      <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+        <div className="flex items-center gap-1">
+          <Calendar size={12} />
+          <span>{date}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <Clock size={12} />
+          <span>{time}</span>
+        </div>
+      </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 relative mb-2">
+      {/* Teams */}
+      <div className="flex items-center justify-between ">
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-12 h-12 relative mb-1">
             <Image
               src={homeTeam.logo || "/placeholder.svg"}
               alt={`${homeTeam.name} logo`}
@@ -65,13 +90,13 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-sm font-medium">{homeTeam.name}</span>
+          <span className="text-xs font-medium">{homeTeam.name}</span>
         </div>
 
-        <div className="text-slate-400 font-bold text-lg mx-4">vs</div>
+        <div className="text-slate-400 font-bold text-sm mx-2">vs</div>
 
-        <div className="flex flex-col items-center">
-          <div className="w-16 h-16 relative mb-2">
+        <div className="flex flex-col items-center flex-1">
+          <div className="w-12 h-12 relative mb-1">
             <Image
               src={awayTeam.logo || "/placeholder.svg"}
               alt={`${awayTeam.name} logo`}
@@ -79,8 +104,26 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-sm font-medium">{awayTeam.name}</span>
+          <span className="text-xs font-medium">{awayTeam.name}</span>
         </div>
+      </div>
+
+      {/* Location */}
+      <div className="text-xs text-slate-400 ">{location}</div>
+
+      {/* Action buttons */}
+      <div className="flex items-center justify-between text-xs font-medium">
+        <button className="text-blue-400 hover:underline">View Details</button>
+        {isBooked ? (
+          <div className="flex items-center gap-1 text-yellow-400">
+            <Check size={14} />
+            <span>Booked</span>
+          </div>
+        ) : (
+          <button className="text-yellow-400 hover:underline">
+            Book for Analysis
+          </button>
+        )}
       </div>
     </Card>
   );
