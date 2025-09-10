@@ -1,5 +1,6 @@
 import { GameCard } from "./game-card"
 
+
 interface Team {
   name: string
   logo: string
@@ -8,8 +9,11 @@ interface Team {
 interface Game {
   id: string
   date: string
+  time: string
+  location: string
   homeTeam: Team
   awayTeam: Team
+  isBooked?: boolean
 }
 
 interface GamesGridProps {
@@ -22,7 +26,15 @@ export function GamesGrid({ games }: GamesGridProps) {
       <h2 className="text-2xl font-bold text-white mb-6">AVAILABLE GAMES</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {games.map((game) => (
-          <GameCard key={game.id} date={game.date} homeTeam={game.homeTeam} awayTeam={game.awayTeam} />
+          <GameCard
+            key={game.id}
+            date={game.date}
+            time={game.time}       
+            location={game.location} 
+            homeTeam={game.homeTeam} 
+            awayTeam={game.awayTeam}
+            isBooked={game.isBooked}
+             />
         ))}
       </div>
     </div>
