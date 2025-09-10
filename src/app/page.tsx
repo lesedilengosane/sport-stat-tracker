@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
+import HistoricalData from "@/components/historicaldata"
 
 export default function Home() {
   const router = useRouter()
@@ -74,7 +75,7 @@ export default function Home() {
             THE BRIGHTEST LIGHTS. THE LOUDEST CROWDS. THE BIGGEST GAMES. GET THE STATS THAT DEFINE THE MOMENTS YOU&apos;LL
             NEVER FORGET.
           </p>
-
+                {/* <HistoricalData team={""} league={""} /> */}
           {/* Buttons */}
           <div className="flex flex-wrap gap-4 ml-8">
             <button
