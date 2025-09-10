@@ -221,8 +221,17 @@ export default function StatTrackerPage() {
     };
   };
 
+
+
+
+
+
+
+
+
   const handleSaveGame = async (completeGameData: any) => {
     try {
+
       const dataStr = JSON.stringify(completeGameData, null, 2);
       const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
