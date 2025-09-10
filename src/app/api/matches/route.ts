@@ -152,7 +152,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-   /*
+   
     const match_record={
       match_id:body.match_id,
       home_team_id:body.homeTeam.teamid,
@@ -180,24 +180,44 @@ export async function POST(request: Request) {
 
     //The match events are successfully updated along with matches table
 
-    */
+    
 
     //Now we wanna update player stats
+    //home team
     const home_team_stats=body.homeTeam.players.map((p: { stats: any; }) =>p.stats);
     const away_team_stats=body.awayTeam.players.map((p: { stats: any; }) =>p.stats);
-    const {data :matchStats,error}=await supabase
+    const {data :matchStats}=await supabase
     .from('player_stats')
     .insert(home_team_stats)
     .select()
 
+    //away team
+    const {data :matchStats2}=await supabase
+    .from('player_stats')
+    .insert(away_team_stats)
+    .select()
 
+    //The stats per player in a match are updated successfully
+    
+    //we wanna update all time statistics now
 
+    //we define something called a RPC which is a Postgres function that takes in a json and perfoms operations with it
+    //it uses our json to update all time player stats
+
+    const { data, error } = await supabase.rpc("bulk_update_player_stats", {
+      p_stats: home_team_stats
+      });
+
+    const { data:away_team} = await supabase.rpc("bulk_update_player_stats", {
+  p_stats: away_team_stats});
+
+      //at this point all data has been successfully updated
     if (error) {
       return NextResponse.json({ error: `Match stats for players failed to insert or server error : ${error.message}`},{ status: 500 });
     }
 
 
-    return NextResponse.json(matchStats);
+    return NextResponse.json(matchStats2);
   } catch (err) {
     return NextResponse.json(
       { error: 'Failed to create match' },
