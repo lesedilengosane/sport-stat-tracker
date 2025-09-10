@@ -1,19 +1,21 @@
+// ./types/basketball
+
 export interface Player {
-    id: string
-    name: string
-    position: string
-    jerseyNumber: number
-  }
+  id: string;
+  name: string;
+  position: string;
+  jerseyNumber?: number;
+}
   
-  export interface Team {
-    id: string
-    name: string
-    color: string
-    players: Player[]
-    score: number
-    timeouts: number
-    fouls: number
-  }
+export interface Team {
+  id: string;
+  name: string;
+  color: string;
+  score: number;
+  timeouts: number;
+  fouls: number;
+  players: Player[];
+}
   
   export interface GameEvent {
     id: string
@@ -43,11 +45,11 @@ export interface Player {
   }
   
   export interface GameData {
-    id: string
-    date: string
-    homeTeam: Team
-    awayTeam: Team
-    status: "scheduled" | "live" | "completed"
-    location?: string
+    id: string;
+    date: string;
+    homeTeam: Team;
+    awayTeam: Team;
+    status: "live" | "completed" | "scheduled";
+    location?: string;
   }
   

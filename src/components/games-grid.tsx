@@ -1,12 +1,21 @@
-import { GameCard } from "./game-card"
+// ../components/games-grid.tsx
+import { GameCard } from "./game-card";
 
 
 interface Team {
-  name: string
-  logo: string
+  id: string; // ← Make sure this is here
+  name: string;
+  logo: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  position?: string;
 }
 
 interface Game {
+
   id: string
   date: string
   time: string
@@ -14,10 +23,13 @@ interface Game {
   homeTeam: Team
   awayTeam: Team
   isBooked?: boolean
+  homeLineup?: any[];
+  awayLineup?: any[];
+
 }
 
 interface GamesGridProps {
-  games: Game[]
+  games: Game[];
 }
 
 export function GamesGrid({ games }: GamesGridProps) {
@@ -35,8 +47,9 @@ export function GamesGrid({ games }: GamesGridProps) {
             awayTeam={game.awayTeam}
             isBooked={game.isBooked}
              />
+
         ))}
       </div>
     </div>
-  )
+  );
 }

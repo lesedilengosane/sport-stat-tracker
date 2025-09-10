@@ -5,8 +5,15 @@ import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
 
 interface Team {
+  id: string; // ← Add this property
   name: string;
   logo: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  position?: string;
 }
 
 interface GameCardProps {
@@ -16,6 +23,9 @@ interface GameCardProps {
   awayTeam: Team;
   location: string;
   isBooked?: boolean;
+  homeLineup?: Player[];
+  awayLineup?: Player[];
+
 }
 
 export function GameCard({
@@ -29,8 +39,13 @@ export function GameCard({
   const router = useRouter();
 
   const handleClick = () => {
+
     if (isBooked) return; // prevent navigation if booked
+    // Pass team data as URL parameters - ADD TEAM IDs
+
     const queryParams = new URLSearchParams({
+      homeTeamId: homeTeam.id, // ← Add this
+      awayTeamId: awayTeam.id, // ← Add this
       homeTeam: homeTeam.name,
       homeLogo: homeTeam.logo,
       awayTeam: awayTeam.name,
