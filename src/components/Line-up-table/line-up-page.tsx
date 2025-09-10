@@ -1,12 +1,9 @@
+// components/Line-up-table/line-up-page.tsx
+
 import Image from "next/image";
 import LastGames from "./last5games";
 import BasketballTimeline from "@/components/basketball-timeline";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { DataTable } from "./LineUp-table";
 import { columns } from "@/app/analyst/match-lineup/column";
@@ -22,9 +19,8 @@ interface TabspageProps {
   awayTeam?: string;
   awayLogo?: string;
   date?: string;
-  data: any[]; // for DataTable
-  homeLineup?: Player[];
-  awayLineup?: Player[];
+  homeLineup?: any[]; // typed properly
+  awayLineup?: any[];
 }
 
 export function Tabspage({
@@ -33,7 +29,6 @@ export function Tabspage({
   awayTeam = "Away Team",
   awayLogo = "/placeholder.svg",
   date = "Date not specified",
-  data,
   homeLineup = [],
   awayLineup = [],
 }: TabspageProps) {
@@ -44,28 +39,19 @@ export function Tabspage({
         <TabsList className="flex justify-center border-b border-gray-200">
           <TabsTrigger
             value="lineups"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 
-                       data-[state=active]:after:absolute data-[state=active]:after:left-0 
-                       data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] 
-                       data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
+            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
           >
             Lineups
           </TabsTrigger>
           <TabsTrigger
             value="lastgames"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 
-                       data-[state=active]:after:absolute data-[state=active]:after:left-0 
-                       data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] 
-                       data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
+            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
           >
             Last 5 Games
           </TabsTrigger>
           <TabsTrigger
             value="summary"
-            className="relative px-6 py-3 data-[state=active]:text-orange-500 
-                       data-[state=active]:after:absolute data-[state=active]:after:left-0 
-                       data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] 
-                       data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
+            className="relative px-6 py-3 data-[state=active]:text-orange-500 data-[state=active]:after:absolute data-[state=active]:after:left-0 data-[state=active]:after:bottom-0 data-[state=active]:after:h-[2px] data-[state=active]:after:w-full data-[state=active]:after:bg-orange-500"
           >
             Game Summary
           </TabsTrigger>
@@ -86,7 +72,7 @@ export function Tabspage({
                 />
                 <h4 className="text-xl font-bold">{homeTeam}</h4>
               </div>
-              <DataTable columns={columns} data={data} />
+              <DataTable columns={columns} data={homeLineup} />
             </div>
 
             {/* Away Team */}
@@ -101,7 +87,7 @@ export function Tabspage({
                 />
                 <h4 className="text-xl font-bold">{awayTeam}</h4>
               </div>
-              <DataTable columns={columns} data={data} />
+              <DataTable columns={columns} data={awayLineup} />
             </div>
           </div>
         </TabsContent>

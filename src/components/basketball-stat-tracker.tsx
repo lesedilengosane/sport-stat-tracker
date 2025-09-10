@@ -1,22 +1,30 @@
-"use client"
+// src\components\basketball-stat-tracker.tsx
 
-import { useState, useMemo } from "react"
-import type { GameEvent, PlayerStats, GameData } from "@/types/basketball"
-import TeamPlayerCard from "./ui/team-player-card"
-import GameHistory from "./ui/game-history"
-import ActionButtons from "./ui/action-buttons"
+"use client";
+
+import { useState, useMemo } from "react";
+import type { GameEvent, PlayerStats, GameData } from "@/types/basketball";
+import TeamPlayerCard from "./ui/team-player-card";
+import GameHistory from "./ui/game-history";
+import ActionButtons from "./ui/action-buttons";
 
 interface BasketballStatTrackerProps {
-  gameData: GameData
-  onBack?: () => void
-  onSave?: (gameData: any) => void
+  gameData: GameData;
+  onBack?: () => void;
+  onSave?: (gameData: any) => void;
 }
 
-export default function BasketballStatTracker({ gameData, onBack, onSave }: BasketballStatTrackerProps) {
-  const [selectedPlayer, setSelectedPlayer] = useState<string>("")
-  const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
-  const [playerStats, setPlayerStats] = useState<Record<string, PlayerStats>>({})
-  const [gameScore, setGameScore] = useState({ home: 0, away: 0 })
+export default function BasketballStatTracker({
+  gameData,
+  onBack,
+  onSave,
+}: BasketballStatTrackerProps) {
+  const [selectedPlayer, setSelectedPlayer] = useState<string>("");
+  const [gameEvents, setGameEvents] = useState<GameEvent[]>([]);
+  const [playerStats, setPlayerStats] = useState<Record<string, PlayerStats>>(
+    {}
+  );
+  const [gameScore, setGameScore] = useState({ home: 0, away: 0 });
 
   const initializePlayerStats = (playerId: string): PlayerStats => ({
     playerId,
@@ -33,33 +41,48 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
     threePointsAttempted: 0,
     freeThrowsMade: 0,
     freeThrowsAttempted: 0,
-  })
+  });
+
+  // Get team for a player
+  const getPlayerTeam = (playerId: string): "home" | "away" | null => {
+    if (gameData.homeTeam.players.some((p) => p.id === playerId)) return "home";
+    if (gameData.awayTeam.players.some((p) => p.id === playerId)) return "away";
+    return null;
+  };
 
   const allPlayerStats = useMemo(() => {
-    const allPlayers = [...gameData.homeTeam.players, ...gameData.awayTeam.players]
-    const computedStats: Record<string, PlayerStats> = {}
+    const allPlayers = [
+      ...gameData.homeTeam.players,
+      ...gameData.awayTeam.players,
+    ];
+    const computedStats: Record<string, PlayerStats> = {};
 
     allPlayers.forEach((player) => {
-      computedStats[player.id] = playerStats[player.id] || initializePlayerStats(player.id)
-    })
+      computedStats[player.id] =
+        playerStats[player.id] || initializePlayerStats(player.id);
+    });
 
-    return computedStats
-  }, [playerStats, gameData.homeTeam.players, gameData.awayTeam.players])
+    return computedStats;
+  }, [playerStats, gameData.homeTeam.players, gameData.awayTeam.players]);
 
   const getPlayerStats = (playerId: string): PlayerStats => {
-    return allPlayerStats[playerId] || initializePlayerStats(playerId)
-  }
+    return allPlayerStats[playerId] || initializePlayerStats(playerId);
+  };
 
   const addGameEvent = (action: string, points = 0) => {
     if (!selectedPlayer) {
-      alert("Please select a player first")
-      return
+      alert("Please select a player first");
+      return;
     }
 
-    const player = [...gameData.homeTeam.players, ...gameData.awayTeam.players].find((p) => p.id === selectedPlayer)
-    if (!player) return
+    const player = [
+      ...gameData.homeTeam.players,
+      ...gameData.awayTeam.players,
+    ].find((p) => p.id === selectedPlayer);
+    if (!player) return;
 
-    const teamId = gameData.homeTeam.players.find((p) => p.id === selectedPlayer) ? "home" : "away"
+    const teamId = getPlayerTeam(selectedPlayer);
+    if (!teamId) return;
 
     const event: GameEvent = {
       id: Date.now().toString(),
@@ -69,61 +92,73 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
       playerName: player.name,
       action,
       points,
-    }
+    };
 
-    setGameEvents((prev) => [event, ...prev])
+    setGameEvents((prev) => [event, ...prev]);
 
-    const currentStats = getPlayerStats(selectedPlayer)
-    const updatedStats = { ...currentStats }
+    // Create a completely new stats object to avoid reference issues
+    const currentStats = getPlayerStats(selectedPlayer);
+    const updatedStats = {
+      ...initializePlayerStats(selectedPlayer),
+      ...currentStats,
+    };
 
     switch (action) {
       case "+1 FT":
-        updatedStats.freeThrowsMade += 1
-        updatedStats.freeThrowsAttempted += 1
-        updatedStats.points += 1
-        break
+        updatedStats.freeThrowsMade += 1;
+        updatedStats.freeThrowsAttempted += 1;
+        updatedStats.points += 1;
+        break;
       case "+2 FG":
-        updatedStats.twoPointsMade += 1
-        updatedStats.twoPointsAttempted += 1
-        updatedStats.points += 2
-        break
+        updatedStats.twoPointsMade += 1;
+        updatedStats.twoPointsAttempted += 1;
+        updatedStats.points += 2;
+        break;
       case "+3 FG":
-        updatedStats.threePointsMade += 1
-        updatedStats.threePointsAttempted += 1
-        updatedStats.points += 3
-        break
+        updatedStats.threePointsMade += 1;
+        updatedStats.threePointsAttempted += 1;
+        updatedStats.points += 3;
+        break;
       case "Reb":
-        updatedStats.rebounds += 1
-        break
+        updatedStats.rebounds += 1;
+        break;
       case "Ast":
-        updatedStats.assists += 1
-        break
+        updatedStats.assists += 1;
+        break;
       case "Stl":
-        updatedStats.steals += 1
-        break
+        updatedStats.steals += 1;
+        break;
       case "Blk":
-        updatedStats.blocks += 1
-        break
+        updatedStats.blocks += 1;
+        break;
       case "TO":
-        updatedStats.turnovers += 1
-        break
+        updatedStats.turnovers += 1;
+        break;
       case "Foul":
-        updatedStats.fouls += 1
-        break
+        updatedStats.fouls += 1;
+        break;
     }
 
+    // Update player stats immutably
     setPlayerStats((prev) => ({
       ...prev,
       [selectedPlayer]: updatedStats,
-    }))
+    }));
 
     if (points > 0) {
       setGameScore((prev) => ({
         ...prev,
         [teamId]: prev[teamId] + points,
-      }))
+      }));
     }
-  }
+  };
+
+  const handlePlayerSelect = (playerId: string) => {
+    // Only allow selecting one player at a time
+    setSelectedPlayer((prevSelected) =>
+      prevSelected === playerId ? "" : playerId
+    );
+  };
 
   const handleSave = () => {
     const completeGameData = {
@@ -156,21 +191,25 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
       },
       events: gameEvents,
       finalScore: `${gameScore.home}-${gameScore.away}`,
-    }
+    };
 
     if (onSave) {
-      onSave(completeGameData)
+      onSave(completeGameData);
     } else {
-      const dataStr = JSON.stringify(completeGameData, null, 2)
-      const dataBlob = new Blob([dataStr], { type: "application/json" })
-      const url = URL.createObjectURL(dataBlob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `game-stats-${gameData.id}-${new Date().toISOString().split("T")[0]}.json`
-      link.click()
-      URL.revokeObjectURL(url)
+      const dataStr = JSON.stringify(completeGameData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `game-stats-${gameData.id}-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
@@ -199,30 +238,50 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
               <div className="flex items-center gap-20">
                 {/* Home Team */}
                 <div className="flex items-center gap-6">
-                  <img src="/generic-basketball-logo.png" alt="Lakers Logo" className="w-16 h-16 drop-shadow-md" />
+                  <img
+                    src="/generic-basketball-logo.png"
+                    alt="Lakers Logo"
+                    className="w-16 h-16 drop-shadow-md"
+                  />
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-blue-600 mb-3 tracking-tight">{gameData.homeTeam.name}</h2>
+                    <h2 className="text-3xl font-bold text-blue-600 mb-3 tracking-tight">
+                      {gameData.homeTeam.name}
+                    </h2>
                     <div className="w-24 h-20 bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-300 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-4xl font-bold text-blue-800">{gameScore.home}</span>
+                      <span className="text-4xl font-bold text-blue-800">
+                        {gameScore.home}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {/* VS Divider */}
                 <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-slate-400 mb-2">VS</div>
-                  <div className="text-sm text-slate-500 font-medium">Live Game</div>
+                  <div className="text-2xl font-bold text-slate-400 mb-2">
+                    VS
+                  </div>
+                  <div className="text-sm text-slate-500 font-medium">
+                    Live Game
+                  </div>
                 </div>
 
                 {/* Away Team */}
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-red-600 mb-3 tracking-tight">{gameData.awayTeam.name}</h2>
+                    <h2 className="text-3xl font-bold text-red-600 mb-3 tracking-tight">
+                      {gameData.awayTeam.name}
+                    </h2>
                     <div className="w-24 h-20 bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-300 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-4xl font-bold text-red-800">{gameScore.away}</span>
+                      <span className="text-4xl font-bold text-red-800">
+                        {gameScore.away}
+                      </span>
                     </div>
                   </div>
-                  <img src="/miami-heat-logo.png" alt="Heat Logo" className="w-16 h-16 drop-shadow-md" />
+                  <img
+                    src="/miami-heat-logo.png"
+                    alt="Heat Logo"
+                    className="w-16 h-16 drop-shadow-md"
+                  />
                 </div>
               </div>
             </div>
@@ -233,8 +292,13 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
               {/* Action Buttons */}
               <div className="w-36 flex-shrink-0">
                 <div className="sticky top-0">
-                  <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">Actions</h3>
-                  <ActionButtons onAction={addGameEvent} disabled={!selectedPlayer} />
+                  <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">
+                    Actions
+                  </h3>
+                  <ActionButtons
+                    onAction={addGameEvent}
+                    disabled={!selectedPlayer}
+                  />
                 </div>
               </div>
 
@@ -249,7 +313,7 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
                       <TeamPlayerCard
                         team={gameData.homeTeam}
                         selectedPlayer={selectedPlayer}
-                        onPlayerSelect={setSelectedPlayer}
+                        onPlayerSelect={handlePlayerSelect}
                         getPlayerStats={getPlayerStats}
                         teamColor="blue"
                       />
@@ -264,7 +328,7 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
                       <TeamPlayerCard
                         team={gameData.awayTeam}
                         selectedPlayer={selectedPlayer}
-                        onPlayerSelect={setSelectedPlayer}
+                        onPlayerSelect={handlePlayerSelect}
                         getPlayerStats={getPlayerStats}
                         teamColor="red"
                       />
@@ -275,7 +339,9 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
 
               {/* Game History */}
               <div className="w-72 flex-shrink-0">
-                <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">Game History</h3>
+                <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">
+                  Game History
+                </h3>
                 <GameHistory events={gameEvents} />
               </div>
             </div>
@@ -283,5 +349,5 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
         </div>
       </div>
     </div>
-  )
+  );
 }
