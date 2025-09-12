@@ -5,18 +5,19 @@ import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
 
 interface Team {
-  id: string; // ← Add this property
+  team_id: string; // ← Add this property
   name: string;
   logo: string;
 }
 
 interface Player {
-  id: string;
+  player_id: string;
   name: string;
   position?: string;
 }
 
 interface GameCardProps {
+  match_id:string;
   date: string;
   time: string;
   homeTeam: Team;
@@ -29,6 +30,7 @@ interface GameCardProps {
 }
 
 export function GameCard({
+  match_id,
   date,
   time,
   homeTeam,
@@ -44,8 +46,8 @@ export function GameCard({
     // Pass team data as URL parameters - ADD TEAM IDs
 
     const queryParams = new URLSearchParams({
-      homeTeamId: homeTeam.id, // ← Add this
-      awayTeamId: awayTeam.id, // ← Add this
+      homeTeamId: homeTeam.team_id, // ← Add this
+      awayTeamId: awayTeam.team_id, // ← Add this
       homeTeam: homeTeam.name,
       homeLogo: homeTeam.logo,
       awayTeam: awayTeam.name,
@@ -54,8 +56,8 @@ export function GameCard({
       time,
       location,
     }).toString();
-
-    router.push(`/analyst?${queryParams}`);
+    router.push(`/analyst/${match_id}`)
+    //router.push(`/analyst?${queryParams}`);
   };
 
   return (

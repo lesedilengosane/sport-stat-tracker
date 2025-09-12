@@ -35,7 +35,7 @@ export default function SignInCallback() {
         if (exists) {
           // ✅ user exists → go to dashboard
           console.log("User exists:", session.user);
-          router.push("/dashboard");
+          router.push("/analyst");
         } else {
           // ❌ user does not exist → sign them out and send to signup
           await supabase.auth.signOut();

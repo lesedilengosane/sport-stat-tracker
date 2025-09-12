@@ -1,14 +1,14 @@
 // ./types/basketball
 
 export interface Player {
-  id: string;
+  player_id: string;
   name: string;
   position: string;
   jerseyNumber?: number;
 }
   
 export interface Team {
-  id: string;
+  team_id: string;
   name: string;
   color: string;
   score: number;
@@ -18,17 +18,18 @@ export interface Team {
 }
   
   export interface GameEvent {
-    id: string
+    match_id: string
     timestamp: string
-    teamId: string
-    playerId: string
+    team_id: string
+    player_id: string
     playerName: string
     action: string
     points?: number
   }
   
   export interface PlayerStats {
-    playerId: string
+    player_id: string
+    match_id:string
     points: number
     assists: number
     rebounds: number
@@ -45,7 +46,7 @@ export interface Team {
   }
   
   export interface GameData {
-    id: string;
+    match_id: string;
     date: string;
     homeTeam: Team;
     awayTeam: Team;

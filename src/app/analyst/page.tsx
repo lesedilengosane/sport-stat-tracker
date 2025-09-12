@@ -1,230 +1,384 @@
-// app/analyst/page.tsx
+// app/dashboard/page.tsx
 "use client";
 
-import { Tabspage } from "@/components/line-up-page";
+import React from "react";
 import Image from "next/image";
-import { useSearchParams, useRouter } from "next/navigation";
-import { Player_details } from "./column";
+import Link from "next/link";
+import styles from "../landing.module.css";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { apiClient } from "@/app/utils/apiClient";
+import { supabase } from "../api/DatabaseApi/supabaseClient";
+import { GamesGrid } from "@/components/games-grid";
+import { apiClient } from "../utils/apiClient";
+import { Player_details } from "@/app/analyst/column";
+import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 
-const AnalystPage = () => {
-  const searchParams = useSearchParams();
+// Define TypeScript interfaces based on your schema
+interface Team {
+  team_id: string;
+  name: string;
+  icon_url: string;
+}
+
+interface Match {
+  match_id: string;
+  match_date: string;
+  location: string | null;
+  home_score: number;
+  away_score: number;
+  status: string;
+  home_team_id: string;
+  away_team_id: string;
+}
+
+interface Player {
+  position: string;
+  player: string;
+  jerseyNumber?: number;
+}
+
+interface Game {
+  match_id: string;
+  date: string;
+  time: string;
+  location :string;
+  homeTeam: { team_id: string; name: string; logo: string };
+  awayTeam: { team_id: string; name: string; logo: string };
+  homeLineup?: Player[];
+  awayLineup?: Player[];
+  isSampleData?: boolean;
+}
+
+
+
+const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
+  return lineup.map((player, index) => {
+    const nameParts = player.player?.split(" ") || ["Player", "Unknown"];
+    const name = nameParts[0] || "Player";
+    const surname = nameParts.slice(1).join(" ") || "Unknown";
+
+    return {
+      id: `${team}-player-${index}`,
+      name,
+      surname,
+      position: player.position || "Unknown",
+    };
+  });
+};
+
+export default function Dashboard() {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>("");
+  const [matches, setMatches] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Get data from URL parameters
-  const gameId = searchParams.get("id") || "";
-  const gameDate = searchParams.get("date") || "Date not specified";
-  const homeTeamId = searchParams.get("homeTeamId") || "";
-  const awayTeamId = searchParams.get("awayTeamId") || "";
-  const homeTeamName = searchParams.get("homeTeam") || "";
-  const homeTeamLogo = searchParams.get("homeLogo") || "/placeholder.svg";
-  const awayTeamName = searchParams.get("awayTeam") || "";
-  const awayTeamLogo = searchParams.get("awayLogo") || "/placeholder.svg";
-  const homeLineupParam = searchParams.get("homeLineup");
-  const awayLineupParam = searchParams.get("awayLineup");
-
-  const [homePlayers, setHomePlayers] = useState<Player_details[]>([]);
-  const [awayPlayers, setAwayPlayers] = useState<Player_details[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [usingSampleData, setUsingSampleData] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>("");
+  const [allGames, setAllGames] = useState<Game[]>([]);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
-      try {
-        console.log("Home Team ID:", homeTeamId);
-        console.log("Away Team ID:", awayTeamId);
+    const fetchUser = async () => {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
 
-        // Parse lineup data
-        const homeLineup = homeLineupParam ? JSON.parse(homeLineupParam) : [];
-        const awayLineup = awayLineupParam ? JSON.parse(awayLineupParam) : [];
+      if (error) {
+        console.error("Error fetching user:", error.message);
+        setError("Failed to fetch user information");
+        return;
+      }
 
-        // Create fallback players from URL data
-        const createFallbackPlayers = (
-          lineup: any[],
-          team: string
-        ): Player_details[] => {
-          return lineup.map((player, index) => {
-            const nameParts = player.player?.split(" ") || [
-              "Player",
-              "Unknown",
-            ];
-            const name = nameParts[0] || "Player";
-            const surname = nameParts.slice(1).join(" ") || "Unknown";
-
-            return {
-              id: `${team}-player-${index}`,
-              name: name,
-              surname: surname,
-              position: player.position || "Unknown",
-              avatarUrl: player.avatarUrl || "/avatars/player3.jpg",
-            };
-          });
-        };
-
-        const homeFallback = createFallbackPlayers(homeLineup, "home");
-        const awayFallback = createFallbackPlayers(awayLineup, "away");
-
-        if (!homeTeamId || !awayTeamId) {
-          console.log("Using fallback lineup data");
-          setHomePlayers(homeFallback);
-          setAwayPlayers(awayFallback);
-          setIsLoading(false);
-          return;
-        }
-
-        // Only fetch for the two teams we need
-        const playersMap = await apiClient.getPlayersByTeamIds([
-          homeTeamId,
-          awayTeamId,
-        ]);
-
-        console.log("Players Map:", playersMap);
-        console.log("Home team players from API:", playersMap.get(homeTeamId));
-        console.log("Away team players from API:", playersMap.get(awayTeamId));
-
-        // Convert API data to the format your DataTable expects
-        const formatApiPlayers = (players: any[]): Player_details[] => {
-          return players.map((player, index) => ({
-            id: player.id || `player-${index}`,
-            name: player.first_name || player.name || "Player",
-            surname: player.last_name || player.surname || "Unknown",
-            position: player.position || "Unknown",
-            avatarUrl:
-              player.avatar_url || player.avatarUrl || "/avatars/player3.jpg",
-          }));
-        };
-
-        const homeApiPlayers = playersMap.get(homeTeamId) || [];
-        const awayApiPlayers = playersMap.get(awayTeamId) || [];
-
-        const homeFormatted = formatApiPlayers(homeApiPlayers);
-        const awayFormatted = formatApiPlayers(awayApiPlayers);
-
-        console.log("Formatted home players:", homeFormatted);
-        console.log("Formatted away players:", awayFormatted);
-
-        // Use API data if available, otherwise use fallback
-        setHomePlayers(homeFormatted.length > 0 ? homeFormatted : homeFallback);
-        setAwayPlayers(awayFormatted.length > 0 ? awayFormatted : awayFallback);
-      } catch (err) {
-        console.error("Error fetching players:", err);
-        // Fallback to URL data
-        const homeLineup = homeLineupParam ? JSON.parse(homeLineupParam) : [];
-        const awayLineup = awayLineupParam ? JSON.parse(awayLineupParam) : [];
-
-        const createFallbackPlayers = (
-          lineup: any[],
-          team: string
-        ): Player_details[] => {
-          return lineup.map((player, index) => {
-            const nameParts = player.player?.split(" ") || [
-              "Player",
-              "Unknown",
-            ];
-            const name = nameParts[0] || "Player";
-            const surname = nameParts.slice(1).join(" ") || "Unknown";
-
-            return {
-              id: `${team}-player-${index}`,
-              name: name,
-              surname: surname,
-              position: player.position || "Unknown",
-              avatarUrl: player.avatarUrl || "/avatars/player3.jpg",
-            };
-          });
-        };
-
-        setHomePlayers(createFallbackPlayers(homeLineup, "home"));
-        setAwayPlayers(createFallbackPlayers(awayLineup, "away"));
-      } finally {
-        setIsLoading(false);
+      if (user) {
+        const fullName = user.user_metadata?.full_name || user.email || "User";
+        setUserName(fullName.split(" ")[0]);
+      } else {
+        router.push("/");
       }
     };
 
-    fetchPlayers();
-  }, [homeTeamId, awayTeamId, homeLineupParam, awayLineupParam]); // Only depend on URL params
+    fetchUser();
+  }, [router]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
-        Loading...
-      </div>
-    );
-  }
+  // Function to add test teams and a match
 
-  console.log("Final Home Players to display:", homePlayers);
-  console.log("Final Away Players to display:", awayPlayers);
+  // Fetch matches data using the API client
+  const fetchMatches = async () => {
+    try {
+      setIsLoading(true);
+      setUsingSampleData(false);
+      setDebugInfo("Fetching matches from API...");
+
+      // Get all matches
+      const matchesData = await apiClient.getMatches();
+      setDebugInfo(`Found ${matchesData?.length || 0} matches`);
+
+      let databaseGames: Game[] = [];
+
+      if (matchesData && matchesData.length > 0) {
+        // Get all unique team IDs from the matches
+        const teamIds = [
+          ...new Set([
+            ...matchesData.map((m: any) => m.home_team_id),
+            ...matchesData.map((m: any) => m.away_team_id),
+          ]),
+        ];
+
+        setDebugInfo(`Fetching ${teamIds.length} teams and players...`);
+
+        // Fetch all teams
+        const teamsData = await apiClient.getTeamsByIds(teamIds);
+
+        // Fetch all players for these teams
+        const playersMap = await apiClient.getPlayersByTeamIds(teamIds);
+
+        // Create a map of team_id to team data
+        const teamsMap = new Map();
+        teamsData?.forEach((team: any) => {
+          teamsMap.set(team.team_id, team);
+        });
+
+        // Format the data
+        databaseGames = await Promise.all(
+          matchesData.map(async (match: any) => {
+            const homeTeam = teamsMap.get(match.home_team_id) || {};
+            const awayTeam = teamsMap.get(match.away_team_id) || {};
+
+            // Get players for each team
+            const homePlayers = playersMap.get(match.home_team_id) || [];
+            const awayPlayers = playersMap.get(match.away_team_id) || [];
+
+            // Format lineup data - get first 5 players for each team
+            const homeLineup: Player_details[] = homePlayers
+              .slice(0, 5)
+              .map((p: any, index: number) => ({
+                id: `home-${index}`,
+                name: p.first_name,
+                surname: p.last_name,
+                position: p.position || "Unknown",
+              }));
+
+            const awayLineup: Player_details[] = awayPlayers
+              .slice(0, 5)
+              .map((p: any, index: number) => ({
+                id: `away-${index}`,
+                name: p.first_name,
+                surname: p.last_name,
+                position: p.position || "Unknown",
+              }));
+
+            return {
+              id: match.match_id,
+              date: new Date(match.match_date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              }),
+              homeTeam: {
+                id: match.home_team_id, // ✅ keep the raw team_id
+                name: homeTeam.name || homeTeam.team_name || "Unknown Team",
+                logo: homeTeam.icon_url || "/default_team.svg",
+              },
+              awayTeam: {
+                id: match.away_team_id, // ✅ keep the raw team_id
+                name: awayTeam.name || awayTeam.team_name || "Unknown Team",
+                logo: awayTeam.icon_url || "/default_team.svg",
+              },
+              homeLineup:
+                homeLineup.length > 0
+                  ? homeLineup
+                  : [
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Center",
+                        player: "Starting Center",
+                        jerseyNumber: 0,
+                      },
+                    ],
+              awayLineup:
+                awayLineup.length > 0
+                  ? awayLineup
+                  : [
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Guard",
+                        player: "Starting Guard",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Forward",
+                        player: "Starting Forward",
+                        jerseyNumber: 0,
+                      },
+                      {
+                        position: "Center",
+                        player: "Starting Center",
+                        jerseyNumber: 0,
+                      },
+                    ],
+              isSampleData: false,
+            };
+          })
+        );
+
+        setMatches(databaseGames);
+        setDebugInfo(
+          `Successfully loaded ${databaseGames.length} games from database`
+        );
+      } else {
+        console.log("No matches found in database");
+        setUsingSampleData(true);
+      }
+      setAllGames([...databaseGames]);
+    } catch (err: any) {
+      console.error("Error fetching matches:", err);
+      setError("Failed to load matches from database. Using sample data.");
+      setMatches([]);
+      setUsingSampleData(true);
+      //setAllGames(sampleGames);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
-      <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center rounded-lg mb-6">
-        <div className="text-sm mb-2">Last Time Out: 109-113</div>
-        <div className="flex items-center justify-between w-full max-w-4xl">
-          {/* Home Team */}
-          <div className="flex flex-col items-center">
-            <Image
-              src={homeTeamLogo}
-              alt={`${homeTeamName} Logo`}
-              width={80}
-              height={80}
-              className="mb-2"
+    <div className="relative min-h-screen">
+      {/* Background image */}
+      <div className="fixed inset-0 z-0">
+        <Image
+          src="/bgr.jpg"
+          alt="Background"
+          fill
+          priority
+          className="object-cover"
+        />
+      </div>
+
+      {/* Main content overlay with semi-transparent background and blur effect */}
+      <div className="relative z-10 min-h-screen bg-black/30 backdrop-blur-sm">
+        {/* Header section with search bar, user greeting, and profile icon */}
+        <div className="flex justify-between items-center w-full max-w-6xl mx-auto p-6 pt-16">
+          {/* Search input field */}
+          <div className="flex items-center bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 w-80">
+            <input
+              type="text"
+              placeholder="Search"
+              className="bg-transparent text-white placeholder-white/70 outline-none flex-1"
             />
-            <span className="text-lg font-bold font-bebas">{homeTeamName}</span>
+            <svg
+              className="w-5 h-5 text-white/70"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
           </div>
 
-          {/* Date */}
-          <div className="text-center">
-            <div className="text-2xl font-bold">{gameDate}</div>
-          </div>
-
-          {/* Away Team */}
-          <div className="flex flex-col items-center">
-            <Image
-              src={awayTeamLogo}
-              alt={`${awayTeamName} Logo`}
-              width={80}
-              height={80}
-              className="mb-2"
-            />
-            <span className="text-lg font-bold font-bebas">{awayTeamName}</span>
+          {/* User greeting and profile icon */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white">Hello, {userName}</span>
+            <Link href="./analyst/profile">
+              <Image
+                src="/profile.jpg"
+                alt="Profile"
+                width={50}
+                height={50}
+                className="rounded-full border-2 border-white shadow-md cursor-pointer"
+              />
+            </Link>
           </div>
         </div>
 
-        <button
-          onClick={() => {
-            // Pass ALL game data as URL parameters to the tracker
-            const queryParams = new URLSearchParams({
-              gameId: gameId,
-              date: gameDate,
-              homeTeamId: homeTeamId,
-              awayTeamId: awayTeamId,
-              homeTeam: homeTeamName,
-              awayTeam: awayTeamName,
-              homeLogo: homeTeamLogo,
-              awayLogo: awayTeamLogo,
-              homeLineup: JSON.stringify(homePlayers),
-              awayLineup: JSON.stringify(awayPlayers),
-            }).toString();
+        {/* Error message display */}
+        {error && (
+          <div className="max-w-6xl mx-auto mb-6">
+            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          </div>
+        )}
 
-            router.push(`/analyst/tracker?${queryParams}`);
-          }}
-          className="mt-4 bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-        >
-          ADD STATS
-        </button>
-      </header>
+        {/* Loading state indicator */}
+        {isLoading ? (
+                 <div className="w-full max-w-6xl mx-auto p-6">
+                 <h2 className="text-2xl font-bold text-white mb-6">AVAILABLE GAMES</h2>
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                   {Array.from({ length: 12 }).map((_, index) => (
+                     <GameCardSkeleton key={index} />
+                   ))}
+                 </div>
+               </div>
+        
+                ) : (
+          /* Games grid display when data is loaded */
+          <div className="max-w-6xl mx-auto">
+            <GamesGrid
+              games={allGames.map((game) => ({
+                ...game,
+                homeLineup: convertToPlayerDetails(
+                  game.homeLineup || [],
+                  "home"
+                ),
+                awayLineup: convertToPlayerDetails(
+                  game.awayLineup || [],
+                  "away"
+                ),
+              }))}
+            />
+          </div>
+        )}
 
-      <Tabspage
-        // homeTeam={homeTeamName}
-        // homeLogo={homeTeamLogo}
-        // awayTeam={awayTeamName}
-        // awayLogo={awayTeamLogo}
-        // date={gameDate}
-        homeLineup={homePlayers}
-        awayLineup={awayPlayers}
-      />
+        {/* Logout button */}
+        <div className="mt-8 text-center pb-8">
+          <button onClick={handleLogout} className={styles.btn}>
+            Welcome to your Dashboard, {userName}! Click to log out
+          </button>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default AnalystPage;
+}
