@@ -3,7 +3,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../api/DatabaseApi/supabaseClient"; // adjust path
+import { supabase } from "../api/DatabaseApi/supabaseClient"; 
 
 interface AuthContextType {
   user: any | null;
