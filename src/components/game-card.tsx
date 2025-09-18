@@ -43,19 +43,7 @@ export function GameCard({
   const handleClick = () => {
 
     if (isBooked) return; // prevent navigation if booked
-    // Pass team data as URL parameters - ADD TEAM IDs
-
-    const queryParams = new URLSearchParams({
-      homeTeamId: homeTeam.team_id, // ← Add this
-      awayTeamId: awayTeam.team_id, // ← Add this
-      homeTeam: homeTeam.name,
-      homeLogo: homeTeam.logo,
-      awayTeam: awayTeam.name,
-      awayLogo: awayTeam.logo,
-      date,
-      time,
-      location,
-    }).toString();
+    console.log('This is before clicking game card->GameCard match_id:', match_id);
     router.push(`/analyst/${match_id}`)
     //router.push(`/analyst?${queryParams}`);
   };

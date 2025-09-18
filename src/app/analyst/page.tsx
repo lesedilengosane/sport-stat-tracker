@@ -12,6 +12,7 @@ import { GamesGrid } from "@/components/games-grid";
 import { apiClient } from "../utils/apiClient";
 import { Player_details } from "@/app/analyst/column";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
+import { useAuth } from "../contexts/AuthContext"
 
 // Define TypeScript interfaces based on your schema
 interface Team {
@@ -32,6 +33,7 @@ interface Match {
 }
 
 interface Player {
+  player_id:string
   position: string;
   player: string;
   jerseyNumber?: number;
@@ -68,206 +70,95 @@ const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
 
 export default function Dashboard() {
   const router = useRouter();
-  const [userName, setUserName] = useState<string>("");
+  
   const [matches, setMatches] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingSampleData, setUsingSampleData] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [allGames, setAllGames] = useState<Game[]>([]);
+  const { userName, loading} = useAuth();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
 
-      if (error) {
-        console.error("Error fetching user:", error.message);
-        setError("Failed to fetch user information");
-        return;
-      }
-
-      if (user) {
-        const fullName = user.user_metadata?.full_name || user.email || "User";
-        setUserName(fullName.split(" ")[0]);
-      } else {
-        router.push("/");
-      }
-    };
-
-    fetchUser();
-  }, [router]);
-
-  // Function to add test teams and a match
+  
 
   // Fetch matches data using the API client
-  const fetchMatches = async () => {
-    try {
-      setIsLoading(true);
-      setUsingSampleData(false);
-      setDebugInfo("Fetching matches from API...");
+const fetchMatches = async () => {
+  try {
+    setIsLoading(true);
+    setUsingSampleData(false);
+    setDebugInfo("Fetching matches from API...");
 
-      // Get all matches
-      const matchesData = await apiClient.getMatches();
-      setDebugInfo(`Found ${matchesData?.length || 0} matches`);
+    // 1️⃣ Get all matches
+    const matchesData = await apiClient.getMatches();
+    setDebugInfo(`Found ${matchesData?.length || 0} matches`);
 
-      let databaseGames: Game[] = [];
+    if (matchesData && matchesData.length > 0) {
+      // 2️⃣ Collect team IDs
+      const teamIds = [
+        ...new Set([
+          ...matchesData.map((m: any) => m.home_team_id),
+          ...matchesData.map((m: any) => m.away_team_id),
+        ]),
+      ];
 
-      if (matchesData && matchesData.length > 0) {
-        // Get all unique team IDs from the matches
-        const teamIds = [
-          ...new Set([
-            ...matchesData.map((m: any) => m.home_team_id),
-            ...matchesData.map((m: any) => m.away_team_id),
-          ]),
-        ];
+      setDebugInfo(`Fetching ${teamIds.length} teams...`);
 
-        setDebugInfo(`Fetching ${teamIds.length} teams and players...`);
+      // 3️⃣ Fetch all teams (for names + logos)
+      const teamsData = await apiClient.getTeamsByIds(teamIds);
 
-        // Fetch all teams
-        const teamsData = await apiClient.getTeamsByIds(teamIds);
+      // 4️⃣ Create a map team_id → team data
+      const teamsMap = new Map();
+      teamsData?.forEach((team: any) => {
+        teamsMap.set(team.team_id, team);
+      });
 
-        // Fetch all players for these teams
-        const playersMap = await apiClient.getPlayersByTeamIds(teamIds);
+      // 5️⃣ Format matches (NO players/lineups)
+      const databaseGames: Game[] = matchesData.map((match: any) => {
+        const homeTeam = teamsMap.get(match.home_team_id) || {};
+        const awayTeam = teamsMap.get(match.away_team_id) || {};
 
-        // Create a map of team_id to team data
-        const teamsMap = new Map();
-        teamsData?.forEach((team: any) => {
-          teamsMap.set(team.team_id, team);
-        });
+        return {
+          id: match.match_id,
+          date: new Date(match.match_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          time: new Date(match.match_date).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          homeTeam: {
+            id: match.home_team_id,
+            name: homeTeam.name || homeTeam.team_name || "Unknown Team",
+            logo: homeTeam.icon_url || "/default_team.svg",
+          },
+          awayTeam: {
+            id: match.away_team_id,
+            name: awayTeam.name || awayTeam.team_name || "Unknown Team",
+            logo: awayTeam.icon_url || "/default_team.svg",
+          },
+        };
+      });
 
-        // Format the data
-        databaseGames = await Promise.all(
-          matchesData.map(async (match: any) => {
-            const homeTeam = teamsMap.get(match.home_team_id) || {};
-            const awayTeam = teamsMap.get(match.away_team_id) || {};
-
-            // Get players for each team
-            const homePlayers = playersMap.get(match.home_team_id) || [];
-            const awayPlayers = playersMap.get(match.away_team_id) || [];
-
-            // Format lineup data - get first 5 players for each team
-            const homeLineup: Player_details[] = homePlayers
-              .slice(0, 5)
-              .map((p: any, index: number) => ({
-                id: `home-${index}`,
-                name: p.first_name,
-                surname: p.last_name,
-                position: p.position || "Unknown",
-              }));
-
-            const awayLineup: Player_details[] = awayPlayers
-              .slice(0, 5)
-              .map((p: any, index: number) => ({
-                id: `away-${index}`,
-                name: p.first_name,
-                surname: p.last_name,
-                position: p.position || "Unknown",
-              }));
-
-            return {
-              id: match.match_id,
-              date: new Date(match.match_date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              }),
-              homeTeam: {
-                id: match.home_team_id, // ✅ keep the raw team_id
-                name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-                logo: homeTeam.icon_url || "/default_team.svg",
-              },
-              awayTeam: {
-                id: match.away_team_id, // ✅ keep the raw team_id
-                name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-                logo: awayTeam.icon_url || "/default_team.svg",
-              },
-              homeLineup:
-                homeLineup.length > 0
-                  ? homeLineup
-                  : [
-                      {
-                        position: "Guard",
-                        player: "Starting Guard",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Guard",
-                        player: "Starting Guard",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Forward",
-                        player: "Starting Forward",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Forward",
-                        player: "Starting Forward",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Center",
-                        player: "Starting Center",
-                        jerseyNumber: 0,
-                      },
-                    ],
-              awayLineup:
-                awayLineup.length > 0
-                  ? awayLineup
-                  : [
-                      {
-                        position: "Guard",
-                        player: "Starting Guard",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Guard",
-                        player: "Starting Guard",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Forward",
-                        player: "Starting Forward",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Forward",
-                        player: "Starting Forward",
-                        jerseyNumber: 0,
-                      },
-                      {
-                        position: "Center",
-                        player: "Starting Center",
-                        jerseyNumber: 0,
-                      },
-                    ],
-              isSampleData: false,
-            };
-          })
-        );
-
-        setMatches(databaseGames);
-        setDebugInfo(
-          `Successfully loaded ${databaseGames.length} games from database`
-        );
-      } else {
-        console.log("No matches found in database");
-        setUsingSampleData(true);
-      }
+      setMatches(databaseGames);
       setAllGames([...databaseGames]);
-    } catch (err: any) {
-      console.error("Error fetching matches:", err);
-      setError("Failed to load matches from database. Using sample data.");
-      setMatches([]);
+      setDebugInfo(`Successfully loaded ${databaseGames.length} games`);
+    } else {
+      console.log("No matches found in database");
       setUsingSampleData(true);
-      //setAllGames(sampleGames);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (err: any) {
+    console.error("Error fetching matches:", err);
+    setError("Failed to load matches from database.");
+    setMatches([]);
+    setUsingSampleData(true);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchMatches();
