@@ -15,20 +15,34 @@ export async function GET(request:Request,{params}:{
     
 try {
     //we need to fetch all both teamids then fetch all the default lineups or lineups set
-     const {data: teamids, error:matchError } = await supabase
-    .from("matches")
-    .select("away_team_id, home_team_id")
-    .eq("match_id", matchid)
-    .eq("completed", false)
-    .single();
-    const awayTeamId = teamids?.away_team_id;
-    const homeTeamId = teamids?.home_team_id;
+     // 1. Fetch match object
+    const { data: matchMetaData, error: errorMatch } = await supabase
+      .from("matches")
+      .select("*") // include all match fields (date, score, status, etc.)
+      .eq("match_id", matchid)
+      .single();
 
-    if (matchError){
-        return NextResponse.json({error:matchError.message},{status:500})
+    if (errorMatch) {
+      return NextResponse.json({ error: errorMatch.message }, { status: 500 });
     }
+
+    const awayTeamId = matchMetaData.away_team_id;
+    const homeTeamId = matchMetaData.home_team_id;
     
     //The above works well and returns the team ids
+    const {data:Teams,error:teamsError}=await supabase
+    .from("teams")
+    .select(
+        `team_id,
+        team_name,
+        coach_id,
+        icon_url`
+    )
+    .in("team_id",[awayTeamId,homeTeamId])
+
+    if(teamsError){
+        return NextResponse.json({error :teamsError.message},{status:500})
+    }
     
     //Lineups are the team_players
     // 2. Fetch lineups for both teams in the match
@@ -61,12 +75,44 @@ try {
  const awayLineup = lineups.filter((l) => l.teamid === away_team_id);
 const homeLineup = lineups.filter((l) => l.teamid === home_team_id);
  */
-        return NextResponse.json(lineups)
 
+//The above for fetching lineups works well
+//3 last 5 matches for home team
+    const { data: homePrevMatches, error: homeError } = await supabase
+    .from("matches")
+    .select("*")
+    .or(`home_team_id.eq.${homeTeamId},away_team_id.eq.${awayTeamId}`)
+    .eq("completed", true)
+    .order("match_date", { ascending: false })
+    .limit(5);
 
+    if(homeError){
+        return NextResponse.json({error:homeError.message},{status:500})
+    }
 
-    //The previous games summary data 
-    
+// last 5 matches for away team
+    const { data: awayPrevMatches, error: awayError } = await supabase
+    .from("matches")
+    .select("*")
+    .or(`home_team_id.eq.${homeTeamId},away_team_id.eq.${awayTeamId}`)
+    .eq("completed", true)
+    .order("match_date", { ascending: false })
+    .limit(5);
+
+    if (awayError){
+        return NextResponse.json({error:awayError.message},{status:500})
+    }
+//Now we need to combine the two Jsons
+ return NextResponse.json({
+    matchMetaData,
+    Teams,
+    lineups,
+    awayPrevMatches,
+    homePrevMatches
+ })
+
+        
+
 } catch (err) {
     return NextResponse.json(
         {error : "failed to fetch TeamIds"},{ status :500}

@@ -5,144 +5,72 @@ import { Tabspage } from "@/components/line-up-page";
 import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Player_details } from "../column";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
+import * as React from 'react'
 import { apiClient } from "@/app/utils/apiClient";
 
-const AnalystPage = () => {
-  const searchParams = useSearchParams();
+
+export default async function MatchPage({ params, }:{params:{matchid:string}}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
-
-  // Get data from URL parameters
-  const gameId = searchParams.get("id") || "";
-  const gameDate = searchParams.get("date") || "Date not specified";
-  const homeTeamId = searchParams.get("homeTeamId") || "";
-  const awayTeamId = searchParams.get("awayTeamId") || "";
-  const homeTeamName = searchParams.get("homeTeam") || "";
-  const homeTeamLogo = searchParams.get("homeLogo") || "/placeholder.svg";
-  const awayTeamName = searchParams.get("awayTeam") || "";
-  const awayTeamLogo = searchParams.get("awayLogo") || "/placeholder.svg";
-  const homeLineupParam = searchParams.get("homeLineup");
-  const awayLineupParam = searchParams.get("awayLineup");
+  const {matchid}=await params
+  
 
   const [homePlayers, setHomePlayers] = useState<Player_details[]>([]);
   const [awayPlayers, setAwayPlayers] = useState<Player_details[]>([]);
+  const [homeTeam, setHomeTeam] = useState<any>(null);
+  const [awayTeam, setAwayTeam] = useState<any>(null);
+  const [match, setMatch] = useState<any>(null);
 
   useEffect(() => {
-    const fetchPlayers = async () => {
+    const fetchMatchData = async () => {
       try {
-        console.log("Home Team ID:", homeTeamId);
-        console.log("Away Team ID:", awayTeamId);
+        const res = await fetch(`/api/analyst/${matchid}`);
+        if (!res.ok) throw new Error("Failed to fetch match data");
+        const data = await res.json();
 
-        // Parse lineup data
-        const homeLineup = homeLineupParam ? JSON.parse(homeLineupParam) : [];
-        const awayLineup = awayLineupParam ? JSON.parse(awayLineupParam) : [];
+        console.log("API response:", data);
 
-        // Create fallback players from URL data
-        const createFallbackPlayers = (
-          lineup: any[],
-          team: string
-        ): Player_details[] => {
-          return lineup.map((player, index) => {
-            const nameParts = player.player?.split(" ") || [
-              "Player",
-              "Unknown",
-            ];
-            const name = nameParts[0] || "Player";
-            const surname = nameParts.slice(1).join(" ") || "Unknown";
+        setMatch(data.match);
 
-            return {
-              id: `${team}-player-${index}`,
-              name: name,
-              surname: surname,
-              position: player.position || "Unknown",
-              avatarUrl: player.avatarUrl || "/avatars/player3.jpg",
-            };
-          });
-        };
+        // Extract Teams
+        const home = data.Teams.find(
+          (t: any) => t.team_id === data.match.home_team_id
+        );
+        const away = data.Teams.find(
+          (t: any) => t.team_id === data.match.away_team_id
+        );
+        setHomeTeam(home);
+        setAwayTeam(away);
 
-        const homeFallback = createFallbackPlayers(homeLineup, "home");
-        const awayFallback = createFallbackPlayers(awayLineup, "away");
-
-        if (!homeTeamId || !awayTeamId) {
-          console.log("Using fallback lineup data");
-          setHomePlayers(homeFallback);
-          setAwayPlayers(awayFallback);
-          setIsLoading(false);
-          return;
-        }
-
-        // Only fetch for the two teams we need
-        const playersMap = await apiClient.getPlayersByTeamIds([
-          homeTeamId,
-          awayTeamId,
-        ]);
-
-        console.log("Players Map:", playersMap);
-        console.log("Home team players from API:", playersMap.get(homeTeamId));
-        console.log("Away team players from API:", playersMap.get(awayTeamId));
-
-        // Convert API data to the format your DataTable expects
-        const formatApiPlayers = (players: any[]): Player_details[] => {
-          return players.map((player, index) => ({
-            id: player.id || `player-${index}`,
-            name: player.first_name || player.name || "Player",
-            surname: player.last_name || player.surname || "Unknown",
+        // Extract Lineups and convert into Player_details[]
+        const formatLineup = (lineup: any[], team: string): Player_details[] =>
+          lineup.map((player: any, idx: number) => ({
+            id: `${team}-${player.player_id || idx}`,
+            name: player.player?.first_name || "Player",
+            surname: player.player?.last_name || "Unknown",
             position: player.position || "Unknown",
-            avatarUrl:
-              player.avatar_url || player.avatarUrl || "/avatars/player3.jpg",
+            avatarUrl: "/avatars/player3.jpg", // you can replace with player.avatar_url if stored
           }));
-        };
 
-        const homeApiPlayers = playersMap.get(homeTeamId) || [];
-        const awayApiPlayers = playersMap.get(awayTeamId) || [];
+        const homeLineup = data.lineups.filter(
+          (l: any) => l.team_id === data.match.home_team_id
+        );
+        const awayLineup = data.lineups.filter(
+          (l: any) => l.team_id === data.match.away_team_id
+        );
 
-        const homeFormatted = formatApiPlayers(homeApiPlayers);
-        const awayFormatted = formatApiPlayers(awayApiPlayers);
-
-        console.log("Formatted home players:", homeFormatted);
-        console.log("Formatted away players:", awayFormatted);
-
-        // Use API data if available, otherwise use fallback
-        setHomePlayers(homeFormatted.length > 0 ? homeFormatted : homeFallback);
-        setAwayPlayers(awayFormatted.length > 0 ? awayFormatted : awayFallback);
+        setHomePlayers(formatLineup(homeLineup, "home"));
+        setAwayPlayers(formatLineup(awayLineup, "away"));
       } catch (err) {
-        console.error("Error fetching players:", err);
-        // Fallback to URL data
-        const homeLineup = homeLineupParam ? JSON.parse(homeLineupParam) : [];
-        const awayLineup = awayLineupParam ? JSON.parse(awayLineupParam) : [];
-
-        const createFallbackPlayers = (
-          lineup: any[],
-          team: string
-        ): Player_details[] => {
-          return lineup.map((player, index) => {
-            const nameParts = player.player?.split(" ") || [
-              "Player",
-              "Unknown",
-            ];
-            const name = nameParts[0] || "Player";
-            const surname = nameParts.slice(1).join(" ") || "Unknown";
-
-            return {
-              id: `${team}-player-${index}`,
-              name: name,
-              surname: surname,
-              position: player.position || "Unknown",
-              avatarUrl: player.avatarUrl || "/avatars/player3.jpg",
-            };
-          });
-        };
-
-        setHomePlayers(createFallbackPlayers(homeLineup, "home"));
-        setAwayPlayers(createFallbackPlayers(awayLineup, "away"));
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPlayers();
-  }, [homeTeamId, awayTeamId, homeLineupParam, awayLineupParam]); // Only depend on URL params
+    fetchMatchData();
+  }, [params.matchid]);
 
   if (isLoading) {
     return (
@@ -152,56 +80,70 @@ const AnalystPage = () => {
     );
   }
 
-  console.log("Final Home Players to display:", homePlayers);
-  console.log("Final Away Players to display:", awayPlayers);
+  if (!match || !homeTeam || !awayTeam) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
+        Match not found
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 p-4">
       <header className="bg-blue-900 text-white p-4 flex flex-col items-center justify-center rounded-lg mb-6">
-        <div className="text-sm mb-2">Last Time Out: 109-113</div>
+        {/* Example previous result — you can swap this with data.homePrevMatches[0] */}
+        <div className="text-sm mb-2">
+          Last Time Out: {homeTeam.team_name} vs {awayTeam.team_name}
+        </div>
+
         <div className="flex items-center justify-between w-full max-w-4xl">
           {/* Home Team */}
           <div className="flex flex-col items-center">
             <Image
-              src={homeTeamLogo}
-              alt={`${homeTeamName} Logo`}
+              src={homeTeam.icon_url || "/placeholder.svg"}
+              alt={`${homeTeam.team_name} Logo`}
               width={80}
               height={80}
               className="mb-2"
             />
-            <span className="text-lg font-bold font-bebas">{homeTeamName}</span>
+            <span className="text-lg font-bold font-bebas">
+              {homeTeam.team_name}
+            </span>
           </div>
 
           {/* Date */}
           <div className="text-center">
-            <div className="text-2xl font-bold">{gameDate}</div>
+            <div className="text-2xl font-bold">
+              {new Date(match.match_date).toLocaleDateString()}
+            </div>
           </div>
 
           {/* Away Team */}
           <div className="flex flex-col items-center">
             <Image
-              src={awayTeamLogo}
-              alt={`${awayTeamName} Logo`}
+              src={awayTeam.icon_url || "/placeholder.svg"}
+              alt={`${awayTeam.team_name} Logo`}
               width={80}
               height={80}
               className="mb-2"
             />
-            <span className="text-lg font-bold font-bebas">{awayTeamName}</span>
+            <span className="text-lg font-bold font-bebas">
+              {awayTeam.team_name}
+            </span>
           </div>
         </div>
 
         <button
           onClick={() => {
-            // Pass ALL game data as URL parameters to the tracker
             const queryParams = new URLSearchParams({
-              gameId: gameId,
-              date: gameDate,
-              homeTeamId: homeTeamId,
-              awayTeamId: awayTeamId,
-              homeTeam: homeTeamName,
-              awayTeam: awayTeamName,
-              homeLogo: homeTeamLogo,
-              awayLogo: awayTeamLogo,
+              gameId: match.match_id,
+              date: match.match_date,
+              homeTeamId: homeTeam.team_id,
+              awayTeamId: awayTeam.team_id,
+              homeTeam: homeTeam.team_name,
+              awayTeam: awayTeam.team_name,
+              homeLogo: homeTeam.icon_url || "/placeholder.svg",
+              awayLogo: awayTeam.icon_url || "/placeholder.svg",
               homeLineup: JSON.stringify(homePlayers),
               awayLineup: JSON.stringify(awayPlayers),
             }).toString();
@@ -214,17 +156,7 @@ const AnalystPage = () => {
         </button>
       </header>
 
-      <Tabspage
-        // homeTeam={homeTeamName}
-        // homeLogo={homeTeamLogo}
-        // awayTeam={awayTeamName}
-        // awayLogo={awayTeamLogo}
-        // date={gameDate}
-        homeLineup={homePlayers}
-        awayLineup={awayPlayers}
-      />
+      <Tabspage homeLineup={homePlayers} awayLineup={awayPlayers} />
     </div>
   );
-};
-
-export default AnalystPage;
+}
