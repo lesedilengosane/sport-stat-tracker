@@ -1,11 +1,13 @@
-// components/game-card.tsx
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "../app/api/DatabaseApi/supabaseClient"; // adjust path to your client
+import { BookingApiClient } from "../app/utils/BookGames"; // adjust path
 
 interface Team {
-  team_id: string; // ← Add this property
+  team_id: string;
   name: string;
   logo: string;
 }
@@ -17,7 +19,7 @@ interface Player {
 }
 
 interface GameCardProps {
-  match_id:string;
+  match_id: string;
   date: string;
   time: string;
   homeTeam: Team;
@@ -26,7 +28,6 @@ interface GameCardProps {
   isBooked?: boolean;
   homeLineup?: Player[];
   awayLineup?: Player[];
-
 }
 
 export function GameCard({
@@ -36,21 +37,63 @@ export function GameCard({
   homeTeam,
   awayTeam,
   location,
-  isBooked = false,
+  isBooked: initialBooked = false,
 }: GameCardProps) {
   const router = useRouter();
 
-  const handleClick = () => {
+  // track current analyst id
+  const [analystId, setAnalystId] = useState<string | null>(null);
+  // local booked state to update UI instantly
+  const [isBooked, setIsBooked] = useState<boolean>(initialBooked);
+  const [loading, setLoading] = useState<boolean>(false);
 
+  // fetch current user (Google ID)
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setAnalystId(data.user.id);
+      }
+    });
+  }, []);
+
+  const handleCardClick = () => {
     if (isBooked) return; // prevent navigation if booked
-    console.log('This is before clicking game card->GameCard match_id:', match_id);
-    router.push(`/analyst/${match_id}`)
-    //router.push(`/analyst?${queryParams}`);
+    router.push(`/analyst/${match_id}`);
+  };
+
+  const handleBookClick = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // don’t trigger the card click navigation
+    if (!analystId) {
+      alert("You must be logged in as an analyst to book.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const result = await BookingApiClient.bookGame(match_id, analystId);
+      if (result.success) {
+        setIsBooked(true); // update UI
+        alert(result.message);
+
+      } else {
+        if (result.message === 'This match already has an analyst assigned ❌'){
+        setIsBooked(true); // update UI
+        alert(result.message);
+        }
+        else{
+          alert(result.message || "Booking failed");
+        }
+        
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Card
-      onClick={handleClick}
+      onClick={handleCardClick}
       className={`bg-slate-800 border-slate-700 p-3 text-white transition-all duration-300 ease-in-out ${
         isBooked
           ? "opacity-80 cursor-not-allowed"
@@ -70,7 +113,7 @@ export function GameCard({
       </div>
 
       {/* Teams */}
-      <div className="flex items-center justify-between ">
+      <div className="flex items-center justify-between">
         <div className="flex flex-col items-center flex-1">
           <div className="w-12 h-12 relative mb-1">
             <Image
@@ -99,10 +142,10 @@ export function GameCard({
       </div>
 
       {/* Location */}
-      <div className="text-xs text-slate-400 ">{location}</div>
+      <div className="text-xs text-slate-400">{location}</div>
 
       {/* Action buttons */}
-      <div className="flex items-center justify-between text-xs font-medium">
+      <div className="flex items-center justify-between text-xs font-medium mt-2">
         <button className="text-blue-400 hover:underline">View Details</button>
         {isBooked ? (
           <div className="flex items-center gap-1 text-yellow-400">
@@ -110,8 +153,12 @@ export function GameCard({
             <span>Booked</span>
           </div>
         ) : (
-          <button className="text-yellow-400 hover:underline">
-            Book for Analysis
+          <button
+            onClick={handleBookClick}
+            disabled={loading}
+            className="text-yellow-400 hover:underline disabled:opacity-50"
+          >
+            {loading ? "Booking..." : "Book for Analysis"}
           </button>
         )}
       </div>
