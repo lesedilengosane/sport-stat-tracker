@@ -194,6 +194,7 @@ const fetchMatches = async () => {
               placeholder="Search"
               className="bg-transparent text-white placeholder-white/70 outline-none flex-1"
             />
+            
             <svg
               className="w-5 h-5 text-white/70"
               fill="none"
