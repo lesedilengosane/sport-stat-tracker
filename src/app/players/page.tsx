@@ -1,5 +1,6 @@
-import { supabase } from '@/app/api/DatabaseApi/supabaseClient';
-import PlayersList from './PlayersList';
+import Image from "next/image";
+import { supabase } from "@/app/api/DatabaseApi/supabaseClient";
+import PlayersList from "./PlayersList";
 
 interface Player {
   player_id: string;
@@ -9,13 +10,13 @@ interface Player {
   jersey_number: number;
 }
 
-export const revalidate = 60; // optional: ISR
+export const revalidate = 60; // ISR
 
 export default async function PlayersPage() {
   const { data: players, error } = await supabase
-    .from('players')
-    .select('player_id, first_name, last_name, position, jersey_number')
-    .order('last_name', { ascending: true });
+    .from("players")
+    .select("player_id, first_name, last_name, position, jersey_number")
+    .order("last_name", { ascending: true });
 
   if (error) {
     return (
@@ -32,9 +33,29 @@ export default async function PlayersPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">All Players</h1>
-      <PlayersList players={players} />
+    <div className="relative w-full h-screen scroll overflow-hidden bg-black">
+      {/* Background Image */}
+      <Image
+        src="/bgr.jpg"
+        alt="Basketball background"
+        fill
+        priority
+        className="object-cover opacity-100 scale-100"
+      />
+      <div className="absolute inset-0 bg-black/40" />
+
+      {/* Main content */}
+      <div className="relative z-10 flex flex-col h-full px-6 md:px-16 py-12">
+        {/* Heading */}
+        <h1 className="text-4xl md:text-6xl font-bold text-orange-500 mb-8">
+          ALL PLAYERS
+        </h1>
+
+        {/* Players list container */}
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 max-h-[70vh] overflow-y-auto">
+          <PlayersList players={players as Player[]} />
+        </div>
+      </div>
     </div>
   );
 }
