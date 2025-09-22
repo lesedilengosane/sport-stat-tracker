@@ -18,24 +18,31 @@ export default function SignInCallback() {
         }
 
         // 2. Check if user exists
-        const checkResponse = await fetch("/api/DatabaseApi/checkUser", {
+        const response = await fetch("/api/DatabaseApi/checkUser", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ auth_user_id: session.user.id }),
         });
 
-        if (!checkResponse.ok) {
-          const errorData = await checkResponse.json();
+        if (!response.ok) {
+          const errorData = await response.json();
           throw new Error(errorData.error || "Failed to check user existence");
         }
 
-        const { exists } = await checkResponse.json();
+        const { exists , role  } = await response.json();
 
-        // 3. Redirect based on existence
+        // 3. Redirect based on existence and role
         if (exists) {
           // ✅ user exists → go to dashboard
+
           console.log("User exists:", session.user);
-          router.push("/analyst");
+          if (role === "Coach"){
+            router.push("/coach");
+          }
+          else{
+            router.push("/analyst");
+          }
+          
         } else {
           // ❌ user does not exist → sign them out and send to signup
           await supabase.auth.signOut();
