@@ -215,7 +215,10 @@ export default function Dashboard() {
 
       {/* Main content */}
       <div className="relative z-10 min-h-screen bg-black/30 backdrop-blur-sm">
+
         <DashboardHeader placeholder="Search players and teams..." />
+
+       
 
         {/* Error message display */}
         {error && (

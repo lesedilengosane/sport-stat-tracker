@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { supabase } from "@/app/api/DatabaseApi/supabaseClient";
 import UserCard from "@/components/UserCard";
 import Historicaldata from "@/components/historicaldata";
 import Booked_Games from "@/components/Booked_Games";
 import ExtApi from "@/components/ExtApi";
+import { useAuth } from "@/app/contexts/AuthContext";
 
 const Profile = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string>("");
   const [userName, setUserName] = useState<string>("");
   const [role, setRole] = useState<string>("");
   const [loadingUser, setLoadingUser] = useState<boolean>(true);
-
+/*
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -54,6 +55,10 @@ const Profile = () => {
     };
     fetchUserData();
   }, []);
+  */
+ const { currentUser } = useAuth();
+
+
 
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4 py-8">

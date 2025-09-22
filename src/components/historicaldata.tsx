@@ -18,6 +18,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import  Link  from 'next/link';
 
 interface BasketballGame {
   score_away: string;
@@ -44,6 +45,7 @@ interface PlayerDetails {
 }
 
 interface PlayerStat {
+  players: any;
   id: string;
   match_id: string;
   player_id: string;
@@ -240,13 +242,18 @@ const mergedPlayerStats = playerStats.map((stat) => {
               </tr>
             </thead>
             <tbody>
-              {playerStats.map((stat: any) => (
+              {playerStats.map((stat: PlayerStat) => (
                 <tr key={stat.id} className="text-center">
                   <td className="p-2 border font-medium">
-                    {stat.players?.first_name} {stat.players?.last_name}{" "}
+                    <Link
+                      href={`/players/${stat.players?.player_id}`}
+                    >
+                      {stat.players?.first_name} {stat.players?.last_name}{" "}
+                    </Link>
                     <span className="text-gray-500">
                       #{stat.players?.jersey_number}
                     </span>
+
                   </td>
                   <td className="p-2 border">{stat.points}</td>
                   <td className="p-2 border">
