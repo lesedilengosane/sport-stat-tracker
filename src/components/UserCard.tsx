@@ -10,44 +10,41 @@ interface UserCardProps {
 
 export default function UserCard({ name, email, role }: UserCardProps) {
   return (
-    <section className="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md mb-6">
+    <section className="group relative w-full max-w-md mx-auto p-8 rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl text-gray-100 border border-gray-700 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.5)]">
+      
+      {/* Avatar */}
+      <div className="flex flex-col items-center">
+        <div className="relative w-24 h-24 rounded-full bg-gradient-to-tr from-orange-500 via-pink-500 to-purple-600 shadow-lg flex items-center justify-center text-white text-4xl font-extrabold ring-4 ring-gray-800/60 group-hover:scale-105 transition-transform duration-300">
+          {name?.charAt(0).toUpperCase() || "U"}
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-900 shadow-md"></div>
+        </div>
+
+        <h2 className="mt-5 text-2xl font-semibold text-gray-100 tracking-wide group-hover:text-white transition-colors">
+          {name || "Unknown User"}
+        </h2>
+        <p className="text-gray-400 text-sm mt-1">{email || "No email"}</p>
+      </div>
+
+      {/* Divider */}
+      <div className="my-6 border-t border-gray-700" />
+
+      {/* Role */}
       <div className="text-center">
-        {/* Avatar circle with initial */}
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-          <span className="text-white text-2xl font-bold">
-            {name?.charAt(0).toUpperCase() || "U"}
-          </span>
-        </div>
-
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">User Information</h2>
-
-        {/* Info rows */}
-        <div className="space-y-3 text-left">
-          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-            <span className="text-gray-600 font-medium">Name:</span>
-            <span className="text-gray-800">{name}</span>
-          </div>
-          <div className="flex justify-between items-center py-2 border-b border-gray-100">
-            <span className="text-gray-600 font-medium">Email:</span>
-            <span className="text-gray-800 break-all">{email}</span>
-          </div>
-          <div className="flex justify-between items-center py-2">
-            <span className="text-gray-600 font-medium">Role:</span>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium ${
-                role === "Coach"
-                  ? "bg-green-100 text-green-800"
-                  : role === "Analyst"
-                  ? "bg-blue-100 text-blue-800"
-                  : role === "Fan"
-                  ? "bg-purple-100 text-purple-800"
-                  : "bg-gray-100 text-gray-800"
-              }`}
-            >
-              {role}
-            </span>
-          </div>
-        </div>
+        <span className="text-gray-400 font-medium block mb-2">Role</span>
+        <span
+          className={`inline-block px-5 py-1.5 rounded-full text-sm font-semibold shadow-sm transition-colors
+            ${
+              role === "Coach"
+                ? "bg-green-700 text-green-100"
+                : role === "Analyst"
+                ? "bg-blue-700 text-blue-100"
+                : role === "Fan"
+                ? "bg-purple-700 text-purple-100"
+                : "bg-gray-700 text-gray-100"
+            }`}
+        >
+          {role || "User"}
+        </span>
       </div>
     </section>
   );

@@ -1,59 +1,69 @@
 // app/players/[id]/layout.tsx
 import type { ReactNode } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 export default function PlayerLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top navigation / header */}
-      <header className="sticky top-0 z-40 bg-white shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Player Profile</h1>
+    <div className="relative min-h-screen bg-black text-white overflow-hidden">
+      {/* Hero Background */}
+      <Image
+        src="/bgr.jpg" // hero-style basketball image in public/
+        alt="Basketball hero background"
+        fill
+        priority
+        className="object-cover opacity-30"
+      />
+      <div className="absolute inset-0 bg-black/40" /> {/* overlay for readability */}
+
+      {/* Main Content */}
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-6">
+        {/* Header */}
+        <header className="sticky top-0 z-20 bg-transparent backdrop-blur-sm mb-6 rounded-xl p-4 flex items-center justify-between shadow-lg">
+          <h1 className="text-2xl font-bold text-white">Player Profile</h1>
           <nav className="space-x-4">
-            <a
+            <Link
               href="/"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-white hover:text-orange-400 transition-colors"
             >
               Home
-            </a>
-            <a
+            </Link>
+            <Link
               href="/players"
-              className="text-gray-600 hover:text-gray-900 transition-colors"
+              className="text-white hover:text-orange-400 transition-colors"
             >
               All Players
-            </a>
+            </Link>
           </nav>
-        </div>
-      </header>
+        </header>
 
-      {/* Main content */}
-      <main className="mx-auto max-w-7xl px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Left sidebar (profile photo, quick info) */}
+        {/* Main Grid */}
+        <main className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Left Sidebar */}
           <aside className="lg:col-span-1">
-            {/* Example skeleton for profile card */}
-            <div className="rounded-2xl bg-white shadow p-4 sticky top-20">
-              <div className="aspect-square w-full rounded-xl bg-gray-200 mb-4" />
+            <div className="sticky top-20 rounded-2xl bg-white/10 backdrop-blur-sm p-4 shadow space-y-4">
+              <div className="aspect-square w-full rounded-xl bg-gray-300/20" />
               <div className="space-y-2">
-                <div className="h-5 w-3/4 bg-gray-100 rounded" />
-                <div className="h-4 w-1/2 bg-gray-100 rounded" />
-                <div className="h-4 w-2/3 bg-gray-100 rounded" />
+                <div className="h-5 w-3/4 bg-gray-100/30 rounded" />
+                <div className="h-4 w-1/2 bg-gray-100/30 rounded" />
+                <div className="h-4 w-2/3 bg-gray-100/30 rounded" />
               </div>
             </div>
           </aside>
 
-          {/* Right content area */}
+          {/* Right Content Area */}
           <section className="lg:col-span-3">
-            <div className="rounded-2xl bg-white shadow p-6">{children}</div>
+            <div className="rounded-2xl bg-white/10 backdrop-blur-sm shadow p-6">
+              {children}
+            </div>
           </section>
-        </div>
-      </main>
+        </main>
 
-      {/* Footer */}
-      <footer className="mt-12 border-t bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 text-center text-sm text-gray-500">
+        {/* Footer */}
+        <footer className="mt-12 border-t border-white/20 text-center text-sm text-white/70 py-6">
           © {new Date().getFullYear()} HoopMania · All rights reserved.
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }

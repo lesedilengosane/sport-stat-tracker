@@ -26,51 +26,61 @@ export default function PlayersList({ players }: { players: Player[] }) {
   }, [players, query]);
 
   return (
-    <div>
-      {/* Search input + button */}
-      <div className="mb-4 flex gap-2">
+    <section className="max-w-5xl mx-auto px-4 py-10">
+      {/* Search box */}
+      <div className="mb-8">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by name or jersey #"
-          className="flex-1 rounded-md border px-3 py-2 text-sm"
+          className="w-full rounded-xl bg-black/30 backdrop-blur-md border border-white/20 px-4 py-3 text-base text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
-        {/*
-        <button
-          onClick={() => setQuery(query.trim())}
-          className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-        >
-          Search
-        </button>
-*/}
       </div>
 
-      {/* List */}
-      <ul className="divide-y divide-gray-200 rounded-lg border bg-white shadow">
+      {/* Player grid */}
+      <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filtered.map((p) => (
-          <li key={p.player_id} className="hover:bg-gray-50">
-            <Link
-              href={`/players/${p.player_id}`}
-              className="flex items-center justify-between p-4"
-            >
-              <div>
-                <p className="text-lg font-medium">
-                  {p.first_name} {p.last_name}
-                </p>
-                <p className="text-sm text-gray-500">
-                  #{p.jersey_number} · {p.position}
-                </p>
+          <li
+            key={p.player_id}
+            className="
+              group rounded-2xl
+              bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700
+              bg-opacity-80 backdrop-blur-xl
+              p-6 shadow-lg
+              transition-all duration-300
+              hover:scale-105 hover:shadow-2xl
+              hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600
+            "
+          >
+            <Link href={`/players/${p.player_id}`} className="block h-full">
+              <div className="flex flex-col justify-between h-full">
+                <div>
+                  <h3 className="text-2xl font-semibold text-white mb-1">
+                    {p.first_name} {p.last_name}
+                  </h3>
+                  <p className="text-sm text-gray-200">
+                    #{p.jersey_number} · {p.position}
+                  </p>
+                </div>
+
+                <div className="mt-6 text-right">
+                  <span className="text-sm font-semibold text-pink-300 group-hover:text-white">
+                    View →
+                  </span>
+                </div>
               </div>
-              <span className="text-blue-600 text-sm font-semibold">
-                View →
-              </span>
             </Link>
           </li>
         ))}
+
         {filtered.length === 0 && (
-          <li className="p-4 text-gray-500">No players match your search.</li>
+          <li className="col-span-full text-center py-10 text-gray-300 
+                         bg-gradient-to-br from-indigo-800 via-purple-800 to-pink-800
+                         bg-opacity-70 backdrop-blur-xl rounded-2xl shadow-lg">
+            No players match your search.
+          </li>
         )}
       </ul>
-    </div>
+    </section>
   );
 }
