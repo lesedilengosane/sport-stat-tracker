@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ placeholder = "Search players and teams..." }: DashboardHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
-  const { userName } = useAuth()
+  const { user } = useAuth()
 
   return (
     <div className="bg-black/50 backdrop-blur-sm border-b border-orange-500/20 p-4">
@@ -35,9 +35,9 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
         <div className="flex items-center gap-4">
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-white">Hello, {userName || "User"}</span>
+            <span className="text-sm text-white">Hello, {user?.first_name || "User"}</span>
             <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
-              {userName?.[0]?.toUpperCase() || "U"}
+              {user?.first_name?.[0]?.toUpperCase() || "U"}
             </div>
           </div>
         </div>
