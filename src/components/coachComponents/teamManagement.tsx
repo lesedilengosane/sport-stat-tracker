@@ -1,163 +1,153 @@
 "use client"
-import type React from "react"
-import { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Save } from "lucide-react"
 import { Reserves } from "@/components/coachComponents/reserves"
 import { CourtPlayer } from "@/components/coachComponents/courtPlayer"
 import type { Player, CourtPosition } from "@/types/player"
-
-const mockPlayers: Player[] = [
-  {
-    teamID: "LAL001",
-    playerID: "P001",
-    name: "DeAndre Ayton",
-    position: "Center",
-    isStarting: false,
-    jerseyNumber: 32,
-    profileImage: "/playerPictures/DeAndre.png",
-    status: "fit",
-  },
-  {
-    teamID: "LAL001",
-    playerID: "P002",
-    name: "Luka Dončić",
-    position: "Point Guard",
-    isStarting: false,
-    jerseyNumber: 77,
-    profileImage: "/playerPictures/Luka.jpeg",
-    status: "fit",
-  },
-  {
-    teamID: "LAL001",
-    playerID: "P003",
-    name: "Dalton Knecht",
-    position: "Shooting Guard",
-    isStarting: false,
-    jerseyNumber: 44,
-    profileImage: "/playerPictures/Dalton.png",
-    status: "fit",
-  },
-  {
-    teamID: "LAL001",
-    playerID: "P004",
-    name: "Austin Reaves",
-    position: "Guard",
-    isStarting: false,
-    jerseyNumber: 15,
-    profileImage: "/playerPictures/Austin.jpeg",
-    status: "suspended",
-  },
-  {
-    teamID: "LAL001",
-    playerID: "P005",
-    name: "Rui Hachimura",
-    position: "Forward",
-    isStarting: false,
-    jerseyNumber: 28,
-    profileImage: "/playerPictures/Rui.png",
-    status: "fit",
-  },
-  { 
-    teamID: "LAL001",
-    playerID: "P006",
-    name: "LeBron James", 
-    position: "Forward", 
-    isStarting: false,
-    jerseyNumber: 23, 
-    profileImage: "/playerPictures/LeBron.jpeg", 
-    status: "fit" },
-]
+import { getDefaultLineup } from "@/app/utils/lineups"
+import { supabase } from "@/app/api/DatabaseApi/supabaseClient"
 
 // Predefined court positions
 const courtPositions: CourtPosition[] = [
-  { id: "pg", x: 50, y: 85, label: "PG" }, // Point Guard
-  { id: "sg", x: 25, y: 70, label: "SG" }, // Shooting Guard
-  { id: "sf", x: 75, y: 70, label: "SF" }, // Small Forward
-  { id: "pf", x: 35, y: 45, label: "PF" }, // Power Forward
-  { id: "c", x: 65, y: 45, label: "C" }, // Center
+  { id: "pg", x: 50, y: 85, label: "PG" },
+  { id: "sg", x: 25, y: 70, label: "SG" },
+  { id: "sf", x: 75, y: 70, label: "SF" },
+  { id: "pf", x: 35, y: 45, label: "PF" },
+  { id: "c", x: 65, y: 45, label: "C" },
 ]
 
 export function TeamManagement() {
-  const [reservePlayers, setReservePlayers] = useState<Player[]>(mockPlayers)
+  const [reservePlayers, setReservePlayers] = useState<Player[]>([])
   const [courtPlayers, setCourtPlayers] = useState<Map<string, Player>>(new Map())
+  const [loading, setLoading] = useState(true)
 
-  const handleStatusChange = (playerId: string, status: Player["status"]) => {
-    setReservePlayers((prev) => prev.map((player) => (player.playerID === playerId ? { ...player, status } : player)))
-  }
+  useEffect(() => {
+    async function fetchLineup() {
+      const { data: { session } } = await supabase.auth.getSession()
+      const authUserId = session?.user.id
+      if (!authUserId) {
+        setLoading(false)
+        return
+      }
 
-  const handleAddPlayer = () => {
-    console.log("Add player clicked")
-    // TODO: Implement add player functionality
-  }
+      const lineupResponse = await getDefaultLineup(authUserId)
+      if (lineupResponse.lineup) {
+        const startingPlayers: Player[] = []
+        const reserves: Player[] = []
 
-  const handleSaveLineup = () => {
-    const lineupData = {
-      startingLineup: Array.from(courtPlayers.entries()).map(([positionId, player]) => ({
-        teamID: player.teamID,
-        playerID: player.playerID,
-        position: positionId.toUpperCase(),
-        isStarting: true,
-        jerseyNumber: player.jerseyNumber,
-      })),
-      reserves: reservePlayers.map((player) => ({
-        teamID: player.teamID,
-        playerID: player.playerID,
-        position: player.position,
-        isStarting: false,
-        jerseyNumber: player.jerseyNumber,
-      })),
+        lineupResponse.lineup.forEach((p) => {
+          const player: Player = {
+            teamID: p.team_id,
+            playerID: p.player_id,
+            name: p.player_name,
+            position: p.position || "",
+            isStarting: !!p.is_starting,
+            jerseyNumber: p.jersey_number || 0,
+            profileImage: `/playerPictures/${p.player_name.replace(" ", "")}.png`, // adjust as needed
+          }
+
+          if (player.isStarting) startingPlayers.push(player)
+          else reserves.push(player)
+        })
+
+        const courtMap = new Map<string, Player>()
+        startingPlayers.forEach((player) => {
+          if (player.position) courtMap.set(player.position.toLowerCase(), player)
+        })
+
+        setCourtPlayers(courtMap)
+        setReservePlayers(reserves)
+      }
+
+      setLoading(false)
     }
 
-    console.log("Team Lineup JSON:", JSON.stringify(lineupData, null, 2))
-
-    const dataStr = JSON.stringify(lineupData, null, 2)
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-
-    const exportFileDefaultName = `team-lineup-${new Date().toISOString().split("T")[0]}.json`
-
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute("download", exportFileDefaultName)
-    linkElement.click()
-  }
+    fetchLineup()
+  }, [])
 
   const handleDrop = (e: React.DragEvent, positionId: string) => {
     e.preventDefault()
     const playerData = e.dataTransfer.getData("application/json")
     const droppedPlayer: Player = JSON.parse(playerData)
 
-    // Check if there's already a player at this position
     const existingPlayer = courtPlayers.get(positionId)
-
     if (existingPlayer) {
-      // Swap players: move existing player back to reserves
       setReservePlayers((prev) => [...prev, existingPlayer])
     }
 
-    // Remove player from reserves and add to court
     setReservePlayers((prev) => prev.filter((p) => p.playerID !== droppedPlayer.playerID))
     setCourtPlayers((prev) => new Map(prev.set(positionId, droppedPlayer)))
   }
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-  }
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault()
 
   const handleCourtPlayerDragStart = (player: Player) => {
-    // Remove player from court when dragging starts
     const positionId = Array.from(courtPlayers.entries()).find(([_, p]) => p.playerID === player.playerID)?.[0]
+    if (!positionId) return
 
-    if (positionId) {
-      setCourtPlayers((prev) => {
-        const newMap = new Map(prev)
-        newMap.delete(positionId)
-        return newMap
-      })
-      setReservePlayers((prev) => [...prev, player])
-    }
+    setCourtPlayers((prev) => {
+      const newMap = new Map(prev)
+      newMap.delete(positionId)
+      return newMap
+    })
+    setReservePlayers((prev) => [...prev, player])
   }
+
+ const handleSaveLineup = async () => {
+  const lineupData = {
+    startingLineup: Array.from(courtPlayers.entries()).map(([positionId, player]) => ({
+      teamID: player.teamID,
+      playerID: player.playerID,
+      position: positionId.toUpperCase(),
+      isStarting: true,
+      jerseyNumber: player.jerseyNumber,
+    })),
+    reserves: reservePlayers.map((player) => ({
+      teamID: player.teamID,
+      playerID: player.playerID,
+      position: player.position,
+      isStarting: false,
+      jerseyNumber: player.jerseyNumber,
+    })),
+  }
+
+  // Save JSON locally
+  const dataStr = JSON.stringify(lineupData, null, 2)
+  const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
+  const linkElement = document.createElement("a")
+  linkElement.setAttribute("href", dataUri)
+  linkElement.setAttribute(
+    "download",
+    `team-lineup-${new Date().toISOString().split("T")[0]}.json`
+  )
+  linkElement.click()
+
+  // Call API route to save to database
+  try {
+    const response = await fetch("/api/lineups/UpdateDefault", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(lineupData),
+    })
+
+    const result = await response.json()
+
+    if (response.ok) {
+      alert("Lineup successfully updated ✅")
+    } else {
+      alert("Failed to update lineup ❌")
+      console.log("Failed to update lineup ❌", result.error)
+    }
+  } catch (err: any) {
+    alert("Error updating lineup ❌")
+    console.log("Error updating lineup ❌", err.message)
+  }
+}
+
+
+  if (loading) return <div>Loading lineup...</div>
 
   return (
     <div className="max-w-full mx-auto p-6">
@@ -173,22 +163,18 @@ export function TeamManagement() {
       </div>
 
       <div className="flex gap-6 h-[calc(130vh-160px)]">
-        {/* Basketball Court - 70% */}
+        {/* Basketball Court */}
         <div className="flex-[7] relative">
           <Card className="h-full overflow-hidden bg-black/50 backdrop-blur-sm border-orange-500/20">
             <CardContent className="p-0 h-full relative">
               <div
                 className="w-full h-full bg-cover bg-center bg-no-repeat relative"
-                style={{
-                  backgroundImage: `url('/court/aerialView.png')`,
-                }}
+                style={{ backgroundImage: `url('/court/aerialView.png')` }}
               >
                 <div className="absolute inset-0 bg-black/20"></div>
 
-                {/* Drop Zones for Court Positions */}
                 {courtPositions.map((position) => (
-                  <div key={position.id}>
-                    {/* Drop Zone */}
+                  <React.Fragment key={position.id}>
                     <div
                       className="absolute w-16 h-16 border-2 border-dashed border-orange-500/50 rounded-full bg-orange-500/10 hover:bg-orange-500/20 transition-colors z-10"
                       style={{
@@ -199,7 +185,6 @@ export function TeamManagement() {
                       onDrop={(e) => handleDrop(e, position.id)}
                       onDragOver={handleDragOver}
                     />
-
                     <div
                       className="absolute text-white font-bold text-sm bg-black/80 px-2 py-1 rounded z-30 pointer-events-none"
                       style={{
@@ -210,10 +195,10 @@ export function TeamManagement() {
                     >
                       {position.label}
                     </div>
-                  </div>
+                  </React.Fragment>
                 ))}
 
-                {/* Players on Court */}
+                {/* Render players on court */}
                 {courtPositions.map((position) => {
                   const player = courtPlayers.get(position.id)
                   return player ? (
@@ -230,9 +215,9 @@ export function TeamManagement() {
           </Card>
         </div>
 
-        {/* Reserves Section - 30% */}
+        {/* Reserves */}
         <div className="flex-[3] h-full">
-          <Reserves players={reservePlayers} onAddPlayer={handleAddPlayer} onStatusChange={handleStatusChange} />
+          <Reserves players={reservePlayers} onAddPlayer={() => {}} />
         </div>
       </div>
     </div>

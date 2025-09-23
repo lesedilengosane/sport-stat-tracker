@@ -43,6 +43,7 @@ export default function CoachDashboard() {
 
   const [matches, setMatches] = useState<Game[]>([]); // schedule tab
   const [allGames, setAllGames] = useState<Game[]>([]); // all-games tab
+
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("schedule");

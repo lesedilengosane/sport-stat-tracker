@@ -9,10 +9,9 @@ import { PlayerCard } from "@/components/coachComponents/playerCard"
 interface ReservesProps {
   players: Player[]
   onAddPlayer: () => void
-  onStatusChange: (playerId: string, status: Player["status"]) => void
 }
 
-export function Reserves({ players, onAddPlayer, onStatusChange }: ReservesProps) {
+export function Reserves({ players, onAddPlayer}: ReservesProps) {
   return (
     <Card className="h-full flex flex-col bg-black/50 backdrop-blur-sm border-orange-500/20">
       <CardHeader className="pb-4 flex-shrink-0">
@@ -24,7 +23,7 @@ export function Reserves({ players, onAddPlayer, onStatusChange }: ReservesProps
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500/50 scrollbar-track-transparent pr-2 min-h-0">
           <div className="space-y-3">
             {players.length > 0 ? (
-              players.map((player) => <PlayerCard key={player.playerID} player={player} onStatusChange={onStatusChange} />)
+              players.map((player) => <PlayerCard key={player.playerID} player={player} />)
             ) : (
               <div className="flex items-center justify-center h-32">
                 <div className="text-center text-gray-300">
