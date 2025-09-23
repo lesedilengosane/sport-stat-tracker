@@ -4,12 +4,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../api/DatabaseApi/supabaseClient";
-import { GamesGrid } from "@/components/games-grid";
-import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "@/app/context/AuthContext"; // ✅ Correct context
 import { CoachSideNav } from "@/components/sideNav/coachSideNav";
 import { DashboardHeader } from "@/components/header/header";
+import { TeamManagement } from "@/components/coachComponents/teamManagement";
+import { GamesGrid } from "@/components/games-grid";
+import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 
+// Types
 interface Team {
   team_id: string;
   name: string;
@@ -47,6 +49,7 @@ export default function CoachDashboard() {
     router.push("/");
   };
 
+  // Convert raw lineup data
   const convertToPlayerDetails = (lineup: any[], team: "home" | "away") =>
     lineup.map((player, index) => ({
       player_id: `${team}-player-${index}`,
@@ -54,6 +57,7 @@ export default function CoachDashboard() {
       position: player.position || "Unknown",
     }));
 
+  // Fetch games for coach
   const fetchCoachGames = async () => {
     setIsLoading(true);
     setError(null);
@@ -150,18 +154,66 @@ export default function CoachDashboard() {
     if (activeTab === "schedule") fetchCoachGames();
   }, [activeTab]);
 
+  // Tab rendering
   const renderTabContent = () => {
-    if (activeTab !== "schedule") return null;
+    switch (activeTab) {
+      case "schedule":
+        return isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto p-6">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <GameCardSkeleton key={i} />
+            ))}
+          </div>
+        ) : (
+          <GamesGrid games={allGames} />
+        );
 
-    return isLoading ? (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-6xl mx-auto p-6">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <GameCardSkeleton key={i} />
-        ))}
-      </div>
-    ) : (
-      <GamesGrid games={allGames} />
-    );
+      case "all-games":
+        return (
+          <div className="max-w-6xl mx-auto p-6">
+            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">All Games</h2>
+              <p className="text-gray-300">
+                This is where all past and future games will be displayed
+              </p>
+            </div>
+          </div>
+        );
+
+      case "team-management":
+        return <TeamManagement />;
+
+      case "team-stats":
+        return (
+          <div className="max-w-6xl mx-auto p-6">
+            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">
+                Team Statistics
+              </h2>
+              <p className="text-gray-300">
+                This is where comprehensive team statistics and performance
+                metrics will be shown
+              </p>
+            </div>
+          </div>
+        );
+
+      case "players":
+        return (
+          <div className="max-w-6xl mx-auto p-6">
+            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
+              <h2 className="text-2xl font-bold text-white mb-4">Team Players</h2>
+              <p className="text-gray-300">
+                This is where player roster and individual statistics will be
+                managed
+              </p>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
