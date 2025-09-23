@@ -89,7 +89,7 @@ export default function Dashboard() {
       if (matchesData && matchesData.length > 0) {
         // 2️⃣ Collect team IDs
         const teamIds = [
-          ...new Set([...matchesData.map((m: any) => m.home_team_id), ...matchesData.map((m: any) => m.away_team_id)]),
+          ...new Set([...matchesData.map((m: Match) => m.home_team_id), ...matchesData.map((m: Match) => m.away_team_id)]),
         ]
 
         setDebugInfo(`Fetching ${teamIds.length} teams...`)
@@ -99,12 +99,12 @@ export default function Dashboard() {
 
         // 4️⃣ Create a map team_id → team data
         const teamsMap = new Map()
-        teamsData?.forEach((team: any) => {
+        teamsData?.forEach((team: Team) => {
           teamsMap.set(team.team_id, team)
         })
 
         // 5️⃣ Format matches (NO players/lineups)
-        const databaseGames: Game[] = matchesData.map((match: any) => {
+        const databaseGames: Game[] = matchesData.map((match: Match) => {
           const homeTeam = teamsMap.get(match.home_team_id) || {}
           const awayTeam = teamsMap.get(match.away_team_id) || {}
 
