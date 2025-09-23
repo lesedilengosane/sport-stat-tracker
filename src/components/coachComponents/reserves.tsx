@@ -24,7 +24,7 @@ export function Reserves({ players, onAddPlayer, onStatusChange }: ReservesProps
         <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-orange-500/50 scrollbar-track-transparent pr-2 min-h-0">
           <div className="space-y-3">
             {players.length > 0 ? (
-              players.map((player) => <PlayerCard key={player.id} player={player} onStatusChange={onStatusChange} />)
+              players.map((player) => <PlayerCard key={player.playerID} player={player} onStatusChange={onStatusChange} />)
             ) : (
               <div className="flex items-center justify-center h-32">
                 <div className="text-center text-gray-300">
