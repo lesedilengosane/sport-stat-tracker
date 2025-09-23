@@ -10,7 +10,7 @@ import { supabase } from "../supabaseClient";
 export async function checkUser(
   identifier: string,
   by: 'auth_user_id' | 'email' = 'auth_user_id'
-): Promise<{ exists: boolean; role?: string; first_name?: string; error?: string }> {
+): Promise<{ exists: boolean; role?: string; first_name?: string;last_name?:string;user_id?:string; error?: string }> {
   try {
     // Validate input
     if (!identifier) {
@@ -23,7 +23,7 @@ export async function checkUser(
     // Query the database for role + first_name too
     const { data, error } = await supabase
       .from('users')
-      .select(`${by}, role, first_name`)
+      .select("*")
       .eq(by, identifier)
       .maybeSingle();
 
@@ -38,17 +38,25 @@ export async function checkUser(
     if (!data) {
       return { 
         exists: false, 
+        user_id: undefined,
         role: undefined, 
-        first_name: undefined 
+        first_name: undefined, 
+        last_name: undefined,
+        
       };
     }
 
     // Return existence + user details
-    return {
-      exists: true,
-      role: data.role,
-      first_name: data.first_name
-    };
+   // console.log("Raw Supabase data:", data);
+const result = {
+  exists: true,
+  user_id: data.user_id,
+  role: data.role,
+  first_name: data.first_name,
+  last_name: data.last_name,
+};
+//console.log("Returning result:", result);
+return result;
 
   } catch (error) {
     console.error('Unexpected error in checkUser:', error);

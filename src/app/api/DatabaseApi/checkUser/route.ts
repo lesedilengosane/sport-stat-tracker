@@ -27,7 +27,9 @@ export async function POST(request: NextRequest) {
       { 
         exists: result.exists, 
         role: result.role, 
-        first_name: result.first_name 
+        first_name: result.first_name,
+        user_id:result.user_id,
+        last_name: result.last_name
       },
       { status: 200 }
     );

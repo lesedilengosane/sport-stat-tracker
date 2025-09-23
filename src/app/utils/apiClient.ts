@@ -10,6 +10,14 @@ export const apiClient = {
     return response.json();
   },
 
+  getMatchesByCoachId: async (coachId: string) => {
+    const response = await fetch(`/api/matches_by_coachID?coachId=${coachId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch matches for coach');
+    }
+    return response.json();
+  },
+
   createMatch: async (matchData: any) => {
     const response = await fetch('/api/matches', {
       method: 'POST',

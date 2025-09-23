@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { supabase } from "../api/DatabaseApi/supabaseClient";
-import { useAuth } from "@/app/context/AuthContext"; // ✅ Use the correct context
+import { useAuth } from "@/app/context/AuthContext"; // ✅ Correct context
 import { CoachSideNav } from "@/components/sideNav/coachSideNav";
 import { DashboardHeader } from "@/components/header/header";
 import { TeamManagement } from "@/components/coachComponents/teamManagement";
