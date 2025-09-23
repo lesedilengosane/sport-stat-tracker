@@ -9,11 +9,11 @@ import Image from "next/image"
 
 interface PlayerCardProps {
   player: Player
-  onStatusChange: (playerId: string, status: Player["status"]) => void
+ 
   isDragging?: boolean
 }
 
-export function PlayerCard({ player, onStatusChange, isDragging = false }: PlayerCardProps) {
+export function PlayerCard({ player,  isDragging = false }: PlayerCardProps) {
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData("application/json", JSON.stringify(player))
     e.dataTransfer.effectAllowed = "move"
@@ -50,29 +50,6 @@ export function PlayerCard({ player, onStatusChange, isDragging = false }: Playe
             <div className="min-w-0 flex-1">
               <h3 className="text-white font-medium text-sm truncate">{player.name}</h3>
               <p className="text-gray-400 text-xs">{player.position}</p>
-            </div>
-
-            {/* Status Dropdown */}
-            <div className="w-20">
-              <Select
-                value={player.status}
-                onValueChange={(value: Player["status"]) => onStatusChange(player.id, value)}
-              >
-                <SelectTrigger className="w-full h-7 bg-gray-700 border-gray-600 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fit" className="text-green-400">
-                    Fit
-                  </SelectItem>
-                  <SelectItem value="injured" className="text-red-400">
-                    Injured
-                  </SelectItem>
-                  <SelectItem value="suspended" className="text-yellow-400">
-                    Suspended
-                  </SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
         </div>
