@@ -3,43 +3,46 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 import UserCard from "@/components/UserCard";
 import Historicaldata from "@/components/historicaldata";
 import ExtApi from "@/components/ExtApi";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, userName, loading } = useAuth();
+  const { user } = useAuth();
 
   const [blurActive, setBlurActive] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const name_surname = `${user?.first_name} ${user?.last_name}`;
 
   // Animate text/buttons on mount
   useEffect(() => {
-    setIsLoaded(true);
     const t1 = setTimeout(() => setShowText(true), 200);
     const t2 = setTimeout(() => setShowButtons(true), 600);
+    const t3 = setTimeout(() => setIsLoading(false), 800); // mark loading finished after animation
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
+      clearTimeout(t3);
     };
   }, []);
 
   return (
-    <><div className="relative w-full min-h-screen overflow-auto bg-black">
+    <div className="relative w-full min-h-screen overflow-auto bg-black">
       {/* Background Image */}
       <Image
-        src="/bgr.jpg" // replace with your hero background
+        src="/bgr.jpg"
         alt="Basketball player dunking"
         fill
         priority
-        onLoad={() => setIsLoaded(true)}
+        onLoad={() => setIsLoading(false)}
         className={`object-cover transition-all duration-1000 ease-out ${
           blurActive ? "blur-sm" : ""
-        } ${isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
+        } ${!isLoading ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
       />
 
       {/* Dark overlay */}
@@ -55,7 +58,7 @@ export default function ProfilePage() {
             }`}
           >
             <span className="text-orange-500">
-              {loading ? "Loading..." : `WELCOME, ${userName || "PLAYER"}.`}
+              {isLoading ? "Loading..." : `WELCOME, ${name_surname || "PLAYER"}.`}
             </span>
           </h1>
           <h1
@@ -77,12 +80,12 @@ export default function ProfilePage() {
         </p>
 
         {/* Profile card */}
-        {!loading && user && (
+        {!isLoading && user && (
           <div className="mb-8 flex justify-center">
             <UserCard
-              name={userName || "No name"}
-              email={user.email || "No email"}
-              role={user.role || "User"}
+              name={name_surname || "No name"}
+              email={`${name_surname}@gmail.com` || "No email"}
+              role={user.user_role || "User"}
             />
           </div>
         )}
@@ -118,7 +121,6 @@ export default function ProfilePage() {
           <ExtApi />
         </div>
       </div>
-    </div> </>
-    
+    </div>
   );
 }

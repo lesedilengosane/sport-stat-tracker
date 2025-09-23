@@ -33,7 +33,10 @@ export default function SignInCallback() {
           throw new Error(errorData.error || "Failed to check user existence");
         }
 
-        const { exists, role, first_name, last_name,user_id } = await checkResponse.json();
+        const { exists, role, first_name, last_name,user_id }= await checkResponse.json();
+       
+        
+
 
         const User={
           user_id:user_id,
@@ -61,13 +64,13 @@ export default function SignInCallback() {
         //else if they exist then we pass the userpbject and make it accessible globally
         switch(User.user_role){
           case "Fan":
-            router.push("/fan");
+            router.push("/dashboard");
             break;
           case "Analyst":
             router.push("/analyst");
             break;
           case "Coach":
-            router.push("/coach");
+            router.push("/dashboard");
             break;
           default:
             router.push("/")
@@ -111,5 +114,4 @@ export default function SignInCallback() {
 );
 
 }
-
 
