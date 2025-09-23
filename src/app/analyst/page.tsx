@@ -12,7 +12,7 @@ import { GamesGrid } from "@/components/games-grid";
 import { apiClient } from "../utils/apiClient";
 import { Player_details } from "@/app/analyst/column";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../context/AuthContext"
 
 // Define TypeScript interfaces based on your schema
 interface Team {
@@ -77,7 +77,7 @@ export default function Dashboard() {
   const [usingSampleData, setUsingSampleData] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string>("");
   const [allGames, setAllGames] = useState<Game[]>([]);
-  const { userName, loading} = useAuth();
+  const {user}=useAuth()
 
 
   
@@ -211,7 +211,7 @@ const fetchMatches = async () => {
 
           {/* User greeting and profile icon */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-white">Hello, {userName}</span>
+            <span className="text-sm text-white">Hello, {user?.first_name}</span>
             <Link href="./analyst/profile">
               <Image
                 src="/profile.jpg"
@@ -266,7 +266,7 @@ const fetchMatches = async () => {
         {/* Logout button */}
         <div className="mt-8 text-center pb-8">
           <button onClick={handleLogout} className={styles.btn}>
-            Welcome to your Dashboard, {userName}! Click to log out
+            Welcome to your Dashboard, {user?.first_name}! Click to log out
           </button>
         </div>
       </div>
