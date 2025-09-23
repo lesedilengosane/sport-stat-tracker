@@ -1,7 +1,7 @@
 "use client"
 import { Search, Bell } from "lucide-react"
 import { useState } from "react"
-import { useAuth } from "@/app/contexts/AuthContext"
+import { useAuth } from "@/app/context/AuthContext"
 
 interface DashboardHeaderProps {
   placeholder?: string

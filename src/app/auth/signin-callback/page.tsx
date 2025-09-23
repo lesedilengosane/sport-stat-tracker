@@ -44,7 +44,7 @@ export default function SignInCallback() {
         setUser(User)
 
         if(User){
-          console.log(`The user given is : ${User.user_id} and their role is ${User.user_role}`)
+          console.log(`The userID : ${User.user_id}\n role is ${User.user_role} \n first name : ${User.first_name}`)
         }
         else{
           console.log("The user is invalid or was not filled")

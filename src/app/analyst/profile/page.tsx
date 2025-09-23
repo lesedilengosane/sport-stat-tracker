@@ -3,19 +3,22 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAuth } from "@/app/contexts/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 import UserCard from "@/components/UserCard";
 import Historicaldata from "@/components/historicaldata";
 import ExtApi from "@/components/ExtApi";
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, userName, loading } = useAuth();
+  const { user} = useAuth();
 
   const [blurActive, setBlurActive] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
+  const name_surname = `${user?.first_name} ${user?.last_name}`;
+   const [isLoading, setIsLoading] = useState(true);
+
 
   // Animate text/buttons on mount
   useEffect(() => {
@@ -55,7 +58,7 @@ export default function ProfilePage() {
             }`}
           >
             <span className="text-orange-500">
-              {loading ? "Loading..." : `WELCOME, ${userName || "PLAYER"}.`}
+              {loading ? "Loading..." : `WELCOME, ${name_surname || "PLAYER"}.`}
             </span>
           </h1>
           <h1
@@ -80,9 +83,9 @@ export default function ProfilePage() {
         {!loading && user && (
           <div className="mb-8 flex justify-center">
             <UserCard
-              name={userName || "No name"}
-              email={user.email || "No email"}
-              role={user.role || "User"}
+              name={name_surname  || "No name"}
+              email={`${name_surname}`+"@gmail.com" || "No email"}
+              role={user.user_role || "User"}
             />
           </div>
         )}
