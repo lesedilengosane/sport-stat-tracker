@@ -13,6 +13,17 @@ interface PlayerDetails {
   position: string;
   avatarUrl: string;
 }
+interface Match {
+  match_id: string
+  match_date: string
+  location: string | null
+  home_score: number
+  away_score: number
+  status: string
+  home_team_id: string
+  away_team_id: string
+}
+
 
 interface Team {
   team_id: string;
@@ -27,8 +38,8 @@ interface MatchDetailsProps {
   awayPlayers: PlayerDetails[];
   homeTeam: Team;
   awayTeam: Team;
-  homePrevMatches: any[];
-  awayPrevMatches: any[];
+  homePrevMatches: Match[];
+  awayPrevMatches: Match[];
 }
 
 export default function MatchDetails({

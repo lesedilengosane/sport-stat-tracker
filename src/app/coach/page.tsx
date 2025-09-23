@@ -1,7 +1,7 @@
 "use client"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useAuth } from "../contexts/AuthContext"
+import { useAuth } from "../context/AuthContext"
 import { supabase } from "../api/DatabaseApi/supabaseClient"
 import { CoachSideNav } from "@/components/sideNav/coachSideNav"
 import { DashboardHeader } from "@/components/header/header"
