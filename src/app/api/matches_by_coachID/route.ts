@@ -18,32 +18,44 @@ export async function GET(request: Request) {
       .eq("coach_id", coachId);
 
     if (teamError) {
+      console.error("Error fetching teams:", teamError);
       return NextResponse.json({ error: teamError.message }, { status: 500 });
     }
 
     if (!teams || teams.length === 0) {
-      return NextResponse.json({ error: "No teams found for this coach" }, { status: 404 });
+      console.log(`No teams found for coach ${coachId}`);
+      return NextResponse.json([]); // return empty array instead of error
     }
 
     const teamIds = teams.map(t => t.team_id);
+    console.log("Teams for coach:", teamIds);
 
     // Step 2: fetch upcoming matches for these teams
-    const orFilter = teamIds.map(id => `home_team_id.eq.${id},away_team_id.eq.${id}`).join(',');
+    // Supabase 'or' syntax requires multiple conditions joined by commas
+    const orFilter = teamIds
+      .map(id => `home_team_id.eq.${id},away_team_id.eq.${id}`)
+      .join(",");
+
+    console.log("OR filter:", orFilter);
 
     const { data: matches, error: matchesError } = await supabase
       .from("matches")
       .select("*")
       .or(orFilter)
-      .gte("match_date", new Date().toISOString())
+      // optional: remove future-date filter for testing
+      //.gte("match_date", new Date().toISOString())
       .order("match_date", { ascending: true });
 
     if (matchesError) {
+      console.error("Error fetching matches:", matchesError);
       return NextResponse.json({ error: matchesError.message }, { status: 500 });
     }
 
-    return NextResponse.json(matches);
+    console.log("Matches fetched:", matches);
 
+    return NextResponse.json(matches || []);
   } catch (err) {
+    console.error("Unexpected error:", err);
     return NextResponse.json({ error: "Failed to fetch matches" }, { status: 500 });
   }
 }
