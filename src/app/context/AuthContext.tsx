@@ -1,9 +1,9 @@
-
+// src/app/context/AuthContext.tsx
 "use client";
 import { createContext, useContext, useState } from "react";
 
 type User = {
-  user_id:string;
+  user_id: string;
   first_name: string;
   last_name: string;
   user_role: "Coach" | "Fan" | "Analyst";

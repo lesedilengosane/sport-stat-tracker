@@ -3,8 +3,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
 import { useState, useEffect } from "react";
-import { supabase } from "../app/api/DatabaseApi/supabaseClient"; // adjust path to your client
-import { BookingApiClient } from "../app/utils/BookGames"; // adjust path
+import { supabase } from "../app/api/DatabaseApi/supabaseClient";
+import { BookingApiClient } from "../app/utils/BookGames";
 
 interface Team {
   team_id: string;
@@ -40,29 +40,41 @@ export function GameCard({
   isBooked: initialBooked = false,
 }: GameCardProps) {
   const router = useRouter();
-
-  // track current analyst id
   const [analystId, setAnalystId] = useState<string | null>(null);
-  // local booked state to update UI instantly
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState<boolean>(initialBooked);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // fetch current user (Google ID)
+  // fetch current user + role
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    async function fetchUser() {
+      const { data } = await supabase.auth.getUser();
       if (data.user) {
         setAnalystId(data.user.id);
+
+        // fetch role from 'users' table
+        const { data: userData, error } = await supabase
+          .from("users")
+          .select("role")
+          .eq("auth_user_id", data.user.id)
+          .maybeSingle();
+
+        if (!error && userData) {
+          setUserRole(userData.role); // e.g., "Coach" or "Analyst"
+        }
       }
-    });
+    }
+
+    fetchUser();
   }, []);
 
   const handleCardClick = () => {
-    if (isBooked) return; // prevent navigation if booked
+    if (isBooked) return;
     router.push(`/analyst/${match_id}`);
   };
 
   const handleBookClick = async (e: React.MouseEvent) => {
-    e.stopPropagation(); // don’t trigger the card click navigation
+    e.stopPropagation();
     if (!analystId) {
       alert("You must be logged in as an analyst to book.");
       return;
@@ -71,18 +83,15 @@ export function GameCard({
     try {
       const result = await BookingApiClient.bookGame(match_id, analystId);
       if (result.success) {
-        setIsBooked(true); // update UI
+        setIsBooked(true);
         alert(result.message);
-
       } else {
-        if (result.message === 'This match already has an analyst assigned ❌'){
-        setIsBooked(true); // update UI
-        alert(result.message);
+        if (
+          result.message === "This match already has an analyst assigned ❌"
+        ) {
+          setIsBooked(true);
         }
-        else{
-          alert(result.message || "Booking failed");
-        }
-        
+        alert(result.message || "Booking failed");
       }
     } catch (err) {
       console.error(err);
@@ -100,7 +109,6 @@ export function GameCard({
           : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/50 cursor-pointer"
       }`}
     >
-      {/* Date + Time */}
       <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
         <div className="flex items-center gap-1">
           <Calendar size={12} />
@@ -112,7 +120,6 @@ export function GameCard({
         </div>
       </div>
 
-      {/* Teams */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center flex-1">
           <div className="w-12 h-12 relative mb-1">
@@ -141,25 +148,36 @@ export function GameCard({
         </div>
       </div>
 
-      {/* Location */}
       <div className="text-xs text-slate-400">{location}</div>
 
-      {/* Action buttons */}
       <div className="flex items-center justify-between text-xs font-medium mt-2">
-        <button className="text-blue-400 hover:underline">View Details</button>
-        {isBooked ? (
-          <div className="flex items-center gap-1 text-yellow-400">
-            <Check size={14} />
-            <span>Booked</span>
+        {userRole === "Coach" ? (
+          <div className="flex justify-center w-full">
+            <button className="text-blue-400 hover:underline">
+              View Details
+            </button>
           </div>
         ) : (
-          <button
-            onClick={handleBookClick}
-            disabled={loading}
-            className="text-yellow-400 hover:underline disabled:opacity-50"
-          >
-            {loading ? "Booking..." : "Book for Analysis"}
-          </button>
+          <>
+            <button className="text-blue-400 hover:underline">
+              View Details
+            </button>
+
+            {isBooked ? (
+              <div className="flex items-center gap-1 text-yellow-400">
+                <Check size={14} />
+                <span>Booked</span>
+              </div>
+            ) : (
+              <button
+                onClick={handleBookClick}
+                disabled={loading}
+                className="text-yellow-400 hover:underline disabled:opacity-50"
+              >
+                {loading ? "Booking..." : "Book for Analysis"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </Card>
