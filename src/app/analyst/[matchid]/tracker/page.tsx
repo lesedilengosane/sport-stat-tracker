@@ -1,4 +1,4 @@
-// app/analyst/tracker/page.tsx
+// app/analyst/[matchid]/tracker/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -221,17 +221,8 @@ export default function StatTrackerPage() {
     };
   };
 
-
-
-
-
-
-
-
-
   const handleSaveGame = async (completeGameData: any) => {
     try {
-
       const dataStr = JSON.stringify(completeGameData, null, 2);
       const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
