@@ -38,7 +38,6 @@ interface Game {
 
 export default function CoachDashboard() {
   const router = useRouter();
-  const { userName, loading } = useAuth();
   const [allGames, setAllGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
