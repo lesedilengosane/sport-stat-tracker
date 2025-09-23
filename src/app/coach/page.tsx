@@ -1,12 +1,13 @@
 "use client"
 import Image from "next/image"
+
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/app/context/AuthContext"
 import { supabase } from "../api/DatabaseApi/supabaseClient"
 import { CoachSideNav } from "@/components/sideNav/coachSideNav"
 import { DashboardHeader } from "@/components/header/header"
+import { TeamManagement } from "@/components/coachComponents/teamManagement"
 import { useState } from "react"
-import TeamManagement from "@/components/coachComponents/teamManagement"
 
 export default function CoachDashboard() {
   const router = useRouter()
@@ -47,11 +48,7 @@ export default function CoachDashboard() {
           </div>
         )
       case "team-management":
-        return (
-          <div className="max-w-6xl mx-auto ">
-            <TeamManagement/>
-          </div>
-        )
+        return <TeamManagement />
       case "team-stats":
         return (
           <div className="max-w-6xl mx-auto p-6">
