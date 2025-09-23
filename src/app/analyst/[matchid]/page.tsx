@@ -16,12 +16,16 @@ interface MatchData {
   awayPrevMatches: any[];
 }
 
-interface MatchPageProps {
+type MatchPagePropsCustom = {
   params: { matchid: string };
-}
+};
 
-export default async function MatchPage({ params }: MatchPageProps) {
-  const { matchid } =await  params;
+export default async function MatchPage({
+  params,
+}: {
+  params: Promise<{ matchid: string }>;
+}) {
+  const { matchid } = await params;
   console.log(`This is after extracting matchid---matchID : ${matchid}\n`)
 
   try {

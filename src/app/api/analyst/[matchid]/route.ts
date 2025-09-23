@@ -5,10 +5,10 @@
 import { NextResponse } from "next/server";
 import { supabase } from '@/app/api/DatabaseApi/supabaseClient';
 //Given the MatchID we should be able to fetch all lineups and playerid
-export async function GET(request:Request,{params}:{
-    params:{
-        matchid:string
-    }
+export async function GET(request:Request,{
+  params,
+}: {
+  params: Promise<{ matchid: string }>;
 })
 {
     const {matchid}=await params
