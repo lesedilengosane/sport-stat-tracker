@@ -1,16 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Tabs,
@@ -18,25 +15,21 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import Link from 'next/link';
 
 interface BasketballGame {
   score_away: string;
   score_home: string;
   id: number;
-  team: string;
   team_home: string;
   team_away: string;
-  opponent: string;
   league: string;
   game_date: string;
-  team_score: number | null;
-  opponent_score: number | null;
   venue: string | null;
 }
 
 interface PlayerDetails {
   player_id: string;
-  team_id: string;
   first_name: string;
   last_name: string;
   jersey_number: number;
@@ -44,22 +37,17 @@ interface PlayerDetails {
 }
 
 interface PlayerStat {
+  players: PlayerDetails | null;
   id: string;
-  match_id: string;
-  player_id: string;
   points: number;
-  twoPointsMade: number;
-  twoPointsAttempted: number;
   threePointsMade: number;
   threePointsAttempted: number;
   freeThrowsMade: number;
   freeThrowsAttempted: number;
   rebounds: number;
-  
   assists: number;
   steals: number;
   blocks: number;
-  created_at: string;
 }
 
 export default function PreviousMatches({ team, league }: { team: string; league: string }) {
@@ -68,11 +56,8 @@ export default function PreviousMatches({ team, league }: { team: string; league
   const [limit, setLimit] = useState(10);
 
   const [playerStats, setPlayerStats] = useState<PlayerStat[]>([]);
-  const [playerDetails, setPlayerDetails] = useState<PlayerDetails[]>([]);
   const [loadingPlayerStats, setLoadingPlayerStats] = useState(true);
-  const [loadingPlayerDetails, setLoadingPlayerDetails] = useState(true);
 
-  // Fetch games
   useEffect(() => {
     const fetchGames = async () => {
       setLoading(true);
@@ -80,7 +65,6 @@ export default function PreviousMatches({ team, league }: { team: string; league
         const res = await fetch(
           `/api/history?team=${encodeURIComponent(team)}&league=${encodeURIComponent(league)}&limit=${limit}`
         );
-        if (!res.ok) throw new Error(`Error ${res.status}`);
         const json = await res.json();
         setGames(json.data || []);
       } catch (err) {
@@ -92,13 +76,11 @@ export default function PreviousMatches({ team, league }: { team: string; league
     fetchGames();
   }, [team, league, limit]);
 
-  // Fetch player stats
   useEffect(() => {
     const fetchPlayerStats = async () => {
       setLoadingPlayerStats(true);
       try {
         const res = await fetch(`/api/player_stats`);
-        if (!res.ok) throw new Error(`Error ${res.status}`);
         const json = await res.json();
         setPlayerStats(json.data || []);
       } catch (err) {
@@ -110,98 +92,71 @@ export default function PreviousMatches({ team, league }: { team: string; league
     fetchPlayerStats();
   }, []);
 
-  // Fetch player details
-  useEffect(() => {
-    const fetchPlayerDetails = async () => {
-      setLoadingPlayerDetails(true);
-      try {
-        const res = await fetch(`/api/players`);
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        const json = await res.json();
-        setPlayerDetails(json.data || []);
-      } catch (err) {
-        console.error('Fetch error (player details):', err);
-      } finally {
-        setLoadingPlayerDetails(false);
-      }
-    };
-    fetchPlayerDetails();
-  }, []);
-
-  useEffect(() => {
-  console.log("Player details:", playerDetails);
-  console.log("Player stats:", playerStats);
-}, [playerDetails, playerStats]);
-
-
- // Merge player stats with details
-const mergedPlayerStats = playerStats.map((stat) => {
-  const player = playerDetails.find((p) => p.player_id === stat.player_id);
-
-  return {
-    ...stat,
-    firstname: player ? player.first_name : "Unknown",
-    lastname: player ? player.last_name : "Player",
-    jersey: player ? `#${player.jersey_number}` : "",
-    position: player?.position || "",
-    team_id: player?.team_id || null,
-  };
-});
-
-
   return (
-    <div className="flex w-full max-w-6xl flex-col gap-6">
-      <Tabs defaultValue="matches">
-        {/* Tabs header */}
-        <TabsList>
-          <TabsTrigger value="matches">Previous Matches</TabsTrigger>
-          <TabsTrigger value="players">Player Stats</TabsTrigger>
+    <div className="relative w-full max-w-6xl mx-auto p-6 rounded-3xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 shadow-2xl text-gray-100">
+      <Tabs defaultValue="matches" className="w-full">
+        <TabsList className="mb-6 flex justify-center rounded-xl bg-gray-800/70 shadow-md backdrop-blur">
+          <TabsTrigger
+            value="matches"
+            className="px-6 py-2 text-lg font-semibold rounded-xl data-[state=active]:bg-orange-500 data-[state=active]:text-white"
+          >
+            Previous Matches
+          </TabsTrigger>
+          <TabsTrigger
+            value="players"
+            className="px-6 py-2 text-lg font-semibold rounded-xl data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+          >
+            Player Stats
+          </TabsTrigger>
         </TabsList>
 
         {/* Matches Tab */}
         <TabsContent value="matches">
-          <Card>
+          <Card className="border-0 shadow-md rounded-2xl bg-gray-800/80 backdrop-blur">
             <CardHeader>
-              <CardTitle>Previous Matches</CardTitle>
-              <CardDescription>
-                View the last <strong>{limit}</strong> games for {team} in {league}.
+              <CardTitle className="text-xl font-bold text-white">
+                Recent Games
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                Showing last <strong>{limit}</strong> games for {team} in {league}.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Controls */}
+            <CardContent className="space-y-5">
               <div className="flex items-center gap-2">
-                <Label htmlFor="limit">Show last</Label>
+                <Label htmlFor="limit" className="text-gray-200 font-medium">
+                  Show last
+                </Label>
                 <select
                   id="limit"
                   value={limit}
                   onChange={(e) => setLimit(Number(e.target.value))}
-                  className="border rounded px-2 py-1"
+                  className="rounded-lg bg-gray-900 text-white border-gray-600 px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring focus:ring-orange-400"
                 >
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
+                  {[1,2,3,4,5,6,7,8,9,10].map((n) => (
                     <option key={n} value={n}>{n} games</option>
                   ))}
                 </select>
               </div>
 
-              {/* Loading and Errors */}
-              {loading && <p>Loading...</p>}
-              {!loading && games.length === 0 && <p>No previous matches found.</p>}
+              {loading && <p className="text-gray-400">Loading...</p>}
+              {!loading && games.length === 0 && (
+                <p className="text-gray-400">No previous matches found.</p>
+              )}
 
-              {/* Grid of games */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
                 {games.map((game) => (
                   <div
                     key={game.id}
-                    className="p-4 border rounded-lg shadow bg-white flex flex-col"
+                    className="p-5 rounded-xl shadow hover:shadow-lg bg-gradient-to-br from-gray-800 to-gray-700 transition-all duration-300"
                   >
-                    <p className="font-bold text-lg">
+                    <h3 className="text-lg font-bold text-white">
                       {game.team_home} vs {game.team_away}
+                    </h3>
+                    <p className="text-sm text-gray-300">
+                      {new Date(game.game_date).toDateString()} — {game.venue || "TBD"}
                     </p>
-                    <p className="text-sm text-gray-600">
-                      {new Date(game.game_date).toDateString()} — {game.venue || 'TBD'}
-                    </p>
-                    <p className="mt-2 text-xl font-semibold">
-                      {game.score_home ?? '-'} : {game.score_away ?? '-'}
+                    <p className="mt-3 text-2xl font-extrabold text-orange-400">
+                      {game.score_home ?? "-"} : {game.score_away ?? "-"}
                     </p>
                   </div>
                 ))}
@@ -211,66 +166,71 @@ const mergedPlayerStats = playerStats.map((stat) => {
         </TabsContent>
 
         {/* Player Stats Tab */}
-<TabsContent value="players">
-  <Card>
-    <CardHeader>
-      <CardTitle>Player Statistics</CardTitle>
-      <CardDescription>
-        Stats from the latest recorded matches.
-      </CardDescription>
-    </CardHeader>
-    <CardContent>
-      {loadingPlayerStats && <p>Loading player stats...</p>}
-      {!loadingPlayerStats && playerStats.length === 0 && (
-        <p>No player stats available.</p>
-      )}
-      {!loadingPlayerStats && playerStats.length > 0 && (
-        <div className="overflow-x-auto">
-          <table className="min-w-full border border-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">Player</th>
-                <th className="p-2 border">Points</th>
-                <th className="p-2 border">3PM / 3PA</th>
-                <th className="p-2 border">FTM / FTA</th>
-                <th className="p-2 border">Rebounds </th>
-                <th className="p-2 border">Assists</th>
-                <th className="p-2 border">Steals</th>
-                <th className="p-2 border">Blocks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {playerStats.map((stat: any) => (
-                <tr key={stat.id} className="text-center">
-                  <td className="p-2 border font-medium">
-                    {stat.players?.first_name} {stat.players?.last_name}{" "}
-                    <span className="text-gray-500">
-                      #{stat.players?.jersey_number}
-                    </span>
-                  </td>
-                  <td className="p-2 border">{stat.points}</td>
-                  <td className="p-2 border">
-                    {stat.threePointsMade} / {stat.threePointsAttempted}
-                  </td>
-                  <td className="p-2 border">
-                    {stat.freeThrowsMade} / {stat.freeThrowsAttempted}
-                  </td>
-                  <td className="p-2 border">
-                    {stat.rebounds} 
-                  </td>
-                  <td className="p-2 border">{stat.assists}</td>
-                  <td className="p-2 border">{stat.steals}</td>
-                  <td className="p-2 border">{stat.blocks}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </CardContent>
-  </Card>
-</TabsContent>
+        <TabsContent value="players">
+          <Card className="border-0 shadow-md rounded-2xl bg-gray-800/80 backdrop-blur">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-white">
+                Player Statistics
+              </CardTitle>
+              <CardDescription className="text-gray-300">
+                From the latest recorded matches.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {loadingPlayerStats && <p className="text-gray-400">Loading player stats...</p>}
+              {!loadingPlayerStats && playerStats.length === 0 && (
+                <p className="text-gray-400">No player stats available.</p>
+              )}
 
+              {!loadingPlayerStats && playerStats.length > 0 && (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full border border-gray-700 rounded-lg">
+                    <thead className="bg-gray-700">
+                      <tr>
+                        <th className="p-3 text-left font-semibold text-gray-200">Player</th>
+                        <th className="p-3 text-gray-200">PTS</th>
+                        <th className="p-3 text-gray-200">3PM / 3PA</th>
+                        <th className="p-3 text-gray-200">FTM / FTA</th>
+                        <th className="p-3 text-gray-200">REB</th>
+                        <th className="p-3 text-gray-200">AST</th>
+                        <th className="p-3 text-gray-200">STL</th>
+                        <th className="p-3 text-gray-200">BLK</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-700">
+                      {playerStats.map((stat) => (
+                        <tr key={stat.id} className="hover:bg-gray-700/60 transition">
+                          <td className="p-3 font-medium text-white">
+                            <Link
+                              href={`/players/${stat.players?.player_id}`}
+                              className="text-orange-400 hover:underline"
+                            >
+                              {stat.players?.first_name} {stat.players?.last_name}
+                            </Link>
+                            <span className="ml-1 text-gray-400">
+                              #{stat.players?.jersey_number}
+                            </span>
+                          </td>
+                          <td className="p-3 text-center">{stat.points}</td>
+                          <td className="p-3 text-center">
+                            {stat.threePointsMade} / {stat.threePointsAttempted}
+                          </td>
+                          <td className="p-3 text-center">
+                            {stat.freeThrowsMade} / {stat.freeThrowsAttempted}
+                          </td>
+                          <td className="p-3 text-center">{stat.rebounds}</td>
+                          <td className="p-3 text-center">{stat.assists}</td>
+                          <td className="p-3 text-center">{stat.steals}</td>
+                          <td className="p-3 text-center">{stat.blocks}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

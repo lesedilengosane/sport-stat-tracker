@@ -39,6 +39,7 @@ export function GamesGrid({ games }: GamesGridProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {games.map((game) => (
           <GameCard
+            key={game.id} 
             match_id={game.id}
             date={game.date}
             time={game.time}       
