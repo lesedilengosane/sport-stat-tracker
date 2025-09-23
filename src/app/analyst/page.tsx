@@ -1,13 +1,19 @@
-// app/analyst/page.tsx
-"use client"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { supabase } from "../api/DatabaseApi/supabaseClient"
-import { GamesGrid } from "@/components/games-grid"
+
+// app/dashboard/page.tsx
+"use client";
+
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
+import styles from "../landing.module.css";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "../api/DatabaseApi/supabaseClient";
+import { GamesGrid } from "@/components/games-grid";
+import { Player_details } from "@/app/analyst/column";
+import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
+import { useAuth } from "../context/AuthContext"
 import { apiClient } from "../utils/apiClient"
-import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
-import { useAuth } from "../contexts/AuthContext"
 import { AnalystSideNav } from "@/components/sideNav/analystSideNav"
 import { DashboardHeader } from "@/components/header/header"
 
@@ -64,7 +70,15 @@ const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
 }
 
 export default function Dashboard() {
-  const router = useRouter()
+  const router = useRouter();
+  
+  const [matches, setMatches] = useState<Game[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [usingSampleData, setUsingSampleData] = useState(false);
+  const [debugInfo, setDebugInfo] = useState<string>("");
+  const [allGames, setAllGames] = useState<Game[]>([]);
+  const {user}=useAuth()
 
   const [matches, setMatches] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -216,9 +230,26 @@ export default function Dashboard() {
       {/* Main content */}
       <div className="relative z-10 min-h-screen bg-black/30 backdrop-blur-sm">
 
+y
+          {/* User greeting and profile icon */}
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white">Hello, {user?.first_name}</span>
+            <Link href="./analyst/profile">
+              <Image
+                src="/profile.jpg"
+                alt="Profile"
+                width={50}
+                height={50}
+                className="rounded-full border-2 border-white shadow-md cursor-pointer"
+              />
+            </Link>
+          </div>
+        </div>
+
         <DashboardHeader placeholder="Search players and teams..." />
 
        
+
 
         {/* Error message display */}
         {error && (
@@ -239,6 +270,14 @@ export default function Dashboard() {
         ) : (
           renderTabContent()
         )}
+
+
+        {/* Logout button */}
+        <div className="mt-8 text-center pb-8">
+          <button onClick={handleLogout} className={styles.btn}>
+            Welcome to your Dashboard, {user?.first_name}! Click to log out
+          </button>
+        </div>
       </div>
     </div>
   )

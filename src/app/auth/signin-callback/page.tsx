@@ -3,9 +3,13 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../api/DatabaseApi/supabaseClient";
+import { useAuth } from "@/app/context/AuthContext";
+
+
 
 export default function SignInCallback() {
   const router = useRouter();
+  const { setUser } = useAuth();
 
   useEffect(() => {
     const checkUserAndRedirect = async () => {
@@ -18,36 +22,55 @@ export default function SignInCallback() {
         }
 
         // 2. Check if user exists
-        const response = await fetch("/api/DatabaseApi/checkUser", {
+        const checkResponse = await fetch("/api/DatabaseApi/checkUser", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ auth_user_id: session.user.id }),
         });
 
-        if (!response.ok) {
-          const errorData = await response.json();
+        if (!checkResponse.ok) {
+          const errorData = await checkResponse.json();
           throw new Error(errorData.error || "Failed to check user existence");
         }
 
-        const { exists , role  } = await response.json();
+        const { exists, role, first_name, last_name,user_id } = await checkResponse.json();
 
-        // 3. Redirect based on existence and role
-        if (exists) {
-          // ✅ user exists → go to dashboard
+        const User={
+          user_id:user_id,
+          first_name:first_name,
+          last_name:last_name,
+          user_role:role
+        }
+        setUser(User)
 
-          console.log("User exists:", session.user);
-          if (role === "Coach"){
-            router.push("/coach");
-          }
-          else{
-            router.push("/analyst");
-          }
-          
-        } else {
-          // ❌ user does not exist → sign them out and send to signup
+        if(User){
+          console.log(`The user given is : ${User.user_id} and their role is ${User.user_role}`)
+        }
+        else{
+          console.log("The user is invalid or was not filled")
+        }
+        
+
+        // 3. Redirect based on existence
+        if (!exists) {
           await supabase.auth.signOut();
           alert("No account found. Please sign up first.");
           router.push("/signup");
+        }
+
+        //else if they exist then we pass the userpbject and make it accessible globally
+        switch(User.user_role){
+          case "Fan":
+            router.push("/fan");
+            break;
+          case "Analyst":
+            router.push("/analyst");
+            break;
+          case "Coach":
+            router.push("/coach");
+            break;
+          default:
+            router.push("/")
         }
 
       } catch (error) {
@@ -88,3 +111,5 @@ export default function SignInCallback() {
 );
 
 }
+
+
