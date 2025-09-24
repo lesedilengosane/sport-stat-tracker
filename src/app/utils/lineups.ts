@@ -17,7 +17,7 @@ export interface LineupResponse {
 
 export async function getDefaultLineup(authUserId: string): Promise<LineupResponse> {
   try {
-    const response = await fetch('/api/lineups', {
+    const response = await fetch('/api/lineups/GetDefault', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

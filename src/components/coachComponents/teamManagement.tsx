@@ -38,6 +38,56 @@ interface TeamManagementProps {
   coachTeamId: string
 }
 
+// Custom Court Player Component with Name Display
+const CustomCourtPlayer = ({ 
+  player, 
+  position, 
+  onDragStart 
+}: { 
+  player: Player
+  position: { x: number; y: number }
+  onDragStart: (player: Player) => void
+}) => {
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData("application/json", JSON.stringify(player))
+    onDragStart(player)
+  }
+
+  // Extract first name and last initial
+  const firstName = player.name.split(' ')[0]
+  const lastNameInitial = player.name.split(' ')[1]?.[0] || ''
+
+  return (
+    <div
+      className="absolute cursor-move z-20 select-none"
+      style={{
+        left: `${position.x}%`,
+        top: `${position.y}%`,
+        transform: "translate(-50%, -50%)",
+      }}
+      draggable
+      onDragStart={handleDragStart}
+    >
+      <div className="flex flex-col items-center justify-center">
+        {/* Player Circle with Orange Background - Matches the drop zone size */}
+        <div className="w-16 h-16 rounded-full bg-orange-500 border-2 border-orange-300 shadow-lg flex flex-col items-center justify-center">
+          <span className="text-white font-bold text-xs text-center leading-tight">
+            {firstName}
+          </span>
+          <span className="text-white font-bold text-xs">
+            {lastNameInitial}.
+          </span>
+        </div>
+        
+        {/* Jersey Number Badge */}
+        <div className="bg-black/80 text-white text-xs px-2 py-1 rounded-full border border-orange-500 mt-1">
+          #{player.jerseyNumber}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
   const [reservePlayers, setReservePlayers] = useState<Player[]>([])
   const [courtPlayers, setCourtPlayers] = useState<Map<string, Player>>(new Map())
@@ -45,20 +95,20 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
   const [unassignedPlayers, setUnassignedPlayers] = useState<UnassignedPlayer[]>([])
   const [fetchingUnassigned, setFetchingUnassigned] = useState(false)
 
-  // Fetch default lineup
   useEffect(() => {
     async function fetchLineup() {
-      const { data: { session } } = await supabase.auth.getSession()
-      const authUserId = session?.user.id
+      const { data: { session } } = await supabase.auth.getSession();
+      const authUserId = session?.user.id;
       if (!authUserId) {
-        setLoading(false)
-        return
+        setLoading(false);
+        return;
       }
 
-      const lineupResponse = await getDefaultLineup(authUserId)
+      const lineupResponse = await getDefaultLineup(authUserId);
+
       if (lineupResponse.lineup) {
-        const startingPlayers: Player[] = []
-        const reserves: Player[] = []
+        const courtMap = new Map<string, Player>();
+        const reserves: Player[] = [];
 
         lineupResponse.lineup.forEach((p) => {
           const player: Player = {
@@ -68,27 +118,25 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
             position: p.position || "",
             isStarting: !!p.is_starting,
             jerseyNumber: p.jersey_number || 0,
-            profileImage: `/playerPictures/${p.player_name.replace(" ", "")}.png`,
+            profileImage: `/playerPictures/${p.player_name.replace(/ /g, "")}.png`,
+          };
+
+          if (player.isStarting && player.position) {
+            courtMap.set(player.position.toLowerCase(), player);
+          } else {
+            reserves.push(player);
           }
+        });
 
-          if (player.isStarting) startingPlayers.push(player)
-          else reserves.push(player)
-        })
-
-        const courtMap = new Map<string, Player>()
-        startingPlayers.forEach((player) => {
-          if (player.position) courtMap.set(player.position.toLowerCase(), player)
-        })
-
-        setCourtPlayers(courtMap)
-        setReservePlayers(reserves)
+        setCourtPlayers(courtMap);
+        setReservePlayers(reserves);
       }
 
-      setLoading(false)
+      setLoading(false);
     }
 
-    fetchLineup()
-  }, [])
+    fetchLineup();
+  }, []);
 
   // Drag & Drop handlers
   const handleDrop = (e: React.DragEvent, positionId: string) => {
@@ -207,67 +255,94 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Team Management</h1>
+        
         <Button
           onClick={handleSaveLineup}
-          className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white"
+          disabled={courtPlayers.size < 5}
+          className={`flex items-center gap-2 ${
+            courtPlayers.size < 5 
+              ? 'bg-gray-500 cursor-not-allowed' 
+              : 'bg-orange-500 hover:bg-orange-600'
+          } text-white`}
         >
           <Save className="w-4 h-4" />
-          Save Lineup
+          {courtPlayers.size < 5 ? `Need ${5 - courtPlayers.size} more players` : 'Save Lineup'}
         </Button>
+
+        {/* Optional tooltip for disabled state */}
+        {courtPlayers.size < 5 && (
+          <div className="absolute right-0 top-full mt-2 bg-black text-white p-2 rounded text-sm">
+            Assign {5 - courtPlayers.size} more players to save
+          </div>
+        )}
       </div>
 
       <div className="flex gap-6 h-[calc(130vh-160px)]">
         {/* Basketball Court */}
         <div className="flex-[7] relative">
-          <Card className="h-full overflow-hidden bg-black/50 backdrop-blur-sm border-orange-500/20">
-            <CardContent className="p-0 h-full relative">
-              <div
-                className="w-full h-full bg-cover bg-center bg-no-repeat relative"
-                style={{ backgroundImage: `url('/court/aerialView.png')` }}
-              >
-                <div className="absolute inset-0 bg-black/20"></div>
+        <Card className="h-full overflow-hidden bg-black/50 backdrop-blur-sm border-orange-500/20">
+          <CardContent className="p-0 h-full relative">
+            <div
+              className="w-full h-full bg-cover bg-center bg-no-repeat relative"
+              style={{ backgroundImage: `url('/court/aerialView.png')` }}
+            >
+              <div className="absolute inset-0 bg-black/20"></div>
 
-                {courtPositions.map((position) => (
-                  <React.Fragment key={position.id}>
-                    <div
-                      className="absolute w-16 h-16 border-2 border-dashed border-orange-500/50 rounded-full bg-orange-500/10 hover:bg-orange-500/20 transition-colors z-10"
-                      style={{
-                        left: `${position.x}%`,
-                        top: `${position.y}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                      onDrop={(e) => handleDrop(e, position.id)}
-                      onDragOver={handleDragOver}
-                    />
-                    <div
-                      className="absolute text-white font-bold text-sm bg-black/80 px-2 py-1 rounded z-30 pointer-events-none"
-                      style={{
-                        left: `${position.x}%`,
-                        top: `${position.y + 8}%`,
-                        transform: "translate(-50%, -50%)",
-                      }}
-                    >
-                      {position.label}
+              {courtPositions.map((position) => (
+                <React.Fragment key={position.id}>
+                  {/* Invisible Drop Zone - keeps functionality but no visual circle */}
+                  <div
+                    className="absolute w-20 h-20 rounded-full z-10"
+                    style={{
+                      left: `${position.x}%`,
+                      top: `${position.y}%`,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                    onDrop={(e) => handleDrop(e, position.id)}
+                    onDragOver={handleDragOver}
+                  />
+                  
+                  {/* Position Label */}
+                  <div
+                    className="absolute text-white font-bold text-sm bg-black/80 px-2 py-1 rounded z-30 pointer-events-none"
+                    style={{
+                      left: `${position.x}%`,
+                      top: `${position.y + 12}%`,
+                      transform: "translate(-50%, -50%)",
+                    }}
+                  >
+                    {position.label}
+                  </div>
+                </React.Fragment>
+              ))}
+
+              
+                {/* Add this message when no starting lineup is set */}
+                {courtPlayers.size === 0 && (
+                  <div className="absolute inset-0 flex items-center justify-center z-0">
+                    <div className="text-white/50 text-lg font-bold bg-black/30 p-4 rounded-lg">
+                      No starting lineup set. Drag players from reserves to positions.
                     </div>
-                  </React.Fragment>
-                ))}
+                  </div>
+                )}
+              {/* Render players on court using custom component */}
+              {courtPositions.map((position) => {
+                const player = courtPlayers.get(position.id)
+                return player ? (
+                  <CustomCourtPlayer
+                    key={`${position.id}-${player.playerID}`}
+                    player={player}
+                    position={{ x: position.x, y: position.y }}
+                    onDragStart={handleCourtPlayerDragStart}
+                  />
+                ) : null
+              })}
 
-                {/* Render players on court */}
-                {courtPositions.map((position) => {
-                  const player = courtPlayers.get(position.id)
-                  return player ? (
-                    <CourtPlayer
-                      key={`${position.id}-${player.playerID}`}
-                      player={player}
-                      position={{ x: position.x, y: position.y }}
-                      onDragStart={handleCourtPlayerDragStart}
-                    />
-                  ) : null
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
         {/* Reserves & Unassigned */}
         <div className="flex-[3] h-full flex flex-col gap-4">
