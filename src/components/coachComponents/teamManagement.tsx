@@ -269,49 +269,74 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
 
         {/* Reserves */}
         <div className="flex-[3] h-full">
-          <Reserves players={reservePlayers} onAddPlayer={() => {}} />
+          {/*<Reserves players={reservePlayers} onAddPlayer={() => {}} />
+          */}
 
           {/* Unassigned Players Dialog */}
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="mt-4">Show Unassigned Players</Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-lg">
-              <DialogHeader>
-                <DialogTitle>Free Players</DialogTitle>
-              </DialogHeader>
+        <Dialog>
+  <DialogTrigger asChild>
+    <Button
+      className="
+        group rounded-2xl
+        bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700
+        bg-opacity-80 backdrop-blur-xl
+        p-3 px-5 shadow-lg
+        transition-all duration-300
+        hover:scale-105 hover:shadow-2xl
+        hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600
+        text-white font-semibold
+      "
+    >
+      Show Unassigned Players
+    </Button>
+  </DialogTrigger>
 
-              <div className="space-y-4">
-                <Button onClick={fetchUnassignedPlayers} disabled={fetchingUnassigned}>
-                  {fetchingUnassigned ? "Loading..." : "Refresh List"}
-                </Button>
+  <DialogContent className="max-w-md rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl shadow-2xl p-4">
+    <DialogHeader>
+      <DialogTitle className="text-white text-lg font-bold">Free Players</DialogTitle>
+    </DialogHeader>
 
-                {unassignedPlayers.length === 0 ? (
-                  <p className="text-gray-500">No unassigned players available.</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {unassignedPlayers.map((player) => (
-                      <li
-                        key={player.player_id}
-                        className="flex justify-between items-center border p-2 rounded-md"
-                      >
-                        <span>
-                          {player.first_name} {player.last_name} — {player.position} #
-                          {player.jersey_number}
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={() => assignPlayerToTeam(player.player_id)}
-                        >
-                          Add to Team
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+    <div className="space-y-3">
+      {/* Refresh Button */}
+      <Button
+        onClick={fetchUnassignedPlayers}
+        disabled={fetchingUnassigned}
+        className="bg-black/30 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl hover:ring-2 hover:ring-pink-500"
+      >
+        {fetchingUnassigned ? "Loading..." : "Refresh List"}
+      </Button>
+
+      {/* Player List */}
+      {unassignedPlayers.length === 0 ? (
+        <p className="text-gray-200 text-center py-4">No unassigned players available.</p>
+      ) : (
+        <ul className="space-y-2">
+          {unassignedPlayers.map((player) => (
+            <li
+              key={player.player_id}
+              className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-black/20 backdrop-blur-md"
+            >
+              <span className="text-white text-sm">
+                {player.first_name} {player.last_name} — {player.position} #
+                {player.jersey_number}
+              </span>
+              <Button
+                size="sm"
+                onClick={() => assignPlayerToTeam(player.player_id)}
+                className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+              >
+                Add
+              </Button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </DialogContent>
+</Dialog>
+
+
+
         </div>
       </div>
     </div>
