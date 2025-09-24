@@ -8,6 +8,13 @@ import { CourtPlayer } from "@/components/coachComponents/courtPlayer"
 import type { Player, CourtPosition } from "@/types/player"
 import { getDefaultLineup } from "@/app/utils/lineups"
 import { supabase } from "@/app/api/DatabaseApi/supabaseClient"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 
 // Predefined court positions
 const courtPositions: CourtPosition[] = [
@@ -18,11 +25,27 @@ const courtPositions: CourtPosition[] = [
   { id: "c", x: 65, y: 45, label: "C" },
 ]
 
-export function TeamManagement() {
+interface UnassignedPlayer {
+  player_id: string
+  first_name: string
+  last_name: string
+  position: string
+  jersey_number: number
+  team_id: string | null
+}
+
+interface TeamManagementProps {
+  coachTeamId: string
+}
+
+export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
   const [reservePlayers, setReservePlayers] = useState<Player[]>([])
   const [courtPlayers, setCourtPlayers] = useState<Map<string, Player>>(new Map())
   const [loading, setLoading] = useState(true)
+  const [unassignedPlayers, setUnassignedPlayers] = useState<UnassignedPlayer[]>([])
+  const [fetchingUnassigned, setFetchingUnassigned] = useState(false)
 
+  // Fetch default lineup
   useEffect(() => {
     async function fetchLineup() {
       const { data: { session } } = await supabase.auth.getSession()
@@ -45,7 +68,7 @@ export function TeamManagement() {
             position: p.position || "",
             isStarting: !!p.is_starting,
             jerseyNumber: p.jersey_number || 0,
-            profileImage: `/playerPictures/${p.player_name.replace(" ", "")}.png`, // adjust as needed
+            profileImage: `/playerPictures/${p.player_name.replace(" ", "")}.png`,
           }
 
           if (player.isStarting) startingPlayers.push(player)
@@ -67,15 +90,14 @@ export function TeamManagement() {
     fetchLineup()
   }, [])
 
+  // Drag & Drop handlers
   const handleDrop = (e: React.DragEvent, positionId: string) => {
     e.preventDefault()
     const playerData = e.dataTransfer.getData("application/json")
     const droppedPlayer: Player = JSON.parse(playerData)
 
     const existingPlayer = courtPlayers.get(positionId)
-    if (existingPlayer) {
-      setReservePlayers((prev) => [...prev, existingPlayer])
-    }
+    if (existingPlayer) setReservePlayers((prev) => [...prev, existingPlayer])
 
     setReservePlayers((prev) => prev.filter((p) => p.playerID !== droppedPlayer.playerID))
     setCourtPlayers((prev) => new Map(prev.set(positionId, droppedPlayer)))
@@ -95,62 +117,94 @@ export function TeamManagement() {
     setReservePlayers((prev) => [...prev, player])
   }
 
- const handleSaveLineup = async () => {
-  const lineupData = {
-    startingLineup: Array.from(courtPlayers.entries()).map(([positionId, player]) => ({
-      teamID: player.teamID,
-      playerID: player.playerID,
-      position: positionId.toUpperCase(),
-      isStarting: true,
-      jerseyNumber: player.jerseyNumber,
-    })),
-    reserves: reservePlayers.map((player) => ({
-      teamID: player.teamID,
-      playerID: player.playerID,
-      position: player.position,
-      isStarting: false,
-      jerseyNumber: player.jerseyNumber,
-    })),
-  }
-
-  // Save JSON locally
-  const dataStr = JSON.stringify(lineupData, null, 2)
-  const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-  const linkElement = document.createElement("a")
-  linkElement.setAttribute("href", dataUri)
-  linkElement.setAttribute(
-    "download",
-    `team-lineup-${new Date().toISOString().split("T")[0]}.json`
-  )
-  linkElement.click()
-
-  // Call API route to save to database
-  try {
-    const response = await fetch("/api/lineups/UpdateDefault", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(lineupData),
-    })
-
-    const result = await response.json()
-
-    if (response.ok) {
-      alert("Lineup successfully updated ✅")
-    } else {
-      alert("Failed to update lineup ❌")
-      console.log("Failed to update lineup ❌", result.error)
+  // Save lineup
+  const handleSaveLineup = async () => {
+    const lineupData = {
+      startingLineup: Array.from(courtPlayers.entries()).map(([positionId, player]) => ({
+        teamID: player.teamID,
+        playerID: player.playerID,
+        position: positionId.toUpperCase(),
+        isStarting: true,
+        jerseyNumber: player.jerseyNumber,
+      })),
+      reserves: reservePlayers.map((player) => ({
+        teamID: player.teamID,
+        playerID: player.playerID,
+        position: player.position,
+        isStarting: false,
+        jerseyNumber: player.jerseyNumber,
+      })),
     }
-  } catch (err: any) {
-    alert("Error updating lineup ❌")
-    console.log("Error updating lineup ❌", err.message)
-  }
-}
 
+    // Save JSON locally
+    const dataStr = JSON.stringify(lineupData, null, 2)
+    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
+    const linkElement = document.createElement("a")
+    linkElement.setAttribute("href", dataUri)
+    linkElement.setAttribute(
+      "download",
+      `team-lineup-${new Date().toISOString().split("T")[0]}.json`
+    )
+    linkElement.click()
+
+    // Call API route
+    try {
+      const response = await fetch("/api/lineups/UpdateDefault", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lineupData),
+      })
+
+      const result = await response.json()
+      if (response.ok) alert("Lineup successfully updated ✅")
+      else {
+        alert("Failed to update lineup ❌")
+        console.log(result.error)
+      }
+    } catch (err: any) {
+      alert("Error updating lineup ❌")
+      console.log(err.message)
+    }
+  }
+
+  // Fetch unassigned players
+  const fetchUnassignedPlayers = async () => {
+    setFetchingUnassigned(true)
+    try {
+      const res = await fetch("/api/coach/free")
+      const data = await res.json()
+      setUnassignedPlayers(data)
+    } catch (err) {
+      console.error("Error fetching unassigned players:", err)
+    }
+    setFetchingUnassigned(false)
+  }
+
+  // Assign player to team
+  const assignPlayerToTeam = async (playerId: string) => {
+    try {
+      const res = await fetch("/api/coach/assign-player", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId, teamId: coachTeamId }),
+      })
+
+      if (res.ok) {
+        setUnassignedPlayers((prev) => prev.filter((p) => p.player_id !== playerId))
+      } else {
+        const errData = await res.json()
+        console.error("Error assigning player:", errData.error)
+      }
+    } catch (err) {
+      console.error("Error assigning player:", err)
+    }
+  }
 
   if (loading) return <div>Loading lineup...</div>
 
   return (
     <div className="max-w-full mx-auto p-6">
+      {/* Header */}
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold text-white">Team Management</h1>
         <Button
@@ -215,9 +269,58 @@ export function TeamManagement() {
           </Card>
         </div>
 
-        {/* Reserves */}
-        <div className="flex-[3] h-full">
+        {/* Reserves & Unassigned */}
+        <div className="flex-[3] h-full flex flex-col gap-4">
           <Reserves players={reservePlayers} onAddPlayer={() => {}} />
+
+          {/* Unassigned Players Dialog */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="group rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl p-3 px-5 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold">
+                Show Unassigned Players
+              </Button>
+            </DialogTrigger>
+
+            <DialogContent className="max-w-md rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl shadow-2xl p-4">
+              <DialogHeader>
+                <DialogTitle className="text-white text-lg font-bold">Free Players</DialogTitle>
+              </DialogHeader>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={fetchUnassignedPlayers}
+                  disabled={fetchingUnassigned}
+                  className="bg-black/30 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl hover:ring-2 hover:ring-pink-500"
+                >
+                  {fetchingUnassigned ? "Loading..." : "Refresh List"}
+                </Button>
+
+                {unassignedPlayers.length === 0 ? (
+                  <p className="text-gray-200 text-center py-4">No unassigned players available.</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {unassignedPlayers.map((player) => (
+                      <li
+                        key={player.player_id}
+                        className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-black/20 backdrop-blur-md"
+                      >
+                        <span className="text-white text-sm">
+                          {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
+                        </span>
+                        <Button
+                          size="sm"
+                          onClick={() => assignPlayerToTeam(player.player_id)}
+                          className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+                        >
+                          Add
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </div>
