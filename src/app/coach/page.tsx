@@ -7,7 +7,8 @@ import { supabase } from "../api/DatabaseApi/supabaseClient";
 import { useAuth } from "@/app/context/AuthContext"; // ✅ Correct context
 import { CoachSideNav } from "@/components/sideNav/coachSideNav";
 import { DashboardHeader } from "@/components/header/header";
-import { TeamManagement } from "@/components/coachComponents/teamManagement";
+import  TeamManagement  from "@/components/coachComponents/teamManagement";
+import UnassignedPlayersDialog from "@/components/coachComponents/teamManagement";
 import { GamesGrid } from "@/components/games-grid";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 
@@ -37,12 +38,17 @@ interface Game {
 }
 
 export default function CoachDashboard() {
+  
   const router = useRouter();
-  const { userName, loading } = useAuth();
+  const { user } = useAuth();
   const [allGames, setAllGames] = useState<Game[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("schedule");
+  const [teamID, setTeamID] = useState<string>("");
+
+  const name = user?.first_name + " " + user?.last_name || "User";
+  const user_ID = user?.user_id || "No ID";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -72,7 +78,7 @@ export default function CoachDashboard() {
       const { data: coachData, error: coachError } = await supabase
         .from("users")
         .select("user_id")
-        .eq("auth_user_id", user.id)
+        .eq("auth_user_id", user.id || user_ID)
         .maybeSingle();
 
       if (coachError) throw new Error("Failed to fetch coach info");
@@ -81,7 +87,7 @@ export default function CoachDashboard() {
         return;
       }
 
-      const coachId = coachData.user_id;
+      const coachId = coachData.user_id || user_ID;
 
       const { data: teams, error: teamError } = await supabase
         .from("teams")
@@ -151,6 +157,37 @@ export default function CoachDashboard() {
   };
 
   useEffect(() => {
+  const fetchCoachTeam = async () => {
+    if (!user) return;
+
+    try {
+      // Get the logged-in user's ID
+      const userId = user.user_id;
+
+      // Fetch the team assigned to this coach
+      const { data: teamData, error } = await supabase
+        .from("teams")
+        .select("team_id")
+        .eq("coach_id", userId)
+        .maybeSingle(); // returns single team or null
+
+      if (error) throw error;
+
+      if (teamData) {
+        setTeamID(teamData.team_id);
+      } else {
+        console.warn("No team found for this coach");
+      }
+    } catch (err) {
+      console.error("Failed to fetch coach team:", err);
+    }
+  };
+
+  fetchCoachTeam();
+}, [user]);
+
+
+  useEffect(() => {
     if (activeTab === "schedule") fetchCoachGames();
   }, [activeTab]);
 
@@ -181,7 +218,14 @@ export default function CoachDashboard() {
         );
 
       case "team-management":
-        return <TeamManagement />;
+       return teamID ? (
+    <UnassignedPlayersDialog coachTeamId={teamID} />
+  ) : (
+    <p className="text-gray-300 text-center mt-4">
+      Loading team info...
+    </p>
+  );
+;
 
       case "team-stats":
         return (

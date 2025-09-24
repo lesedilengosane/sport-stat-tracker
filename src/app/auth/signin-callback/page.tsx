@@ -70,7 +70,7 @@ export default function SignInCallback() {
             router.push("/analyst");
             break;
           case "Coach":
-            router.push("/dashboard");
+            router.push("/coach");
             break;
           default:
             router.push("/")
