@@ -7,7 +7,6 @@ import { supabase } from "../api/DatabaseApi/supabaseClient";
 import { useAuth } from "@/app/context/AuthContext";
 import { CoachSideNav } from "@/components/sideNav/coachSideNav";
 import { DashboardHeader } from "@/components/header/header";
-import TeamManagement from "@/components/coachComponents/teamManagement";
 import UnassignedPlayersDialog from "@/components/coachComponents/teamManagement";
 import { GamesGrid } from "@/components/games-grid";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";

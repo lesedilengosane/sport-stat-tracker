@@ -6,7 +6,6 @@ export interface Player {
   isStarting: boolean
   jerseyNumber: number
   profileImage: string
-  status: "fit" | "injured" | "suspended"
 }
 
 export interface CourtPosition {
