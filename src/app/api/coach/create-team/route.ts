@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     const teamId = uuidv4();
     const { data: newTeam, error: insertError } = await supabase
       .from("teams")
-      .insert([{ team_id: teamId, team_name, coach_id, logo_url: body.logo_url || null }])
+      .insert([{ team_id: teamId, team_name, coach_id, icon_url: body.logo_url || null }])
       .select()
       .maybeSingle();
 
