@@ -28,7 +28,7 @@ export default function ProfilePage() {
   const [showButtons, setShowButtons] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const name_surname = `${user?.first_name} ${user?.last_name}`;
+  const name_surname = `${userInfo?.first_name} ${userInfo?.last_name}`;
 
   const fetchUserInfo = async () => {
     try {
@@ -129,7 +129,7 @@ export default function ProfilePage() {
             }`}
           >
             <span className="text-orange-500">
-              {isLoading ? "Loading..." : `WELCOME, ${userInfo?.first_name + " " + userInfo?.last_name || "PLAYER"}.`}
+              {isLoading ? "Loading..." : `WELCOME, ${name_surname || "PLAYER"}.`}
             </span>
           </h1>
           <h1
@@ -156,7 +156,7 @@ export default function ProfilePage() {
             <UserCard
               name={name_surname || "No name"}
               email={`${name_surname}@gmail.com` || "No email"}
-              role={user.user_role || "User"}
+              role={userInfo?.role || "User"}
             />
           </div>
         )}
