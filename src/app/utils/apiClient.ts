@@ -10,6 +10,21 @@ export const apiClient = {
     return response.json();
   },
 
+  getMatchesByCoachId: async (coachId: string) => {
+    console.log(`[apiClient] Fetching matches for coachId: ${coachId}`);
+    try {
+      const response = await fetch(`/api/matches_by_coachID?coachId=${coachId}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error("Failed to fetch matches for coach");
+      }
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      throw err;
+    }
+  },
+
   createMatch: async (matchData: any) => {
     const response = await fetch('/api/matches', {
       method: 'POST',

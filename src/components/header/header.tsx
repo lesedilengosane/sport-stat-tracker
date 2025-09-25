@@ -11,6 +11,9 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
   const [searchQuery, setSearchQuery] = useState("")
   const { user } = useAuth()
 
+  const username = user?.first_name + " " + user?.last_name || "User"
+  const userRole = user?.user_role || "User";
+
   return (
     <div className="bg-black/50 backdrop-blur-sm border-b border-orange-500/20 p-4">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
@@ -35,7 +38,7 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
         <div className="flex items-center gap-4">
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-white">Hello, {user?.first_name || "User"}</span>
+            <span className="text-sm text-white">Hello, {user?.first_name + " " + user?.last_name || "User"}</span>
             <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
               {user?.first_name?.[0]?.toUpperCase() || "U"}
             </div>

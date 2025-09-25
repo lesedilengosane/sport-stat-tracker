@@ -1,7 +1,6 @@
 // ../components/games-grid.tsx
 import { GameCard } from "./game-card";
 
-
 interface Team {
   team_id: string; // ← Make sure this is here
   name: string;
@@ -15,6 +14,7 @@ interface Player {
 }
 
 interface Game {
+
   match_id: string
   date: string
   time: string
@@ -22,9 +22,10 @@ interface Game {
   homeTeam: Team
   awayTeam: Team
   isBooked?: boolean
+
+
   homeLineup?: any[];
   awayLineup?: any[];
-
 }
 
 interface GamesGridProps {
@@ -32,7 +33,7 @@ interface GamesGridProps {
 }
 
 export function GamesGrid({ games }: GamesGridProps) {
-  console.log('Gamecard ',games)
+  //console.log('Gamecard ',games)
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
       <h2 className="text-2xl font-bold text-white mb-6">AVAILABLE GAMES</h2>
@@ -41,14 +42,14 @@ export function GamesGrid({ games }: GamesGridProps) {
           <GameCard
             key={game.match_id} 
             match_id={game.match_id}
+
             date={game.date}
-            time={game.time}       
-            location={game.location} 
-            homeTeam={game.homeTeam} 
+            time={game.time}
+            location={game.location}
+            homeTeam={game.homeTeam}
             awayTeam={game.awayTeam}
             isBooked={game.isBooked}
-             />
-
+          />
         ))}
       </div>
     </div>
