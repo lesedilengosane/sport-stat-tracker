@@ -155,12 +155,12 @@ export async function POST(request: Request) {
    
     const match_record={
       match_id:body.match_id,
-      home_team_id:body.homeTeam.teamid,
-      away_team_id:body.awayTeam.teamid,
+      home_team_id:body.homeTeam.team_id,
+      away_team_id:body.awayTeam.team_id,
       match_date:body.date,
       completed:true,
       season:body.season,
-      location:body.location,
+      //location:body.location, The location is there in the DB I do not need it
       home_score:body.homeTeam.score,
       away_score:body.awayTeam.score
     }

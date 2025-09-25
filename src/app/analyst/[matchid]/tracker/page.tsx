@@ -65,22 +65,20 @@ export default function StatTrackerPage() {
           if (!Array.isArray(players)) return [];
 
           return players.map((player, index) => ({
-            id: player?.id
+            player_id: player?.id
               ? `${teamId}-${player.id}`
               : `${teamId}-${teamPrefix}-player-${index + 1}`,
             name: player?.name || `Player ${index + 1}`,
             position: player?.position || "Unknown",
             jerseyNumber: player?.jerseyNumber || index + 1,
-            // Add teamId to ensure proper player identification
-            teamId: teamId,
           }));
         };
 
         const gameData: GameData = {
-          id: gameId,
+          match_id: gameId,
           date: date,
           homeTeam: {
-            id: homeTeamId,
+            team_id: homeTeamId,
             name: homeTeamName,
             //logo: homeLogo,
             color: "blue",
@@ -90,7 +88,7 @@ export default function StatTrackerPage() {
             players: formatPlayers(homeLineup, homeTeamId, "home"),
           },
           awayTeam: {
-            id: awayTeamId,
+            team_id: awayTeamId,
             name: awayTeamName,
             //logo: awayLogo,
             color: "red",
@@ -108,16 +106,6 @@ export default function StatTrackerPage() {
         console.error("Failed to load game data:", error);
         setError("Failed to load game data from URL parameters");
 
-        // Fallback to mock data if parsing fails
-        try {
-          const mockData = await fetchGameData();
-          setGameData(mockData);
-        } catch (fallbackError) {
-          console.error("Fallback data also failed:", fallbackError);
-          setError(
-            "Could not load any game data. Please check the URL parameters."
-          );
-        }
       } finally {
         setIsLoading(false);
       }
@@ -125,101 +113,6 @@ export default function StatTrackerPage() {
 
     loadGameData();
   }, [searchParams]);
-
-  const fetchGameData = async (gameId?: string): Promise<GameData> => {
-    return {
-      id: gameId || "game-001",
-      date: new Date().toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      }),
-      homeTeam: {
-        id: "lakers",
-        name: "Los Angeles Lakers",
-        //logo: "/placeholder.svg",
-        color: "blue",
-        score: 0,
-        timeouts: 0,
-        fouls: 0,
-        players: [
-          {
-            id: "lakers-lebron",
-            name: "LeBron James",
-            position: "SF",
-            jerseyNumber: 6,
-          },
-          {
-            id: "lakers-davis",
-            name: "Anthony Davis",
-            position: "PF",
-            jerseyNumber: 3,
-          },
-          {
-            id: "lakers-westbrook",
-            name: "Russell Westbrook",
-            position: "PG",
-            jerseyNumber: 0,
-          },
-          {
-            id: "lakers-reaves",
-            name: "Austin Reaves",
-            position: "SG",
-            jerseyNumber: 15,
-          },
-          {
-            id: "lakers-bryant",
-            name: "Thomas Bryant",
-            position: "C",
-            jerseyNumber: 13,
-          },
-        ],
-      },
-      awayTeam: {
-        id: "warriors",
-        name: "Golden State Warriors",
-        //logo: "/placeholder.svg",
-        color: "red",
-        score: 0,
-        timeouts: 0,
-        fouls: 0,
-        players: [
-          {
-            id: "warriors-curry",
-            name: "Stephen Curry",
-            position: "PG",
-            jerseyNumber: 30,
-          },
-          {
-            id: "warriors-thompson",
-            name: "Klay Thompson",
-            position: "SG",
-            jerseyNumber: 11,
-          },
-          {
-            id: "warriors-wiggins",
-            name: "Andrew Wiggins",
-            position: "SF",
-            jerseyNumber: 22,
-          },
-          {
-            id: "warriors-green",
-            name: "Draymond Green",
-            position: "PF",
-            jerseyNumber: 23,
-          },
-          {
-            id: "warriors-looney",
-            name: "Kevon Looney",
-            position: "C",
-            jerseyNumber: 5,
-          },
-        ],
-      },
-      status: "live",
-      location: "Crypto.com Arena",
-    };
-  };
 
   const handleSaveGame = async (completeGameData: any) => {
     try {

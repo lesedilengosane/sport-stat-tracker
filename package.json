@@ -41,6 +41,8 @@
     "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@typescript-eslint/eslint-plugin": "^8.44.1",
+    "@typescript-eslint/parser": "^8.44.1",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "identity-obj-proxy": "^3.0.0",

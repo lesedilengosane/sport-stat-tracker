@@ -2,9 +2,9 @@
 
 import { useState, useMemo } from "react"
 import type { GameEvent, PlayerStats, GameData } from "@/types/basketball"
-import TeamPlayerCard from "./ui/team-player-card"
-import GameHistory from "./ui/game-history"
-import ActionButtons from "./ui/action-buttons"
+import TeamPlayerCard from "../ui/team-player-card"
+import GameHistory from "../ui/game-history"
+import ActionButtons from "../ui/action-buttons"
 
 interface BasketballStatTrackerProps {
   gameData: GameData
@@ -17,9 +17,11 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
   const [gameEvents, setGameEvents] = useState<GameEvent[]>([])
   const [playerStats, setPlayerStats] = useState<Record<string, PlayerStats>>({})
   const [gameScore, setGameScore] = useState({ home: 0, away: 0 })
+  const match_id=gameData.match_id
 
-  const initializePlayerStats = (playerId: string): PlayerStats => ({
-    playerId,
+  const initializePlayerStats = (player_id: string,match_id:string): PlayerStats => ({
+    match_id,
+    player_id,
     points: 0,
     assists: 0,
     rebounds: 0,
@@ -33,97 +35,125 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
     threePointsAttempted: 0,
     freeThrowsMade: 0,
     freeThrowsAttempted: 0,
-  })
+  });
+
+  // Get team for a player
+  const getPlayerTeam = (playerId: string): "home" | "away" | null => {
+    if (gameData.homeTeam.players.some((p) => p.player_id === playerId)) return "home";
+    if (gameData.awayTeam.players.some((p) => p.player_id === playerId)) return "away";
+    return null;
+  };
 
   const allPlayerStats = useMemo(() => {
-    const allPlayers = [...gameData.homeTeam.players, ...gameData.awayTeam.players]
-    const computedStats: Record<string, PlayerStats> = {}
+    const allPlayers = [
+      ...gameData.homeTeam.players,
+      ...gameData.awayTeam.players,
+    ];
+    const computedStats: Record<string, PlayerStats> = {};
 
     allPlayers.forEach((player) => {
-      computedStats[player.id] = playerStats[player.id] || initializePlayerStats(player.id)
-    })
+      computedStats[player.player_id] =
+        playerStats[player.player_id] || initializePlayerStats(player.player_id,match_id);
+    });
 
-    return computedStats
-  }, [playerStats, gameData.homeTeam.players, gameData.awayTeam.players])
+    return computedStats;
+  }, [playerStats, gameData.homeTeam.players, gameData.awayTeam.players]);
 
   const getPlayerStats = (playerId: string): PlayerStats => {
-    return allPlayerStats[playerId] || initializePlayerStats(playerId)
-  }
+    return allPlayerStats[playerId] || initializePlayerStats(playerId,match_id);
+  };
 
   const addGameEvent = (action: string, points = 0) => {
     if (!selectedPlayer) {
-      alert("Please select a player first")
-      return
+      alert("Please select a player first");
+      return;
     }
 
-    const player = [...gameData.homeTeam.players, ...gameData.awayTeam.players].find((p) => p.id === selectedPlayer)
-    if (!player) return
+    const player = [
+      ...gameData.homeTeam.players,
+      ...gameData.awayTeam.players,
+    ].find((p) => p.player_id === selectedPlayer);
+    if (!player) return;
 
-    const teamId = gameData.homeTeam.players.find((p) => p.id === selectedPlayer) ? "home" : "away"
+    const teamId = getPlayerTeam(selectedPlayer);
+    if (!teamId) return;
 
     const event: GameEvent = {
       id: Date.now().toString(),
       timestamp: new Date().toLocaleTimeString(),
-      teamId,
-      playerId: selectedPlayer,
+      team_id:teamId,
+      match_id:match_id,
+      player_id: selectedPlayer,
       playerName: player.name,
       action,
       points,
-    }
+    };
 
-    setGameEvents((prev) => [event, ...prev])
+    setGameEvents((prev) => [event, ...prev]);
 
-    const currentStats = getPlayerStats(selectedPlayer)
-    const updatedStats = { ...currentStats }
+    // Create a completely new stats object to avoid reference issues
+    const currentStats = getPlayerStats(selectedPlayer);
+    const updatedStats = {
+      ...initializePlayerStats(selectedPlayer,match_id),
+      ...currentStats,
+    };
 
     switch (action) {
       case "+1 FT":
-        updatedStats.freeThrowsMade += 1
-        updatedStats.freeThrowsAttempted += 1
-        updatedStats.points += 1
-        break
+        updatedStats.freeThrowsMade += 1;
+        updatedStats.freeThrowsAttempted += 1;
+        updatedStats.points += 1;
+        break;
       case "+2 FG":
-        updatedStats.twoPointsMade += 1
-        updatedStats.twoPointsAttempted += 1
-        updatedStats.points += 2
-        break
+        updatedStats.twoPointsMade += 1;
+        updatedStats.twoPointsAttempted += 1;
+        updatedStats.points += 2;
+        break;
       case "+3 FG":
-        updatedStats.threePointsMade += 1
-        updatedStats.threePointsAttempted += 1
-        updatedStats.points += 3
-        break
+        updatedStats.threePointsMade += 1;
+        updatedStats.threePointsAttempted += 1;
+        updatedStats.points += 3;
+        break;
       case "Reb":
-        updatedStats.rebounds += 1
-        break
+        updatedStats.rebounds += 1;
+        break;
       case "Ast":
-        updatedStats.assists += 1
-        break
+        updatedStats.assists += 1;
+        break;
       case "Stl":
-        updatedStats.steals += 1
-        break
+        updatedStats.steals += 1;
+        break;
       case "Blk":
-        updatedStats.blocks += 1
-        break
+        updatedStats.blocks += 1;
+        break;
       case "TO":
-        updatedStats.turnovers += 1
-        break
+        updatedStats.turnovers += 1;
+        break;
       case "Foul":
-        updatedStats.fouls += 1
-        break
+        updatedStats.fouls += 1;
+        break;
     }
 
+    // Update player stats immutably
     setPlayerStats((prev) => ({
       ...prev,
       [selectedPlayer]: updatedStats,
-    }))
+    }));
 
     if (points > 0) {
       setGameScore((prev) => ({
         ...prev,
         [teamId]: prev[teamId] + points,
-      }))
+      }));
     }
-  }
+  };
+
+  const handlePlayerSelect = (playerId: string) => {
+    // Only allow selecting one player at a time
+    setSelectedPlayer((prevSelected) =>
+      prevSelected === playerId ? "" : playerId
+    );
+  };
 
   const handleSave = () => {
     const completeGameData = {
@@ -132,45 +162,54 @@ export default function BasketballStatTracker({ gameData, onBack, onSave }: Bask
         month: "long",
         year: "numeric",
       }),
+      match_id:match_id,
+      //season:"2023", I do not need the location and season because they already exist in the DB
+      //location:gameData,//I need to add a valid location
       homeTeam: {
         name: gameData.homeTeam.name,
+        team_id:gameData.homeTeam.team_id,
         score: gameScore.home,
         players: gameData.homeTeam.players.map((player) => ({
-          id: player.id,
+          player_id: player.player_id,
           name: player.name,
           position: player.position,
           jerseyNumber: player.jerseyNumber,
-          stats: getPlayerStats(player.id),
+          stats: getPlayerStats(player.player_id),
         })),
       },
       awayTeam: {
+        team_id:gameData.awayTeam.team_id,
         name: gameData.awayTeam.name,
         score: gameScore.away,
         players: gameData.awayTeam.players.map((player) => ({
-          id: player.id,
+          player_id: player.player_id,
           name: player.name,
           position: player.position,
           jerseyNumber: player.jerseyNumber,
-          stats: getPlayerStats(player.id),
+          stats: getPlayerStats(player.player_id),
         })),
       },
       events: gameEvents,
       finalScore: `${gameScore.home}-${gameScore.away}`,
-    }
+    };
 
     if (onSave) {
-      onSave(completeGameData)
+      onSave(completeGameData);
     } else {
-      const dataStr = JSON.stringify(completeGameData, null, 2)
-      const dataBlob = new Blob([dataStr], { type: "application/json" })
-      const url = URL.createObjectURL(dataBlob)
-      const link = document.createElement("a")
-      link.href = url
-      link.download = `game-stats-${gameData.id}-${new Date().toISOString().split("T")[0]}.json`
-      link.click()
-      URL.revokeObjectURL(url)
+      const dataStr = JSON.stringify(completeGameData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `game-stats-${gameData.match_id}-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">

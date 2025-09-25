@@ -25,12 +25,12 @@ export default function TeamPlayerCard({
   return (
     <div className="space-y-4">
       {team.players.map((player) => {
-        const stats = getPlayerStats(player.id)
-        const isSelected = selectedPlayer === player.id
+        const stats = getPlayerStats(player.player_id)
+        const isSelected = selectedPlayer === player.player_id
 
         return (
           <PlayerStatCard
-            key={player.id}
+            key={player.player_id}
             player={player}
             stats={stats}
             isSelected={isSelected}

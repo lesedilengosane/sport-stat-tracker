@@ -28,7 +28,7 @@ export default function PlayerStatCard({ player, stats, isSelected, onSelect, te
 
   return (
     <div
-      onClick={() => onSelect(player.id)}
+      onClick={() => onSelect(player.player_id)}
       className={`
         p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
         ${isSelected ? colors.selected : `${colors.border} bg-white hover:bg-gray-50`}

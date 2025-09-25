@@ -24,10 +24,12 @@ export default function BasketballStatTracker({
   const [playerStats, setPlayerStats] = useState<Record<string, PlayerStats>>(
     {}
   );
+  const match_id=gameData.match_id
   const [gameScore, setGameScore] = useState({ home: 0, away: 0 });
 
-  const initializePlayerStats = (playerId: string): PlayerStats => ({
-    playerId,
+  const initializePlayerStats = (player_id: string,match_id:string): PlayerStats => ({
+    match_id,
+    player_id,
     points: 0,
     assists: 0,
     rebounds: 0,
@@ -45,8 +47,8 @@ export default function BasketballStatTracker({
 
   // Get team for a player
   const getPlayerTeam = (playerId: string): "home" | "away" | null => {
-    if (gameData.homeTeam.players.some((p) => p.id === playerId)) return "home";
-    if (gameData.awayTeam.players.some((p) => p.id === playerId)) return "away";
+    if (gameData.homeTeam.players.some((p) => p.player_id === playerId)) return "home";
+    if (gameData.awayTeam.players.some((p) => p.player_id === playerId)) return "away";
     return null;
   };
 
@@ -58,15 +60,15 @@ export default function BasketballStatTracker({
     const computedStats: Record<string, PlayerStats> = {};
 
     allPlayers.forEach((player) => {
-      computedStats[player.id] =
-        playerStats[player.id] || initializePlayerStats(player.id);
+      computedStats[player.player_id] =
+        playerStats[player.player_id] || initializePlayerStats(player.player_id,match_id);
     });
 
     return computedStats;
   }, [playerStats, gameData.homeTeam.players, gameData.awayTeam.players]);
 
   const getPlayerStats = (playerId: string): PlayerStats => {
-    return allPlayerStats[playerId] || initializePlayerStats(playerId);
+    return allPlayerStats[playerId] || initializePlayerStats(playerId,match_id);
   };
 
   const addGameEvent = (action: string, points = 0) => {
@@ -78,7 +80,7 @@ export default function BasketballStatTracker({
     const player = [
       ...gameData.homeTeam.players,
       ...gameData.awayTeam.players,
-    ].find((p) => p.id === selectedPlayer);
+    ].find((p) => p.player_id === selectedPlayer);
     if (!player) return;
 
     const teamId = getPlayerTeam(selectedPlayer);
@@ -87,8 +89,9 @@ export default function BasketballStatTracker({
     const event: GameEvent = {
       id: Date.now().toString(),
       timestamp: new Date().toLocaleTimeString(),
-      teamId,
-      playerId: selectedPlayer,
+      team_id:teamId,
+      match_id:match_id,
+      player_id: selectedPlayer,
       playerName: player.name,
       action,
       points,
@@ -99,7 +102,7 @@ export default function BasketballStatTracker({
     // Create a completely new stats object to avoid reference issues
     const currentStats = getPlayerStats(selectedPlayer);
     const updatedStats = {
-      ...initializePlayerStats(selectedPlayer),
+      ...initializePlayerStats(selectedPlayer,match_id),
       ...currentStats,
     };
 
@@ -167,26 +170,31 @@ export default function BasketballStatTracker({
         month: "long",
         year: "numeric",
       }),
+      match_id:match_id,
+      //season:"2023", I do not need the location and season because they already exist in the DB
+      //location:gameData,//I need to add a valid location
       homeTeam: {
         name: gameData.homeTeam.name,
+        team_id:gameData.homeTeam.team_id,
         score: gameScore.home,
         players: gameData.homeTeam.players.map((player) => ({
-          id: player.id,
+          player_id: player.player_id,
           name: player.name,
           position: player.position,
           jerseyNumber: player.jerseyNumber,
-          stats: getPlayerStats(player.id),
+          stats: getPlayerStats(player.player_id),
         })),
       },
       awayTeam: {
+        team_id:gameData.awayTeam.team_id,
         name: gameData.awayTeam.name,
         score: gameScore.away,
         players: gameData.awayTeam.players.map((player) => ({
-          id: player.id,
+          player_id: player.player_id,
           name: player.name,
           position: player.position,
           jerseyNumber: player.jerseyNumber,
-          stats: getPlayerStats(player.id),
+          stats: getPlayerStats(player.player_id),
         })),
       },
       events: gameEvents,
@@ -201,7 +209,7 @@ export default function BasketballStatTracker({
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `game-stats-${gameData.id}-${
+      link.download = `game-stats-${gameData.match_id}-${
         new Date().toISOString().split("T")[0]
       }.json`;
       document.body.appendChild(link);

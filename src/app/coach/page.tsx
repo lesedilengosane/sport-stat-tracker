@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -220,6 +221,7 @@ export default function CoachDashboard() {
     if (activeTab === "schedule") fetchCoachMatches();
     else if (activeTab === "all-games") fetchAllGames();
   }, [activeTab, user]);
+
 
   const renderTabContent = () => {
     switch (activeTab) {

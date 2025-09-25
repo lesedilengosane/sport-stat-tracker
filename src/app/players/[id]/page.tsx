@@ -28,7 +28,7 @@ interface Player {
 export default async function PlayerDashboard({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
 

@@ -18,13 +18,14 @@ export interface Team {
 }
   
   export interface GameEvent {
+    id:string
     match_id: string
     timestamp: string
     team_id: string
     player_id: string
     playerName: string
     action: string
-    points?: number
+    points: number//changed this from points?. because it was giving a build error
   }
   
   export interface PlayerStats {
