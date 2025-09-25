@@ -13,6 +13,7 @@ import { GamesGrid } from "@/components/games-grid";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 import { apiClient } from "../utils/apiClient";
 
+
 // Types
 interface Team {
   team_id: string;
@@ -28,6 +29,7 @@ interface Player {
 
 interface Game {
   id: string;
+  match_id:string;
   date: string;
   time: string;
   location: string;
@@ -97,6 +99,7 @@ export default function CoachDashboard() {
 
       const formattedGames: Game[] = matchesData.map((match: any) => ({
         id: match.match_id,
+        match_id:match.match_id,//I added this line because I know we will need this property but the interface did not define it before me
         date: new Date(match.match_date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -313,3 +316,4 @@ export default function CoachDashboard() {
     </div>
   );
 }
+
