@@ -7,17 +7,83 @@ import { useAuth } from "@/app/context/AuthContext";
 import UserCard from "@/components/UserCard";
 import Historicaldata from "@/components/historicaldata";
 import ExtApi from "@/components/ExtApi";
+import { supabase } from "../api/DatabaseApi/supabaseClient";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user } = useAuth();
+  const [userInfo, setUserInfo] = useState<{
+    user_id: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+    team_id?: string | null;
+    team_name?: string | null;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  // State for background blur effect
 
   const [blurActive, setBlurActive] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const name_surname = `${user?.first_name} ${user?.last_name}`;
+  const name_surname = `${userInfo?.first_name} ${userInfo?.last_name}`;
+
+  const fetchUserInfo = async () => {
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.user) throw new Error("No session found");
+
+      const res = await fetch("/api/DatabaseApi/checkUser", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ auth_user_id: session.user.id }),
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch user info");
+      const { exists, user_id, first_name, last_name, role } = await res.json();
+
+      if (!exists) {
+        setUserInfo(null);
+        return;
+      }
+
+      let team_id: string | null = null;
+      let team_name: string | null = null;
+
+      if (role === "Coach") {
+        const teamRes = await fetch("/api/coach/getCoachTeam", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id }),
+        });
+
+        if (teamRes.ok) {
+          const teamData = await teamRes.json();
+          team_id = teamData.team_id || null;
+          team_name = teamData.team_name || null;
+        }
+      }
+
+      setUserInfo({ user_id, first_name, last_name, role, team_id, team_name });
+    } catch (err) {
+      console.error("Error fetching user info:", err);
+      setUserInfo(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const dashboard = () => {
+    if (user?.user_role === "Fan") router.push("/fan");
+    else if (user?.user_role === "Coach") router.push("/coach");
+    else if (user?.user_role === "Analyst") router.push("/analyst");
+    //router.push("/analyst");
+  }
 
   // Animate text/buttons on mount
   useEffect(() => {
@@ -30,6 +96,11 @@ export default function ProfilePage() {
       clearTimeout(t3);
     };
   }, []);
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
 
   return (
     <div className="relative w-full min-h-screen overflow-auto bg-black">
@@ -85,7 +156,7 @@ export default function ProfilePage() {
             <UserCard
               name={name_surname || "No name"}
               email={`${name_surname}@gmail.com` || "No email"}
-              role={user.user_role || "User"}
+              role={userInfo?.role || "User"}
             />
           </div>
         )}

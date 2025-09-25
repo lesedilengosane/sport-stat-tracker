@@ -2,6 +2,9 @@
 import { Search, Bell } from "lucide-react"
 import { useState } from "react"
 import { useAuth } from "@/app/context/AuthContext"
+import { Badge } from "@/components/ui/badge"
+import { routerServerGlobal } from "next/dist/server/lib/router-utils/router-server-context"
+import { useRouter } from "next/navigation"
 
 interface DashboardHeaderProps {
   placeholder?: string
@@ -10,6 +13,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ placeholder = "Search players and teams..." }: DashboardHeaderProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const { user } = useAuth()
+  const router = useRouter();
 
   const username = user?.first_name + " " + user?.last_name || "User"
   const userRole = user?.user_role || "User";
@@ -39,9 +43,9 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
 
           <div className="flex items-center gap-3">
             <span className="text-sm text-white">Hello, {user?.first_name + " " + user?.last_name || "User"}</span>
-            <div className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium">
+            <Badge className="h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium" onClick={() => router.push("/profile")}>
               {user?.first_name?.[0]?.toUpperCase() || "U"}
-            </div>
+            </Badge>
           </div>
         </div>
       </div>
