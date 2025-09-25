@@ -3,10 +3,10 @@ import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
 export default defineConfig(
-  eslint.configs.recommended,           // ✅ Core safe rules
-  tseslint.configs.recommended,         // ✅ TypeScript safe rules (not strict)
-  tseslint.configs.stylistic,           // ✅ Consistent style
+  eslint.configs.recommended,           
+  tseslint.configs.recommended,         
+  tseslint.configs.stylistic,           
   {
-    extends: ["next/core-web-vitals"],  // ✅ Next.js best practices
+    extends: ["next/core-web-vitals"], 
   }
 );

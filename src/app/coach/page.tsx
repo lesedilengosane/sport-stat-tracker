@@ -5,19 +5,30 @@ import { useAuth } from "../context/AuthContext"
 import { supabase } from "../api/DatabaseApi/supabaseClient"
 import { CoachSideNav } from "@/components/sideNav/coachSideNav"
 import { DashboardHeader } from "@/components/header/header"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 export default function CoachDashboard() {
   const router = useRouter()
-  const { userName, loading } = useAuth()
-  const [activeTab, setActiveTab] = useState("schedule")
+  const [activeTab, setActiveTab] = useState("schedule");
+  const [isLoading,setIsLoading]=useState(true)
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push("/")
   }
 
-  if (loading) {
+  useEffect(() => {
+  const init = async () => {
+    // do any initial async work here (e.g. fetch user/session/data)
+    await new Promise((resolve) => setTimeout(resolve, 1000)); // mock delay
+    setIsLoading(false);
+  };
+
+  init();
+}, []);
+
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black">
         <div className="text-orange-500 text-xl">Loading...</div>

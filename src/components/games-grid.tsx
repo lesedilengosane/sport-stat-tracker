@@ -15,7 +15,7 @@ interface Player {
 }
 
 interface Game {
-  id: string
+  match_id: string
   date: string
   time: string
   location: string
@@ -39,8 +39,8 @@ export function GamesGrid({ games }: GamesGridProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {games.map((game) => (
           <GameCard
-            key={game.id} 
-            match_id={game.id}
+            key={game.match_id} 
+            match_id={game.match_id}
             date={game.date}
             time={game.time}       
             location={game.location} 
