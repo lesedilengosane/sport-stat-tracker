@@ -36,7 +36,7 @@ export default function SignInCallback() {
       throw new Error(errorData.error || "Failed to check user existence");
     }
 
-    const { exists, role, first_name, last_name, user_id } =
+    const { exists, role, first_name, last_name, user_id, hasTeam } =
       await checkResponse.json();
 
     // 3. Construct user object
@@ -71,7 +71,13 @@ export default function SignInCallback() {
         router.push("/analyst");
         break;
       case "Coach":
-        router.push("/coach/coach-call");
+        if (hasTeam){
+          router.push("/coach");
+        }
+        else{
+          router.push("/coach/coach-call");
+        }
+        
         break;
       default:
         router.push("/");
