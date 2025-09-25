@@ -1,6 +1,7 @@
-// src/app/context/AuthContext.tsx
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+// Update the import path below if your supabaseClient is not in src/lib
+import { supabase } from "../api/DatabaseApi/supabaseClient";
 
 type User = {
   user_id: string;
@@ -21,6 +22,37 @@ const AuthContext = createContext<AuthContextType>({
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+
+  // 🔑 On mount, re-fetch the session and hydrate user
+  useEffect(() => {
+    const restoreUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (session?.user) {
+        const checkResponse = await fetch("/api/DatabaseApi/checkUser", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ auth_user_id: session.user.id }),
+        });
+
+        if (checkResponse.ok) {
+          const { user_id, first_name, last_name, role } =
+            await checkResponse.json();
+
+          setUser({
+            user_id,
+            first_name,
+            last_name,
+            user_role: role,
+          });
+        }
+      }
+    };
+
+    restoreUser();
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, setUser }}>
