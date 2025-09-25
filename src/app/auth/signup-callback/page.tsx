@@ -42,7 +42,7 @@ export default function CallbackPage() {
       if (res.status === 409) {
         await supabase.auth.signOut();
         alert("An account with this email already exists.\nPlease sign in instead.");
-        router.push("/");
+        router.push("/coach/coach-call");
         return;
       }
 
@@ -55,7 +55,19 @@ export default function CallbackPage() {
         return;
       }
 
-      router.push("/dashboard");
+      if(roleParam === "Coach") {
+        router.push("/coach/coach-call");
+        return;
+      }
+      if(roleParam === "Analyst") {
+        router.push("/analyst");
+        return;
+      }
+      if(roleParam === "Fan")
+      {
+        router.push("/fan");
+        return;
+      }
     })();
   }, [router, roleParam]);
 
