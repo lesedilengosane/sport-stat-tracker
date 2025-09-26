@@ -6,10 +6,10 @@ interface GameHistoryProps {
 
 export default function GameHistory({ events }: GameHistoryProps) {
   return (
-    <div className="bg-white border-2 border-gray-300 rounded-lg h-96 flex flex-col">
-      <h3 className="text-lg font-bold text-purple-600 mb-4 text-center p-4 pb-0">history</h3>
+    <div className="bg-white/60 border-2 border-gray-300 rounded-lg h-96 flex flex-col">
+      <h3 className="text-lg font-bold text-[#FE563F] mb-4 text-center p-4 pb-0">history</h3>
 
-      <div className="h-80 overflow-y-scroll scrollbar-hide space-y-2 px-4 pb-4">
+      <div className="h-80 overflow-y-scroll scrollbar-hidden space-y-2 px-4 pb-4">
         {events.length === 0 ? (
           <p className="text-gray-400 text-sm text-center">No events yet</p>
         ) : (
