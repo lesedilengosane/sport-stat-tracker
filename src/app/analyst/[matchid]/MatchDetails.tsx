@@ -60,20 +60,20 @@ export default function MatchDetails({
       {/* Sticky Background */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/background/matchCard.jpeg"
+          src="/background/gameCard.jpeg"
           alt="Background"
           fill
           priority
           className="object-cover"
         />
         {/* Glassy overlay */}
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-lg"></div>
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-md"></div>
       </div>
 
       {/* Page Content */}
       <div className="relative z-10 p-4">
         {/* Glassy Header */}
-        <header className="bg-white/10 backdrop-blur-xl border border-orange-400/20 p-6 flex flex-col items-center justify-center rounded-xl mb-6 shadow-lg shadow-orange-500/10">
+        <header className="bg-white/10   p-6 flex flex-col items-center justify-center rounded-xl mb-6 shadow-lg shadow-orange-500/10">
           <div className="flex items-center justify-between w-full max-w-4xl">
             {/* Home Team */}
             <div className="flex flex-col items-center">
@@ -82,7 +82,7 @@ export default function MatchDetails({
                 alt={homeTeam.team_name}
                 width={80}
                 height={80}
-                className="mb-2 rounded-full border border-white/20 shadow-sm"
+                className="mb-2 rounded-full border border-white/20 shadow-md"
               />
               <span className="text-lg font-bold font-bebas text-black drop-shadow">
                 {homeTeam.team_name}
@@ -103,7 +103,7 @@ export default function MatchDetails({
                 alt={awayTeam.team_name}
                 width={80}
                 height={80}
-                className="mb-2 rounded-full border border-white/20 shadow-sm"
+                className="mb-2 rounded-full border border-white/20 shadow-md"
               />
               <span className="text-lg font-bold font-bebas text-black drop-shadow">
                 {awayTeam.team_name}
@@ -132,6 +132,7 @@ export default function MatchDetails({
           >
             ADD STATS
           </button>
+        
         </header>
 
         {/* Lineups Tab Page */}

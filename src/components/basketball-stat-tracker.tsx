@@ -224,17 +224,19 @@ export default function BasketballStatTracker({
       <div className="max-w-7xl mx-auto">
         {/* Background Image */}
         <div className="fixed inset-0 z-0">
-          <Image src="/background/BasketRim.png" alt="Background" fill priority className="object-cover" />
+          <Image src="/background/rim.jpeg" alt="Background" fill priority className="object-cover" />
     
           {/*Overlay */}   
-            <div className="absolute inset-0 bg-white/40 backdrop-blur-lg"></div>
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-lg"></div>
       </div>
+
+      
         {/* Header Buttons */}
         <div className="flex items-center justify-between mb-8">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 border border-white/20 rounded-2xl bg-white/20 backdrop-blur-md hover:bg-white/30 text-white font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+              className="flex items-center gap-2 px-6 py-3 border border-white/20 rounded-2xl bg-white/20 backdrop-blur-md hover:text-gray-300 hover:bg-white/30 text-black font-medium shadow-sm transition-all duration-200 hover:shadow-md"
             >
               Back
             </button>
@@ -242,7 +244,7 @@ export default function BasketballStatTracker({
           <div className="flex-1" />
           <button
             onClick={handleSave}
-            className="border border-white/20 rounded-2xl bg-white/20 backdrop-blur-md hover:bg-white/25 text-white font-medium shadow-sm px-8 py-3 transition-all duration-200 hover:shadow-md"
+            className="border border-white/20 rounded-2xl bg-[#FE563F]/40 backdrop-blur-md hover:bg-white/25 hover:text-orange-400 text-white font-medium shadow-sm px-8 py-3 transition-all duration-200 hover:shadow-md"
           >
             Save Game
           </button>
@@ -262,11 +264,11 @@ export default function BasketballStatTracker({
                     className="w-16 h-16 drop-shadow-md"
                   />
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-blue-200 mb-3 tracking-tight">
+                    <h2 className="text-3xl font-bold text-black mb-3 tracking-tight">
                       {gameData.homeTeam.name}
                     </h2>
-                    <div className="w-24 h-20 bg-blue-200/20 border-2 border-blue-300/40 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md">
-                      <span className="text-4xl font-bold text-blue-100">
+                    <div className="w-24 h-20 bg-blue-200/20 border-1 border-white/40 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md">
+                      <span className="text-4xl font-bold text-white">
                         {gameScore.home}
                       </span>
                     </div>
@@ -275,10 +277,10 @@ export default function BasketballStatTracker({
 
                 {/* VS Divider */}
                 <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-slate-200 mb-2">
+                  <div className="text-2xl font-bold text-black/60 mb-2">
                     VS
                   </div>
-                  <div className="text-sm text-slate-300 font-medium">
+                  <div className="text-sm text-[#FE563F] font-medium">
                     Live Game
                   </div>
                 </div>
@@ -286,11 +288,11 @@ export default function BasketballStatTracker({
                 {/* Away Team */}
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-red-200 mb-3 tracking-tight">
+                    <h2 className="text-3xl font-bold text-black mb-3 tracking-tight">
                       {gameData.awayTeam.name}
                     </h2>
                     <div className="w-24 h-20 bg-red-200/20 border-2 border-red-300/40 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md">
-                      <span className="text-4xl font-bold text-red-100">
+                      <span className="text-4xl font-bold text-white">
                         {gameScore.away}
                       </span>
                     </div>
