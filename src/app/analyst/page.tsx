@@ -109,7 +109,7 @@ export default function Dashboard() {
           const awayTeam = teamsMap.get(match.away_team_id) || {}
 
           return {
-            id: match.match_id,
+            match_id: match.match_id,
             date: new Date(match.match_date).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
