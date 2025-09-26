@@ -44,7 +44,7 @@ export function GameCard({
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState<boolean>(initialBooked);
   const [loading, setLoading] = useState<boolean>(false);
-
+  console.log(`Inside the game cards,the matchID is :${match_id}`)
   // fetch current user + role
   useEffect(() => {
     async function fetchUser() {
@@ -72,7 +72,7 @@ export function GameCard({
     if (isBooked) return;
     router.push(`/analyst/${match_id}`);
   };
-
+ 
   const handleBookClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!analystId) {

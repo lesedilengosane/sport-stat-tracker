@@ -85,7 +85,7 @@ export default function Dashboard() {
       // 1️⃣ Get all matches
       const matchesData = await apiClient.getMatches()
       setDebugInfo(`Found ${matchesData?.length || 0} matches`)
-      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.last_name}`)
+      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.user_id}`)
       if (matchesData && matchesData.length > 0) {
         // 2️⃣ Collect team IDs
         const teamIds = [
@@ -109,7 +109,7 @@ export default function Dashboard() {
           const awayTeam = teamsMap.get(match.away_team_id) || {}
 
           return {
-            id: match.match_id,
+            match_id: match.match_id,
             date: new Date(match.match_date).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
