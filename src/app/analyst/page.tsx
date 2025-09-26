@@ -210,15 +210,18 @@ export default function Dashboard() {
 
       {/* Background image */}
       <div className="fixed inset-0 z-0">
-        <Image src="/bgr.jpg" alt="Background" fill priority className="object-cover" />
+
+        <Image src="/background/orangebackground.jpeg" alt="Background" fill priority className="object-cover" />
+     
+        {/*Overlay */}   
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-lg"></div>
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 min-h-screen bg-black/30 backdrop-blur-sm">
-
-        <DashboardHeader placeholder="Search players and teams..." />
-
-       
+      <div className="relative z-10 min-h-screen">
+        <div className="sticky top-0 z-20 bg-transparent">
+          <DashboardHeader placeholder="Search players and teams..." />
+        </div> 
 
         {/* Error message display */}
         {error && (
@@ -229,7 +232,7 @@ export default function Dashboard() {
 
         {isLoading ? (
           <div className="w-full max-w-6xl mx-auto p-6">
-            <h2 className="text-2xl font-bold text-white mb-6">AVAILABLE GAMES</h2>
+            <h2 className="text-2xl font-bold text-black mb-6 mt-6">AVAILABLE GAMES</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 12 }).map((_, index) => (
                 <GameCardSkeleton key={index} />
