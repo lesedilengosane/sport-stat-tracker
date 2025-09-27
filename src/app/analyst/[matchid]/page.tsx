@@ -9,9 +9,22 @@ interface PlayerDetails {
   avatarUrl: string;
 }
 
+interface LineupPlayer {
+  player_id: string;
+  position: string;
+  player?: {
+    first_name: string;
+    last_name: string;
+    avatar_url?: string;
+  };
+}
+
 interface MatchData {
   Teams: any[];
-  lineups: any[];
+   lineups: {
+    homeLineup: LineupPlayer[];
+    awayLineup: LineupPlayer[];
+  };
   homePrevMatches: any[];
   awayPrevMatches: any[];
 }
@@ -39,8 +52,8 @@ export default async function MatchPage({
     const awayTeamId = data.Teams.find((t) => t.team_id !== homeTeamId)?.team_id;
 
     // Split lineups for each team
-    const homeLineupRaw = data.lineups.filter((l) => l.team_id === homeTeamId);
-    const awayLineupRaw = data.lineups.filter((l) => l.team_id === awayTeamId);
+    const homeLineupRaw = data.lineups.homeLineup || [];
+  const awayLineupRaw = data.lineups.awayLineup || [];;
 
     // Map lineups to PlayerDetails objects
     const mapLineup = (lineup: any[], team: string): PlayerDetails[] =>

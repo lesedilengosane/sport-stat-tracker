@@ -162,4 +162,22 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     }
     return response.json();
   },
+
+  //The below API takes all the match data after saving a game then it sends it to backend where it will be used to update the DB
+  SaveGameData: async(CompleteGameData:any):Promise<any>=>{
+    console.log(`The game data received by the API from component :\n ${CompleteGameData}`)
+    const response=await fetch('/api/matches',{
+      method :'POST',
+      headers:{
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify(CompleteGameData),
+    });
+    if(!response.ok){
+      throw new Error('Error updating data for the complete game');
+    }
+    return response.json();
+  },
+
+
 };
