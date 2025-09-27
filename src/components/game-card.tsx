@@ -122,7 +122,7 @@ export function GameCard({
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center flex-1">
-        <div className="w-18 h-18 relative mb-0.5">
+          <div className="w-18 h-18 relative mb-0.5">
             <Image
               src={homeTeam.logo || "/placeholder.svg"}
               alt={`${homeTeam.name} logo`}
@@ -130,13 +130,15 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium">{homeTeam.name}</span>
+          <span className="text-xs text-black font-medium">
+            {homeTeam.name}
+          </span>
         </div>
 
         <div className="text-slate-400 font-bold text-sm mx-2">vs</div>
 
         <div className="flex flex-col items-center flex-1">
-        <div className="w-18 h-18 relative mb-0.5">
+          <div className="w-18 h-18 relative mb-0.5">
             <Image
               src={awayTeam.logo || "/placeholder.svg"}
               alt={`${awayTeam.name} logo`}
@@ -144,11 +146,15 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium">{awayTeam.name}</span>
+          <span className="text-xs text-black font-medium">
+            {awayTeam.name}
+          </span>
         </div>
       </div>
 
-      <div className="text-xs text-black">{location}</div>
+      <div className="flex items-center justify-center text-slate-400 text-xs">
+        <span>{location}</span>
+      </div>
 
       <div className="flex items-center justify-between text-xs font-medium mt-2">
         {userRole === "Coach" ? (

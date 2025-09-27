@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -13,8 +12,7 @@ import { GamesGrid } from "@/components/games-grid";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 import { apiClient } from "../utils/apiClient";
 import TeamStats from "@/components/TeamStats/teamstats";
-
-
+import PlayersList from "@/app/players/PlayersList";
 // Types
 interface Team {
   team_id: string;
@@ -30,7 +28,7 @@ interface Player {
 
 interface Game {
   id: string;
-  match_id:string;
+  match_id: string;
   date: string;
   time: string;
   location: string;
@@ -40,7 +38,6 @@ interface Game {
   awayLineup?: Player[];
   isBooked?: boolean;
 }
-
 
 export default function CoachDashboard() {
   const router = useRouter();
@@ -101,7 +98,7 @@ export default function CoachDashboard() {
 
       const formattedGames: Game[] = matchesData.map((match: any) => ({
         id: match.match_id,
-        match_id:match.match_id,//I added this line because I know we will need this property but the interface did not define it before me
+        match_id: match.match_id, //I added this line because I know we will need this property but the interface did not define it before me
         date: new Date(match.match_date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -227,7 +224,6 @@ export default function CoachDashboard() {
     else if (activeTab === "all-games") fetchAllGames();
   }, [activeTab, user]);
 
-
   const renderTabContent = () => {
     switch (activeTab) {
       case "schedule":
@@ -260,19 +256,21 @@ export default function CoachDashboard() {
         );
 
       case "team-stats":
-        return (
-               <TeamStats />
-          );
+        return <TeamStats />;
 
       case "players":
         return (
-          <div className="max-w-6xl mx-auto p-6">
-            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Team Players</h2>
-              <p className="text-gray-300">
-                This is where player roster and individual statistics will be managed
+          <div>
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              Team Players
+            </h1>
+            {teamID ? (
+              <PlayersList teamId={teamID} />
+            ) : (
+              <p className="text-gray-300 text-center mt-4">
+                Loading team info...
               </p>
-            </div>
+            )}
           </div>
         );
 
@@ -311,4 +309,3 @@ export default function CoachDashboard() {
     </div>
   );
 }
-

@@ -162,4 +162,12 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     }
     return response.json();
   },
+
+  getTeamPlayers: async (coachId: string): Promise<any[]> => {
+    const response = await fetch(`/api/coach/fetchTeamPlayers?coachId=${coachId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch team players');
+    }
+    return response.json();
+  },
 };
