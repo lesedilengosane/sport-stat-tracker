@@ -53,7 +53,7 @@ export default async function MatchPage({
 
     // Split lineups for each team
     const homeLineupRaw = data.lineups.homeLineup || [];
-  const awayLineupRaw = data.lineups.awayLineup || [];;
+    const awayLineupRaw = data.lineups.awayLineup || [];;
 
     // Map lineups to PlayerDetails objects
     const mapLineup = (lineup: any[], team: string): PlayerDetails[] =>

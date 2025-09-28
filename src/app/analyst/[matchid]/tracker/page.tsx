@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import BasketballStatTracker from "@/components/basketball-stat-tracker";
 import type { GameData, Team, Player } from "@/types/basketball";
 import { apiClient } from "@/app/utils/apiClient";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function StatTrackerPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function StatTrackerPage() {
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const {user}=useAuth()
 
 
 
@@ -277,23 +279,24 @@ export default function StatTrackerPage() {
 
         // Convert lineup data to the format expected by BasketballStatTracker
         const formatPlayers = (
-          players: any[],
-          teamId: string,
-          teamPrefix: string
-        ): Player[] => {
-          if (!Array.isArray(players)) return [];
+  players: any[],
+  teamId: string,
+  teamPrefix: string
+): Player[] => {
+  if (!Array.isArray(players)) return [];
 
-          return players.map((player, index) => ({
-            player_id: player?.id
-              ? `${teamId}-${player.id}`
-              : `${teamId}-${teamPrefix}-player-${index + 1}`,
-            name: player?.name || `Player ${index + 1}`,
-            position: player?.position || "Unknown",
-            jerseyNumber: player?.jerseyNumber || index + 1,
-          }));
-        };
+  return players.map((player, index) => ({
+    // Use the actual player.id if it exists, otherwise fallback to a safe generated ID
+    player_id: player?.id || `${teamPrefix}-player-${index + 1}`,
+    team_id: teamId,             // Keep teamId separate
+    name: player?.name || `Player ${index + 1}`,
+    position: player?.position || "Unknown",
+    jerseyNumber: player?.jerseyNumber || index + 1,
+  }));
+};
 
         const gameData: GameData = {
+          analyst: user?.user_id ?? "",
           match_id: gameId,
           date: date,
           homeTeam: {
@@ -334,43 +337,39 @@ export default function StatTrackerPage() {
   }, [searchParams]);
 
   const handleSaveGame = async (completeGameData: any) => {
-    try {
-      const dataStr = JSON.stringify(completeGameData, null, 2);
+  try {
+    // 1️⃣ Convert to JSON string for download
+    const dataStr = JSON.stringify(completeGameData, null, 2);
 
-      //I wanna download then post it just for testing
+    // 2️⃣ Post to backend
+    const response = await apiClient.SaveGameData(completeGameData);
 
+    // 3️⃣ Check server response
+    if (response.status === 200) {
+      alert("The game data was saved successfully!");
 
-      //This part also downloads the json object
+      // 4️⃣ Download JSON locally
       const dataBlob = new Blob([dataStr], { type: "application/json" });
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `game-stats-${completeGameData.homeTeam.name}-vs-${
-        completeGameData.awayTeam.name
-      }-${new Date().toISOString().split("T")[0]}.json`;
-
-      // Proper DOM manipulation for download
+      link.download = `game-stats-${completeGameData.homeTeam.name}-vs-${completeGameData.awayTeam.name}-${new Date().toISOString().split("T")[0]}.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      //we need to send the Json object to the backend that updates everything
-      const response=await apiClient.SaveGameData(test_body)
-      console.log(`The game data sent is this:\n ${test_body}`)
-      if (response.status==200){
-        alert(`The game data was saved successfully`)
-      }
-
-      else{
-        alert(`Something failed while saving game data : ${response.error}`)
-      }
 
       alert("Game data downloaded successfully!");
-    } catch (error) {
-      console.error("Failed to save game:", error);
-      alert("Failed to download game data. Please try again.");
+
+      window.location.href = "/analyst";
+    } else {
+      alert(`Something failed while saving game data: ${response.error || "Unknown error"}`);
     }
-  };
+  } catch (error: any) {
+    console.error("Failed to save game:", error);
+    alert(`Failed to save or download game data. ${error?.message || ""}`);
+  }
+};
 
   if (isLoading) {
     return (
