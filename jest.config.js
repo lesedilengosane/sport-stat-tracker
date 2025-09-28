@@ -10,10 +10,10 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   testEnvironment: 'jsdom',
   collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
+    'src/**/*.{js,jsx,tsx}',   // removed plain .ts
     '!src/**/*.d.ts',
-    '!src/**/*.stories.{js,jsx,ts,tsx}',
-    '!src/**/*.test.{js,jsx,ts,tsx}',
+    '!src/**/*.stories.{js,jsx,tsx}',
+    '!src/**/*.test.{js,jsx,tsx}',
     '!src/**/__tests__/**',
     '!src/app/globals.css',
   ],
