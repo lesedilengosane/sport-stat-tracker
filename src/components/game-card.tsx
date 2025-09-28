@@ -103,10 +103,10 @@ export function GameCard({
   return (
     <Card
       onClick={handleCardClick}
-      className={`bg-slate-800 border-slate-700 p-3 text-white transition-all duration-300 ease-in-out ${
+      className={`bg-white border-[#FE563F] p-3 text-black transition-all duration-300 ease-in-out  ${
         isBooked
           ? "opacity-80 cursor-not-allowed"
-          : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/50 cursor-pointer"
+          : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 cursor-pointer"
       }`}
     >
       <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
@@ -122,7 +122,7 @@ export function GameCard({
 
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center flex-1">
-          <div className="w-12 h-12 relative mb-1">
+          <div className="w-18 h-18 relative mb-0.5">
             <Image
               src={homeTeam.logo || "/placeholder.svg"}
               alt={`${homeTeam.name} logo`}
@@ -130,13 +130,15 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs font-medium">{homeTeam.name}</span>
+          <span className="text-xs text-black font-medium">
+            {homeTeam.name}
+          </span>
         </div>
 
         <div className="text-slate-400 font-bold text-sm mx-2">vs</div>
 
         <div className="flex flex-col items-center flex-1">
-          <div className="w-12 h-12 relative mb-1">
+          <div className="w-18 h-18 relative mb-0.5">
             <Image
               src={awayTeam.logo || "/placeholder.svg"}
               alt={`${awayTeam.name} logo`}
@@ -144,11 +146,15 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs font-medium">{awayTeam.name}</span>
+          <span className="text-xs text-black font-medium">
+            {awayTeam.name}
+          </span>
         </div>
       </div>
 
-      <div className="text-xs text-slate-400">{location}</div>
+      <div className="flex items-center justify-center text-slate-400 text-xs">
+        <span>{location}</span>
+      </div>
 
       <div className="flex items-center justify-between text-xs font-medium mt-2">
         {userRole === "Coach" ? (

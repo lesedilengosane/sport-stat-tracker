@@ -163,6 +163,7 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     return response.json();
   },
 
+
   //The below API takes all the match data after saving a game then it sends it to backend where it will be used to update the DB
   SaveGameData: async(CompleteGameData:any):Promise<any>=>{
     console.log(`The game data received by the API from component :\n ${CompleteGameData}`)
@@ -179,5 +180,14 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     return response.json();
   },
 
+
+
+  getTeamPlayers: async (coachId: string): Promise<any[]> => {
+    const response = await fetch(`/api/coach/fetchTeamPlayers?coachId=${coachId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch team players');
+    }
+    return response.json();
+  },
 
 };

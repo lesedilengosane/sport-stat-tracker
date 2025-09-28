@@ -1,7 +1,7 @@
 // src\components\basketball-stat-tracker.tsx
 
 "use client";
-
+import Image from "next/image";
 import { useState, useMemo } from "react";
 import type { GameEvent, PlayerStats, GameData } from "@/types/basketball";
 import TeamPlayerCard from "./ui/team-player-card";
@@ -194,13 +194,23 @@ export default function BasketballStatTracker({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-6">
+    <div className="relative min-h-screen overflow-hidden p-4">
       <div className="max-w-7xl mx-auto">
+        {/* Background Image */}
+        <div className="fixed inset-0 z-0">
+          <Image src="/background/rim.jpeg" alt="Background" fill priority className="object-cover" />
+    
+          {/*Overlay */}   
+            <div className="absolute inset-0 bg-white/20 backdrop-blur-lg"></div>
+      </div>
+
+      
+        {/* Header Buttons */}
         <div className="flex items-center justify-between mb-8">
           {onBack && (
             <button
               onClick={onBack}
-              className="flex items-center gap-2 px-6 py-3 border border-slate-300 rounded-lg bg-white hover:bg-slate-50 text-slate-700 font-medium shadow-sm transition-all duration-200 hover:shadow-md"
+              className="flex items-center gap-2 px-6 py-3 border border-white/20 rounded-2xl bg-white/20 backdrop-blur-md hover:text-gray-300 hover:bg-white/30 text-black font-medium shadow-sm transition-all duration-200 hover:shadow-md"
             >
               Back
             </button>
@@ -208,14 +218,16 @@ export default function BasketballStatTracker({
           <div className="flex-1" />
           <button
             onClick={handleSave}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105"
+            className="border border-white/20 rounded-2xl bg-[#FE563F]/40 backdrop-blur-md hover:bg-white/25 hover:text-orange-400 text-white font-medium shadow-sm px-8 py-3 transition-all duration-200 hover:shadow-md"
           >
             Save Game
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-50 via-white to-red-50 p-8 border-b border-slate-200">
+        {/* Main Glass Card */}
+        <div className="rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
+          {/* Team Header Section */}
+          <div className="bg-gradient-to-r from-blue-100/30 via-white/10 to-red-100/30 p-8 border-b border-white/20 backdrop-blur-lg">
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-20">
                 {/* Home Team */}
@@ -226,11 +238,11 @@ export default function BasketballStatTracker({
                     className="w-16 h-16 drop-shadow-md"
                   />
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-blue-600 mb-3 tracking-tight">
+                    <h2 className="text-3xl font-bold text-black mb-3 tracking-tight">
                       {gameData.homeTeam.name}
                     </h2>
-                    <div className="w-24 h-20 bg-gradient-to-br from-blue-100 to-blue-200 border-2 border-blue-300 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-4xl font-bold text-blue-800">
+                    <div className="w-24 h-20 bg-blue-200/20 border-1 border-white/40 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md">
+                      <span className="text-4xl font-bold text-white">
                         {gameScore.home}
                       </span>
                     </div>
@@ -239,10 +251,10 @@ export default function BasketballStatTracker({
 
                 {/* VS Divider */}
                 <div className="flex flex-col items-center">
-                  <div className="text-2xl font-bold text-slate-400 mb-2">
+                  <div className="text-2xl font-bold text-black/60 mb-2">
                     VS
                   </div>
-                  <div className="text-sm text-slate-500 font-medium">
+                  <div className="text-sm text-[#FE563F] font-medium">
                     Live Game
                   </div>
                 </div>
@@ -250,11 +262,11 @@ export default function BasketballStatTracker({
                 {/* Away Team */}
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <h2 className="text-3xl font-bold text-red-600 mb-3 tracking-tight">
+                    <h2 className="text-3xl font-bold text-black mb-3 tracking-tight">
                       {gameData.awayTeam.name}
                     </h2>
-                    <div className="w-24 h-20 bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-300 rounded-xl flex items-center justify-center shadow-lg">
-                      <span className="text-4xl font-bold text-red-800">
+                    <div className="w-24 h-20 bg-red-200/20 border-2 border-red-300/40 rounded-xl flex items-center justify-center shadow-lg backdrop-blur-md">
+                      <span className="text-4xl font-bold text-white">
                         {gameScore.away}
                       </span>
                     </div>
@@ -269,29 +281,33 @@ export default function BasketballStatTracker({
             </div>
           </div>
 
+          {/* Body Content */}
           <div className="p-8">
             <div className="flex gap-8 h-[700px]">
               {/* Action Buttons */}
               <div className="w-36 flex-shrink-0">
                 <div className="sticky top-0">
-                  <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">
+                  <h3 className="text-lg font-semibold text-white mb-4 text-center">
                     Actions
                   </h3>
-                  <ActionButtons
-                    onAction={addGameEvent}
-                    disabled={!selectedPlayer}
-                  />
+                  <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-3 shadow-lg">
+                    <ActionButtons
+                      onAction={addGameEvent}
+                      disabled={!selectedPlayer}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Player Cards */}
               <div className="flex-1 min-w-0">
                 <div className="grid grid-cols-2 gap-10 h-full">
-                  <div className="border-r-2 border-slate-200 pr-8">
-                    <h3 className="text-xl font-bold text-blue-600 mb-6 text-center">
+                  {/* Home Players */}
+                  <div className="border-r-2 border-white/20 pr-8">
+                    <h3 className="text-xl font-bold text-blue-200 mb-6 text-center">
                       {gameData.homeTeam.name} Players
                     </h3>
-                    <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4">
+                    <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4 bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 p-4">
                       <TeamPlayerCard
                         team={gameData.homeTeam}
                         selectedPlayer={selectedPlayer}
@@ -302,11 +318,12 @@ export default function BasketballStatTracker({
                     </div>
                   </div>
 
+                  {/* Away Players */}
                   <div className="pl-8">
-                    <h3 className="text-xl font-bold text-red-600 mb-6 text-center">
+                    <h3 className="text-xl font-bold text-red-200 mb-6 text-center">
                       {gameData.awayTeam.name} Players
                     </h3>
-                    <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4">
+                    <div className="overflow-y-auto h-[calc(100%-3rem)] pb-4 bg-white/5 backdrop-blur-lg rounded-xl border border-white/10 p-4">
                       <TeamPlayerCard
                         team={gameData.awayTeam}
                         selectedPlayer={selectedPlayer}
@@ -321,10 +338,12 @@ export default function BasketballStatTracker({
 
               {/* Game History */}
               <div className="w-72 flex-shrink-0">
-                <h3 className="text-lg font-semibold text-slate-700 mb-4 text-center">
+                <h3 className="text-lg font-semibold text-white mb-4 text-center">
                   Game History
                 </h3>
-                <GameHistory events={gameEvents} />
+                <div className="bg-white/10 backdrop-blur-lg rounded-xl border border-white/20 p-4 h-full shadow-lg">
+                  <GameHistory events={gameEvents} />
+                </div>
               </div>
             </div>
           </div>
@@ -332,4 +351,5 @@ export default function BasketballStatTracker({
       </div>
     </div>
   );
+
 }

@@ -95,50 +95,52 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
   const [unassignedPlayers, setUnassignedPlayers] = useState<UnassignedPlayer[]>([])
   const [fetchingUnassigned, setFetchingUnassigned] = useState(false)
 
-  useEffect(() => {
-    async function fetchLineup() {
-      const { data: { session } } = await supabase.auth.getSession();
-      const authUserId = session?.user.id;
-      if (!authUserId) {
-        setLoading(false);
-        return;
-      }
 
-      const lineupResponse = await getDefaultLineup(authUserId);
-
-      if (lineupResponse.lineup) {
-        const courtMap = new Map<string, Player>();
-        const reserves: Player[] = [];
-
-        lineupResponse.lineup.forEach((p) => {
-          const player: Player = {
-            teamID: p.team_id,
-            playerID: p.player_id,
-            name: p.player_name,
-            position: p.position || "",
-            isStarting: !!p.is_starting,
-            jerseyNumber: p.jersey_number || 0,
-            profileImage: `/playerPictures/${p.player_name.replace(/ /g, "")}.png`,
-          };
-
-          if (player.isStarting && player.position) {
-            courtMap.set(player.position.toLowerCase(), player);
-          } else {
-            reserves.push(player);
-          }
-        });
-
-        setCourtPlayers(courtMap);
-        setReservePlayers(reserves);
-      }
-
+  const fetchLineup = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const authUserId = session?.user.id;
+    if (!authUserId) {
       setLoading(false);
+      return;
     }
 
-    fetchLineup();
-  }, []);
+    const lineupResponse = await getDefaultLineup(authUserId);
 
-  // Drag & Drop handlers
+    if (lineupResponse.lineup) {
+      const courtMap = new Map<string, Player>();
+      const reserves: Player[] = [];
+
+      lineupResponse.lineup.forEach((p) => {
+        const player: Player = {
+          teamID: p.team_id,
+          playerID: p.player_id,
+          name: p.player_name,
+          position: p.position || "",
+          isStarting: !!p.is_starting,
+          jerseyNumber: p.jersey_number || 0,
+          profileImage: `/playerPictures/${p.player_name.replace(/ /g, "")}.png`,
+        };
+
+        if (player.isStarting && player.position) {
+          courtMap.set(player.position.toLowerCase(), player);
+        } else {
+          reserves.push(player);
+        }
+      });
+
+      setCourtPlayers(courtMap);
+      setReservePlayers(reserves);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLineup();
+    fetchUnassignedPlayers(); // ⭐ NEW: also fetch unassigned players on mount
+  }, [coachTeamId]);
+
+  // Drag & Drop handlers ...
   const handleDrop = (e: React.DragEvent, positionId: string) => {
     e.preventDefault()
     const playerData = e.dataTransfer.getData("application/json")
@@ -165,7 +167,7 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
     setReservePlayers((prev) => [...prev, player])
   }
 
-  // Save lineup
+  // Save lineup ...
   const handleSaveLineup = async () => {
     const lineupData = {
       startingLineup: Array.from(courtPlayers.entries()).map(([positionId, player]) => ({
@@ -184,18 +186,6 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
       })),
     }
 
-    // Save JSON locally
-    const dataStr = JSON.stringify(lineupData, null, 2)
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr)
-    const linkElement = document.createElement("a")
-    linkElement.setAttribute("href", dataUri)
-    linkElement.setAttribute(
-      "download",
-      `team-lineup-${new Date().toISOString().split("T")[0]}.json`
-    )
-    linkElement.click()
-
-    // Call API route
     try {
       const response = await fetch("/api/lineups/UpdateDefault", {
         method: "POST",
@@ -238,7 +228,8 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
       })
 
       if (res.ok) {
-        setUnassignedPlayers((prev) => prev.filter((p) => p.player_id !== playerId))
+        await fetchLineup();
+        await fetchUnassignedPlayers();
       } else {
         const errData = await res.json()
         console.error("Error assigning player:", errData.error)
@@ -247,6 +238,9 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
       console.error("Error assigning player:", err)
     }
   }
+
+
+
 
   if (loading) return <div>Loading lineup...</div>
 

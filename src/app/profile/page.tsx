@@ -83,7 +83,7 @@ export default function ProfilePage() {
     else if (user?.user_role === "Coach") router.push("/coach");
     else if (user?.user_role === "Analyst") router.push("/analyst");
     //router.push("/analyst");
-  }
+  };
 
   // Animate text/buttons on mount
   useEffect(() => {
@@ -100,7 +100,6 @@ export default function ProfilePage() {
   useEffect(() => {
     fetchUserInfo();
   }, []);
-
 
   return (
     <div className="relative w-full min-h-screen overflow-auto bg-black">
@@ -129,7 +128,9 @@ export default function ProfilePage() {
             }`}
           >
             <span className="text-orange-500">
-              {isLoading ? "Loading..." : `WELCOME, ${name_surname || "PLAYER"}.`}
+              {isLoading
+                ? "Loading..."
+                : `WELCOME, ${name_surname || "PLAYER"}.`}
             </span>
           </h1>
           <h1
@@ -147,7 +148,8 @@ export default function ProfilePage() {
             showText ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          Keep track of your performance, bookings, and history all in one place.
+          Keep track of your performance, bookings, and history all in one
+          place.
         </p>
 
         {/* Profile card */}
@@ -169,12 +171,12 @@ export default function ProfilePage() {
             }`}
             onMouseEnter={() => setBlurActive(true)}
             onMouseLeave={() => setBlurActive(false)}
-            onClick={() => router.push("/analyst")}
+            onClick={() => router.back()}
           >
             Dashboard
           </button>
 
-          <button
+          {/* <button
             className={`border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-3 text-lg font-semibold hover:scale-105 rounded-xl transition-all duration-700 ${
               showButtons ? "opacity-100" : "opacity-0"
             }`}
@@ -183,7 +185,7 @@ export default function ProfilePage() {
             onClick={() => router.push("/players")}
           >
             View Players
-          </button>
+          </button> */}
         </div>
 
         {/* Extra components */}
