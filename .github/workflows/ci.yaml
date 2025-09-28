@@ -34,6 +34,9 @@ jobs:
         run: |
           npm run test:coverage || echo "test_failed=true" >> $GITHUB_OUTPUT
         continue-on-error: true
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Check if tests passed
         if: steps.test.outputs.test_failed == 'true'
@@ -90,6 +93,9 @@ jobs:
 
       - name: Build application
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -119,6 +125,9 @@ jobs:
       # Add your deployment steps here
       - name: Deploy to staging
         run: echo "Deploy to staging environment"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         # Example: Vercel, Netlify, AWS, etc.
 
   deploy-production:
@@ -140,4 +149,7 @@ jobs:
       # Add your production deployment steps here
       - name: Deploy to production
         run: echo "Deploy to production environment"
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         # Example: Vercel, Netlify, AWS, etc.
