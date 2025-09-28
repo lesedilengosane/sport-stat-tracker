@@ -1,0 +1,129 @@
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches: [main, develop, "**"] # This will run on ALL branches
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    test:
+        name: Test & Coverage
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                node-version: [18.x, 20.x]
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v4
+              with:
+                  node-version: ${{ matrix.node-version }}
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run tests with coverage
+              run: npm run test:coverage
+
+            - name: Upload coverage reports to Codecov
+              uses: codecov/codecov-action@v4
+              with:
+                  file: ./coverage/lcov.info
+                  flags: unittests
+                  name: codecov-umbrella
+                  fail_ci_if_error: true
+              env:
+                  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+            - name: Upload coverage to Coveralls
+              uses: coverallsapp/github-action@v2
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  path-to-lcov: ./coverage/lcov.info
+
+            - name: Comment coverage on PR
+              if: github.event_name == 'pull_request'
+              uses: romeovs/lcov-reporter-action@v0.3.1
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  lcov-file: ./coverage/lcov.info
+                  delete-old-comments: true
+
+    build:
+        name: Build Application
+        runs-on: ubuntu-latest
+        needs: test
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20.x"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Build application
+              run: npm run build
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                  name: build-files
+                  path: |
+                      .next/
+                      !.next/cache/
+                  retention-days: 7
+
+    deploy:
+        name: Deploy to Staging
+        runs-on: ubuntu-latest
+        needs: [test, build]
+        if: github.ref == 'refs/heads/develop'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: build-files
+                  path: .next/
+
+            # Add your deployment steps here
+            - name: Deploy to staging
+              run: echo "Deploy to staging environment"
+              # Example: Vercel, Netlify, AWS, etc.
+
+    deploy-production:
+        name: Deploy to Production
+        runs-on: ubuntu-latest
+        needs: [test, build]
+        if: github.ref == 'refs/heads/main'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                  name: build-files
+                  path: .next/
+
+            # Add your production deployment steps here
+            - name: Deploy to production
+              run: echo "Deploy to production environment"
+              # Example: Vercel, Netlify, AWS, etc.
