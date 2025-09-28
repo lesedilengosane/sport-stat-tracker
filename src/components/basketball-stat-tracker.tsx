@@ -24,7 +24,7 @@ export default function BasketballStatTracker({
   const [playerStats, setPlayerStats] = useState<Record<string, PlayerStats>>({});
   const match_id = gameData.match_id;
   const [gameScore, setGameScore] = useState({ home: 0, away: 0 });
-  const analyst=gameData.analyst_id
+  const analyst=gameData.analyst
 
   const initializePlayerStats = (player_id: string, match_id: string): PlayerStats => ({
     match_id,
