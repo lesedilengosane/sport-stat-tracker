@@ -32,17 +32,17 @@ export default function Home() {
     <div className="relative w-full h-screen overflow-hidden bg-white">
       {/* Background Image */}
       <Image
-        src="/background/landing.jpg"
+        src="/background/landing.png"
         alt="Basketball player dunking"
         fill
         priority
-        className={`object-cover transition-all duration-1000 ease-out ${blurActive ? "blur-sm" : ""} ${
+        className={`object-cover object-center transition-all duration-1000 ease-out ${blurActive ? "blur-sm" : ""} ${
           isLoaded ? "opacity-100 scale-100" : "opacity-0 scale-110"
         }`}
       />
 
       {/* Dark overlay for better text readability */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/10" />
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col justify-between h-full px-8 md:px-16 py-12">
