@@ -32,7 +32,6 @@ const customJestConfig = {
     '!src/components/TeamStats/**',
     '!src/components/coachComponents/**',
     '!src/components/header/**',
-    '!src/components/sideNav/**',
 
     // Exclude only untested ui files, keep NavBar + TabBar
     '!src/components/ui/action-buttons.tsx',
