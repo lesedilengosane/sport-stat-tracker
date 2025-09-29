@@ -13,6 +13,7 @@ import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 import { apiClient } from "../utils/apiClient";
 import TeamStats from "@/components/TeamStats/teamstats";
 import PlayersList from "@/app/players/PlayersList";
+
 // Types
 interface Team {
   team_id: string;
@@ -50,7 +51,7 @@ export default function CoachDashboard() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [teamID, setTeamID] = useState<string>("");
 
-  const name = user?.first_name + " " + user?.last_name || "User";
+  const name = (user?.first_name || "") + " " + (user?.last_name || "") || "User";
   const user_ID = user?.user_id || "No ID";
 
   const handleLogout = async () => {
@@ -98,7 +99,7 @@ export default function CoachDashboard() {
 
       const formattedGames: Game[] = matchesData.map((match: any) => ({
         id: match.match_id,
-        match_id: match.match_id, //I added this line because I know we will need this property but the interface did not define it before me
+        match_id: match.match_id,
         date: new Date(match.match_date).toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -222,6 +223,7 @@ export default function CoachDashboard() {
   useEffect(() => {
     if (activeTab === "schedule") fetchCoachMatches();
     else if (activeTab === "all-games") fetchAllGames();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user]);
 
   const renderTabContent = () => {
@@ -261,15 +263,11 @@ export default function CoachDashboard() {
       case "players":
         return (
           <div>
-            <h1 className="text-2xl font-bold mb-6 text-center">
-              Team Players
-            </h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">Team Players</h1>
             {teamID ? (
               <PlayersList teamId={teamID} />
             ) : (
-              <p className="text-gray-300 text-center mt-4">
-                Loading team info...
-              </p>
+              <p className="text-gray-300 text-center mt-4">Loading team info...</p>
             )}
           </div>
         );
@@ -283,18 +281,25 @@ export default function CoachDashboard() {
     <div className="relative min-h-screen">
       <CoachSideNav activeTab={activeTab} onTabChange={setActiveTab} />
 
+      {/* Background image + overlay (frosted blur like analyst dashboard) */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/bgr.jpg"
+          src="/background/ballBG.jpeg"
           alt="Background"
           fill
           priority
           className="object-cover"
         />
+
+        {/* Overlay that creates the frosted blur effect */}
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-lg" />
       </div>
 
-      <div className="relative z-10 min-h-screen bg-black/30 backdrop-blur-sm">
-        <DashboardHeader placeholder="Search players and teams..." />
+      {/* Main content */}
+      <div className="relative z-10 min-h-screen">
+        <div className="sticky top-0 z-20 bg-transparent">
+          <DashboardHeader placeholder="Search players and teams..." />
+        </div>
 
         {error && (
           <div className="max-w-6xl mx-auto mb-6 pt-6">
