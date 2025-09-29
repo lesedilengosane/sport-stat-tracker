@@ -1,0 +1,305 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Admindashboard Component - Landing Page Tests matches snapshot 1`] = `
+<div
+  class="flex w-full max-w-7xl flex-col gap-6 mx-auto p-6"
+>
+  <div
+    class="flex flex-col gap-2"
+    data-orientation="horizontal"
+    data-slot="tabs"
+    dir="ltr"
+  >
+    <div
+      aria-orientation="horizontal"
+      class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-3"
+      data-orientation="horizontal"
+      data-slot="tabs-list"
+      role="tablist"
+      style="outline: none;"
+      tabindex="0"
+    >
+      <button
+        aria-controls="radix-«r18»-content-lineups"
+        aria-selected="true"
+        class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        data-orientation="horizontal"
+        data-radix-collection-item=""
+        data-slot="tabs-trigger"
+        data-state="active"
+        id="radix-«r18»-trigger-lineups"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        Lineups
+      </button>
+      <button
+        aria-controls="radix-«r18»-content-lastgames"
+        aria-selected="false"
+        class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        data-orientation="horizontal"
+        data-radix-collection-item=""
+        data-slot="tabs-trigger"
+        data-state="inactive"
+        id="radix-«r18»-trigger-lastgames"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        Last 5 games
+      </button>
+      <button
+        aria-controls="radix-«r18»-content-summary"
+        aria-selected="false"
+        class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+        data-orientation="horizontal"
+        data-radix-collection-item=""
+        data-slot="tabs-trigger"
+        data-state="inactive"
+        id="radix-«r18»-trigger-summary"
+        role="tab"
+        tabindex="-1"
+        type="button"
+      >
+        Game summary
+      </button>
+    </div>
+    <div
+      aria-labelledby="radix-«r18»-trigger-lineups"
+      class="flex-1 outline-none w-full"
+      data-orientation="horizontal"
+      data-slot="tabs-content"
+      data-state="active"
+      id="radix-«r18»-content-lineups"
+      role="tabpanel"
+      style="animation-duration: 0s;"
+      tabindex="0"
+    >
+      <div
+        class="flex w-full gap-6"
+      >
+        <div
+          class="w-1/2"
+        >
+          <div
+            class="flex flex-col items-center mb-4"
+          >
+            <h3
+              class="text-lg font-bold text-white"
+            >
+              Home Team
+            </h3>
+          </div>
+          <div
+            class="overflow-hidden rounded-md border-2 border-orange-500"
+          >
+            <div
+              class="relative w-full overflow-x-auto"
+              data-slot="table-container"
+            >
+              <table
+                class="w-full caption-bottom text-sm min-w-full table-auto bg-white text-black"
+                data-slot="table"
+              >
+                <thead
+                  class="[&_tr]:border-b bg-orange-500 text-black"
+                  data-slot="table-header"
+                >
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                  >
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Name
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Surname
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Position
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="[&_tr:last-child]:border-0"
+                  data-slot="table-body"
+                >
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                  >
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] h-24 text-center border border-orange-500"
+                      colspan="3"
+                      data-slot="table-cell"
+                    >
+                      No results.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div
+          class="w-1/2"
+        >
+          <div
+            class="flex flex-col items-center mb-4"
+          >
+            <h3
+              class="text-lg font-bold text-white"
+            >
+              Away Team
+            </h3>
+          </div>
+          <div
+            class="overflow-hidden rounded-md border-2 border-orange-500"
+          >
+            <div
+              class="relative w-full overflow-x-auto"
+              data-slot="table-container"
+            >
+              <table
+                class="w-full caption-bottom text-sm min-w-full table-auto bg-white text-black"
+                data-slot="table"
+              >
+                <thead
+                  class="[&_tr]:border-b bg-orange-500 text-black"
+                  data-slot="table-header"
+                >
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                  >
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Name
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Surname
+                    </th>
+                    <th
+                      class="text-foreground h-10 px-2 text-left align-middle font-medium whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] border border-orange-500"
+                      data-slot="table-head"
+                    >
+                      Position
+                    </th>
+                  </tr>
+                </thead>
+                <tbody
+                  class="[&_tr:last-child]:border-0"
+                  data-slot="table-body"
+                >
+                  <tr
+                    class="hover:bg-muted/50 data-[state=selected]:bg-muted border-b transition-colors"
+                    data-slot="table-row"
+                  >
+                    <td
+                      class="p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px] h-24 text-center border border-orange-500"
+                      colspan="3"
+                      data-slot="table-cell"
+                    >
+                      No results.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      aria-labelledby="radix-«r18»-trigger-lastgames"
+      class="flex-1 outline-none"
+      data-orientation="horizontal"
+      data-slot="tabs-content"
+      data-state="inactive"
+      hidden=""
+      id="radix-«r18»-content-lastgames"
+      role="tabpanel"
+      tabindex="0"
+    />
+    <div
+      aria-labelledby="radix-«r18»-trigger-summary"
+      class="flex-1 outline-none"
+      data-orientation="horizontal"
+      data-slot="tabs-content"
+      data-state="inactive"
+      hidden=""
+      id="radix-«r18»-content-summary"
+      role="tabpanel"
+      tabindex="0"
+    />
+  </div>
+</div>
+`;
+
+exports[`Admindashboard Component matches snapshot 1`] = `
+<div
+  data-testid="tabspage-component"
+>
+  <div
+    data-testid="home-team"
+  >
+    Home Team
+  </div>
+  <div
+    data-testid="away-team"
+  >
+    Away Team
+  </div>
+  <div
+    data-testid="tabs-container"
+  >
+    <div
+      data-testid="tabs"
+    >
+      <div
+        data-testid="tabs-list"
+      >
+        <div
+          data-testid="tabs-trigger"
+        >
+          Lineups
+        </div>
+        <div
+          data-testid="tabs-trigger"
+        >
+          Last 5 games
+        </div>
+        <div
+          data-testid="tabs-trigger"
+        >
+          Game summary
+        </div>
+      </div>
+      <div
+        data-testid="tabs-content"
+      >
+        <div
+          data-testid="data-table"
+        >
+          DataTable with 0 items
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

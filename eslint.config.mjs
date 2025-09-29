@@ -1,6 +1,8 @@
 import eslint from "@eslint/js";
 import { defineConfig } from "eslint/config";
-import tseslint from "typescript-eslint";
+
+// With this:
+import typescriptEslint from '@typescript-eslint/eslint-plugin';
 
 export default defineConfig(
   eslint.configs.recommended,           
