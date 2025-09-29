@@ -13,9 +13,9 @@ interface ReservesProps {
 
 export function Reserves({ players, onAddPlayer}: ReservesProps) {
   return (
-    <Card className="h-full flex flex-col bg-black/50 backdrop-blur-sm border-orange-500/20">
+    <Card className="h-full flex flex-col bg-white/50 backdrop-blur-sm border-orange-500/20">
       <CardHeader className="pb-4 flex-shrink-0">
-        <CardTitle className="text-xl font-semibold text-white">Reserves</CardTitle>
+        <CardTitle className="text-xl font-semibold text-orange-400">Reserves</CardTitle>
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-4 min-h-0">
