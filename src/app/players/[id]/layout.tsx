@@ -1,7 +1,7 @@
 // app/players/[id]/layout.tsx
-import type { ReactNode } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import type { ReactNode } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function PlayerLayout({ children }: { children: ReactNode }) {
   return (
@@ -14,8 +14,8 @@ export default function PlayerLayout({ children }: { children: ReactNode }) {
         priority
         className="object-cover opacity-30"
       />
-      <div className="absolute inset-0 bg-black/40" /> {/* overlay for readability */}
-
+      <div className="absolute inset-0 bg-black/40" />{" "}
+      {/* overlay for readability */}
       {/* Main Content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 py-6">
         {/* Header */}
@@ -23,17 +23,17 @@ export default function PlayerLayout({ children }: { children: ReactNode }) {
           <h1 className="text-2xl font-bold text-white">Player Profile</h1>
           <nav className="space-x-4">
             <Link
-              href="/"
+              href="/coach"
               className="text-white hover:text-orange-400 transition-colors"
             >
               Home
             </Link>
-            <Link
-              href="/players"
+            {/* <Link
+              href="/coach"
               className="text-white hover:text-orange-400 transition-colors"
             >
               All Players
-            </Link>
+            </Link> */}
           </nav>
         </header>
 

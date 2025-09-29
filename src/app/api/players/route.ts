@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     // Transform the data
     const transformedPlayers = players.map(player => ({
-      id: player.id,
+      id: player.player_id,
       first_name: player.first_name, 
       last_name: player.last_name,
       position: player.position || 'Unknown',
