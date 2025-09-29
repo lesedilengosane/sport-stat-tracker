@@ -21,8 +21,8 @@ export function PlayerCard({ player,  isDragging = false }: PlayerCardProps) {
 
   return (
     <Card
-      className={`bg-gray-800/80 border-gray-700 cursor-move transition-all duration-200 ${
-        isDragging ? "opacity-50 scale-95" : "hover:bg-gray-700/80"
+      className={`bg-white/60 border-gray-100 cursor-move transition-all duration-200 ${
+        isDragging ? "opacity-50 scale-95" : "hover:bg-gray-400/30 border-gray-300 "
       }`}
       draggable
       onDragStart={handleDragStart}
@@ -35,7 +35,7 @@ export function PlayerCard({ player,  isDragging = false }: PlayerCardProps) {
           </div>
 
           {/* Player Image */}
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-600">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-600/30">
             <Image
               src={player.profileImage || "/placeholder.svg"}
               alt={player.name}
@@ -48,7 +48,7 @@ export function PlayerCard({ player,  isDragging = false }: PlayerCardProps) {
           <div className="flex-1 flex items-center justify-between gap-2">
             {/* Player Info */}
             <div className="min-w-0 flex-1">
-              <h3 className="text-white font-medium text-sm truncate">{player.name}</h3>
+              <h3 className="text-orange-400 font-medium text-sm truncate">{player.name}</h3>
               <p className="text-gray-400 text-xs">{player.position}</p>
             </div>
           </div>

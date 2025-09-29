@@ -29,10 +29,10 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden bg-white">
       {/* Background Image */}
       <Image
-        src="/bgr.jpg"
+        src="/background/landing.jpg"
         alt="Basketball player dunking"
         fill
         priority

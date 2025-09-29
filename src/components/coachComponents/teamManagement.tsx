@@ -248,7 +248,7 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
     <div className="max-w-full mx-auto p-6">
       {/* Header */}
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-white">Team Management</h1>
+        <h1 className="text-3xl font-bold text-black">Team Management</h1>
         
         <Button
           onClick={handleSaveLineup}
@@ -274,8 +274,8 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
       <div className="flex gap-6 h-[calc(130vh-160px)]">
         {/* Basketball Court */}
         <div className="flex-[7] relative">
-        <Card className="h-full overflow-hidden bg-black/50 backdrop-blur-sm border-orange-500/20">
-          <CardContent className="p-0 h-full relative">
+        <Card className="h-full overflow-hidden bg-transparent backdrop-blur-sm">
+          <CardContent className="p-0 pt-0 h-full relative">
             <div
               className="w-full h-full bg-cover bg-center bg-no-repeat relative"
               style={{ backgroundImage: `url('/court/aerialView.png')` }}
@@ -371,7 +371,7 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
                     {unassignedPlayers.map((player) => (
                       <li
                         key={player.player_id}
-                        className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-black/20 backdrop-blur-md"
+                        className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-white/50 backdrop-blur-md"
                       >
                         <span className="text-white text-sm">
                           {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
