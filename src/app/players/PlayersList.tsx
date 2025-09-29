@@ -26,8 +26,16 @@ export default function PlayersList({ teamId }: { teamId: string }) {
     const fetchPlayers = async () => {
       try {
         setLoading(true);
-        const data = await apiClient.getPlayersByTeamId(teamId); // 👈 fetch from API
-        setPlayers(data);
+        const data = await apiClient.getPlayersByTeamId(teamId);
+        const normalized = data.map((p) => ({
+          player_id: p.player_id || p.id, // fallback to `id`
+          first_name: p.first_name,
+          last_name: p.last_name,
+          position: p.position,
+          jersey_number: p.jersey_number,
+          image_url: p.image_url,
+        }));
+        setPlayers(normalized);
       } catch (err) {
         console.error("Failed to fetch players:", err);
       } finally {
@@ -75,14 +83,11 @@ export default function PlayersList({ teamId }: { teamId: string }) {
           >
             <Link href={`/players/${p.player_id}`} className="block h-full">
               <div className="flex items-center gap-4">
-                {/* Player picture */}
                 <img
-                  src={p.image_url || "/default-player.png"}
+                  src={p.image_url || "/avatars/player3.jpg"} // fixed fallback
                   alt={`${p.first_name} ${p.last_name}`}
                   className="w-14 h-14 rounded-full object-cover border-2 border-yellow-400"
                 />
-
-                {/* Name, jersey, position */}
                 <div className="flex items-center gap-2">
                   <h3 className="text-lg font-semibold text-gray-900">
                     {p.first_name} {p.last_name}
