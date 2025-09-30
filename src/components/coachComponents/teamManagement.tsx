@@ -345,8 +345,8 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
           {/* Unassigned Players Dialog */}
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="group rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl p-3 px-5 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white font-semibold">
-                Show Unassigned Players
+              <Button className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white border-none">
+                Add free Players
               </Button>
             </DialogTrigger>
 

@@ -36,13 +36,14 @@ export function Reserves({ players, onAddPlayer}: ReservesProps) {
 
         {/* Fixed footer with Add Player button */}
         <div className="flex-shrink-0 border-t border-orange-500/20 pt-4 mt-4">
-          <Button
+         {/* <Button
             onClick={onAddPlayer}
             className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white border-none"
           >
             <Plus className="w-4 h-4" />
             Add Player
           </Button>
+          */}
         </div>
       </CardContent>
     </Card>

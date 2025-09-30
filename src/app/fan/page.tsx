@@ -7,12 +7,13 @@ import { SeasonHighlights } from "@/components/fanComponents/SeasonHighlights"
 import { TopScorers } from "@/components/fanComponents/TopScorers"
 import { GameSchedule } from "@/components/fanComponents/GameSchedule"
 import { LeagueStandings } from "@/components/fanComponents/leagueStanding"
-import { PlayerCards } from "@/components/fanComponents/PlayerCards"
+import  PlayerCards  from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 
 import { apiClient } from "../utils/apiClient"
 import {Game} from "@/types/basketball"
+
 // Define dashboard data structure
 interface FanDashboardData {
   season_highlights: any
@@ -20,6 +21,7 @@ interface FanDashboardData {
   upcoming_games: any[]
   league_standings: any[]
 }
+
 
 interface Team {
   team_id: string
@@ -45,6 +47,7 @@ export default function FanDashboard() {
   const [data, setData] = useState<FanDashboardData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [teamId, setTeamId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,6 +85,7 @@ export default function FanDashboard() {
   const renderPlayers = () => (
     <div className="max-w-7xl mx-auto p-6">
       <PlayerCards />
+      {/*<PlayersList teamId={teamId} />*/}
     </div>
   )
 
