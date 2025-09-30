@@ -8,6 +8,7 @@ export interface Player {
 }
   
 export interface Team {
+  logo: string | Blob | undefined;
   team_id: string;
   name: string;
   color: string;
@@ -56,7 +57,39 @@ export interface Team {
     location?: string;
   }
   
-  export interface Game {
+
+export interface GameCardProps {
+  match_id: string;
+  analyst?:string;
+  date: string;
+  time: string;
+  homeTeam: Team;
+  awayTeam: Team;
+  location: string;
+  isBooked?: boolean;
+  homeLineup?: Player[];
+  awayLineup?: Player[];
+}
+
+export interface CompletedGameCardProps {
+  match_id: string;
+  analyst?:string;
+  date: string;
+  time: string;
+  completed:boolean;
+  home_score:number;
+  away_score:number;
+  homeTeam: Team;
+  awayTeam: Team;
+  location: string;
+  isBooked?: boolean;
+  homeLineup?: Player[];
+  awayLineup?: Player[];
+}
+
+
+
+export interface Game {
   home_score?:number
   away_score?:number
   isBooked: boolean
@@ -71,4 +104,18 @@ export interface Team {
   homeLineup?: Player[]
   awayLineup?: Player[]
   isSampleData?: boolean
+}
+
+
+export interface Match {
+  match_id: string
+  analyst?:string
+  match_date: string
+  location: string | null
+  home_score: number
+  away_score: number
+  completed:boolean
+  isBooked:boolean
+  home_team_id: string
+  away_team_id: string
 }
