@@ -10,23 +10,14 @@ import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 import { useAuth } from "../context/AuthContext"
 import { AnalystSideNav } from "@/components/sideNav/analystSideNav"
 import { DashboardHeader } from "@/components/header/header"
+import { CompletedGamesGrid } from "@/components/completed-games-grid"
+import { Game,Match } from "@/types/basketball"
 
 // Define TypeScript interfaces based on your schema
 interface Team {
   team_id: string
   name: string
   icon_url: string
-}
-
-interface Match {
-  match_id: string
-  match_date: string
-  location: string | null
-  home_score: number
-  away_score: number
-  status: string
-  home_team_id: string
-  away_team_id: string
 }
 
 interface Player {
@@ -36,29 +27,19 @@ interface Player {
   jerseyNumber?: number
 }
 
-interface Game {
-  match_id: string
-  date: string
-  time: string
-  location: string
-  homeTeam: { team_id: string; name: string; logo: string }
-  awayTeam: { team_id: string; name: string; logo: string }
-  homeLineup?: Player[]
-  awayLineup?: Player[]
-  isSampleData?: boolean
-}
+
 
 const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
   return lineup.map((player, index) => {
     const nameParts = player.player?.split(" ") || ["Player", "Unknown"]
     const name = nameParts[0] || "Player"
-    const surname = nameParts.slice(1).join(" ") || "Unknown"
-
+    // The Player interface does not require surname, so omit it
     return {
-      id: `${team}-player-${index}`,
+      player_id: player.player_id || `${team}-player-${index}`,
       name,
-      surname,
       position: player.position || "Unknown",
+      // jerseyNumber is optional and can be added if available
+      jerseyNumber: player.jerseyNumber,
     }
   })
 }
@@ -85,7 +66,7 @@ export default function Dashboard() {
       // 1️⃣ Get all matches
       const matchesData = await apiClient.getMatches()
       setDebugInfo(`Found ${matchesData?.length || 0} matches`)
-      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.last_name}`)
+      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.user_id} and their Auth_userid id ${user?.auth_user_id}`)
       if (matchesData && matchesData.length > 0) {
         // 2️⃣ Collect team IDs
         const teamIds = [
@@ -107,30 +88,36 @@ export default function Dashboard() {
         const databaseGames: Game[] = matchesData.map((match: Match) => {
           const homeTeam = teamsMap.get(match.home_team_id) || {}
           const awayTeam = teamsMap.get(match.away_team_id) || {}
-
+//we added the status and analyst fields in the return
           return {
-            match_id: match.match_id,
-            date: new Date(match.match_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-            time: new Date(match.match_date).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            homeTeam: {
-              id: match.home_team_id,
-              name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-              logo: homeTeam.icon_url || "/default_team.svg",
-            },
-            awayTeam: {
-              id: match.away_team_id,
-              name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-              logo: awayTeam.icon_url || "/default_team.svg",
-            },
-          }
-        })
+    match_id: match.match_id,
+    analyst: match.analyst,          
+    completed: match.completed,
+    isBooked:match.isBooked, 
+    away_score:match.away_score,
+    home_score:match.home_score,
+    location:match.location,           
+    date: new Date(match.match_date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    }),
+    time: new Date(match.match_date).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+    homeTeam: {
+      id: match.home_team_id,
+      name: homeTeam.name || homeTeam.team_name || "Unknown Team",
+      logo: homeTeam.icon_url || "/default_team.svg",
+    },
+    awayTeam: {
+      id: match.away_team_id,
+      name: awayTeam.name || awayTeam.team_name || "Unknown Team",
+      logo: awayTeam.icon_url || "/default_team.svg",
+    },
+  }
+})
 
         setMatches(databaseGames)
         setAllGames([...databaseGames])
@@ -148,11 +135,16 @@ export default function Dashboard() {
       setIsLoading(false)
     }
   }
-
   useEffect(() => {
     fetchMatches()
   }, [])
 
+//filter completed games
+  const completedGames= allGames.filter(
+      (game) => game.completed ==true &&
+        game.analyst === user?.auth_user_id
+    )
+    
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push("/")
@@ -191,14 +183,18 @@ export default function Dashboard() {
           </div>
         )
       case "completed":
-        return (
-          <div className="max-w-6xl mx-auto p-6">
-            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Completed Games</h2>
-              <p className="text-gray-300">This is where completed games and their analysis will be displayed</p>
-            </div>
-          </div>
-        )
+
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+        <CompletedGamesGrid
+          games={completedGames.map((game) => ({
+            ...game,
+            homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
+            awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
+          }))}
+        />
+    </div>
+  )
       default:
         return null
     }
