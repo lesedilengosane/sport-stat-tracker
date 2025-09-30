@@ -1,10 +1,8 @@
 "use client"
 
 interface Game {
-  homeTeam: string
-  homeAbbr: string
-  awayTeam: string
-  awayAbbr: string
+  home_team: string
+  away_team: string
   date: string
   time: string
 }
@@ -15,40 +13,20 @@ interface GameScheduleProps {
 }
 
 export function GameSchedule({ games, compact = false }: GameScheduleProps) {
-  // Default sample data - should be replaced with data from matches table
-  // Query: SELECT m.*, ht.team_name as home_team, at.team_name as away_team
-  //        FROM matches m
-  //        JOIN teams ht ON m.home_team_id = ht.team_id
-  //        JOIN teams at ON m.away_team_id = at.team_id
-  //        WHERE m.match_date > NOW() ORDER BY m.match_date LIMIT 3
-  const defaultGames: Game[] = [
-    {
-      homeTeam: "Phoenix Suns",
-      homeAbbr: "PHX",
-      awayTeam: "Dallas Mavericks",
-      awayAbbr: "DAL",
-      date: "Tomorrow",
-      time: "7:30 PM ET",
-    },
-    {
-      homeTeam: "Miami Heat",
-      homeAbbr: "MIA",
-      awayTeam: "Philadelphia 76ers",
-      awayAbbr: "PHI",
-      date: "Oct 14",
-      time: "8:00 PM ET",
-    },
-    {
-      homeTeam: "Boston Celtics",
-      homeAbbr: "BOS",
-      awayTeam: "Milwaukee Bucks",
-      awayAbbr: "MIL",
-      date: "Oct 15",
-      time: "7:00 PM ET",
-    },
-  ]
+  // Use the provided games data or empty array if none provided
+  const displayGames = games || []
 
-  const displayGames = games || defaultGames
+  // If no games provided, show nothing or a message
+  if (displayGames.length === 0) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-4">{compact ? "Game Schedule" : "Full Schedule"}</h2>
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden p-6">
+          <p className="text-white text-center">No upcoming games scheduled</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -66,24 +44,26 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
                     <span
                       className={`text-${compact ? "xs" : "sm"} font-${compact ? "semibold" : "bold"} text-gray-400 w-${compact ? "10" : "12"}`}
                     >
-                      {game.awayAbbr}
+                      {/* Generate abbreviation from away team name - take first 3 letters */}
+                      {game.away_team.substring(0, 3).toUpperCase()}
                     </span>
                     <span
                       className={`text-white font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
                     >
-                      {game.awayTeam}
+                      {game.away_team}
                     </span>
                   </div>
                   <div className={`flex items-center gap-${compact ? "3" : "4"}`}>
                     <span
                       className={`text-${compact ? "xs" : "sm"} font-${compact ? "semibold" : "bold"} text-gray-400 w-${compact ? "10" : "12"}`}
                     >
-                      {game.homeAbbr}
+                      {/* Generate abbreviation from home team name - take first 3 letters */}
+                      {game.home_team.substring(0, 3).toUpperCase()}
                     </span>
                     <span
                       className={`text-white font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
                     >
-                      {game.homeTeam}
+                      {game.home_team}
                     </span>
                   </div>
                 </div>

@@ -1,6 +1,7 @@
 "use client"
 
 interface Player {
+  player_id: string
   name: string
   team: string
   ppg: number
@@ -14,19 +15,20 @@ interface TopScorersProps {
 }
 
 export function TopScorers({ players }: TopScorersProps) {
-  // Default sample data - should be replaced with data from players table
-  // Query: SELECT first_name, last_name, points/matches_played as ppg,
-  //        rebounds/matches_played as rpg, assists/matches_played as apg,
-  //        (twoPointsMade + threePointsMade) / (twoPointsAttempted + threePointsAttempted) * 100 as fg%
-  const defaultPlayers: Player[] = [
-    { name: "LeBron James", team: "Los Angeles Lakers", ppg: 27.8, rpg: 7.5, apg: 8.1, fg: 52.3 },
-    { name: "Stephen Curry", team: "Golden State Warriors", ppg: 29.4, rpg: 5.2, apg: 6.3, fg: 48.7 },
-    { name: "Kevin Durant", team: "Phoenix Suns", ppg: 30.1, rpg: 6.8, apg: 5.2, fg: 53.1 },
-    { name: "Giannis Antetokounmpo", team: "Milwaukee Bucks", ppg: 31.5, rpg: 11.2, apg: 5.5, fg: 56.8 },
-    { name: "Luka Dončić", team: "Dallas Mavericks", ppg: 33.7, rpg: 8.9, apg: 9.2, fg: 49.4 },
-  ]
+  // Use the provided players data or empty array if none provided
+  const displayPlayers = players || []
 
-  const displayPlayers = players || defaultPlayers
+  // If no players provided, show nothing or a message
+  if (displayPlayers.length === 0) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-4">Top Scorers</h2>
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden p-6">
+          <p className="text-white text-center">No player data available</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -54,16 +56,16 @@ export function TopScorers({ players }: TopScorersProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
-              {displayPlayers.map((player, index) => (
-                <tr key={index} className="hover:bg-white/5 transition-colors">
+              {displayPlayers.map((player) => (
+                <tr key={player.player_id} className="hover:bg-white/5 transition-colors">
                   <td className="px-4 py-3">
                     <div className="text-white font-medium text-sm">{player.name}</div>
                     <div className="text-gray-400 text-xs">{player.team}</div>
                   </td>
-                  <td className="text-center text-white font-semibold px-2 py-3">{player.ppg}</td>
-                  <td className="text-center text-white px-2 py-3">{player.rpg}</td>
-                  <td className="text-center text-white px-2 py-3">{player.apg}</td>
-                  <td className="text-center text-white px-2 py-3">{player.fg}%</td>
+                  <td className="text-center text-white font-semibold px-2 py-3">{player.ppg.toFixed(1)}</td>
+                  <td className="text-center text-white px-2 py-3">{player.rpg.toFixed(1)}</td>
+                  <td className="text-center text-white px-2 py-3">{player.apg.toFixed(1)}</td>
+                  <td className="text-center text-white px-2 py-3">{player.fg.toFixed(1)}%</td>
                 </tr>
               ))}
             </tbody>
