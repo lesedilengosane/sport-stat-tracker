@@ -89,6 +89,15 @@ export const apiClient = {
     }
     return response.json();
   },
+
+  //get players by fan id
+  getPlayersByFanId: async (fanId: string): Promise<any[]> => {
+    const response = await fetch(`/api/players?...`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch players');
+    }
+    return response.json();
+  },
   
 
   // Alternative getPlayersByTeamIds method
@@ -189,5 +198,4 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     }
     return response.json();
   },
-
 };
