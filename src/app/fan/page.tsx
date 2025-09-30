@@ -7,10 +7,11 @@ import { SeasonHighlights } from "@/components/fanComponents/SeasonHighlights"
 import { TopScorers } from "@/components/fanComponents/TopScorers"
 import { GameSchedule } from "@/components/fanComponents/GameSchedule"
 import { LeagueStandings } from "@/components/fanComponents/leagueStanding"
-import { PlayerCards } from "@/components/fanComponents/PlayerCards"
+import  PlayerCards  from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 import { apiClient } from "../utils/apiClient"
+import PlayersList from "../players/PlayersList"
 
 interface Team {
   team_id: string
@@ -43,6 +44,7 @@ export default function FanDashboard() {
   const [games, setGames] = useState<Game[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [teamId, setTeamId] = useState<string | null>(null)
 
   const fetchUpcomingGames = async () => {
     try {
@@ -128,6 +130,7 @@ export default function FanDashboard() {
   const renderPlayers = () => (
     <div className="max-w-7xl mx-auto p-6">
       <PlayerCards />
+      {/*<PlayersList teamId={teamId} />*/}
     </div>
   )
 

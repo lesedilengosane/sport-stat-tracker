@@ -89,6 +89,15 @@ export const apiClient = {
     }
     return response.json();
   },
+
+  //get players by fan id
+  getPlayersByFanId: async (fanId: string): Promise<any[]> => {
+    const response = await fetch(`/api/players?...`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch players');
+    }
+    return response.json();
+  },
   
 
   // Alternative getPlayersByTeamIds method
@@ -167,6 +176,32 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     const response = await fetch(`/api/coach/fetchTeamPlayers?coachId=${coachId}`);
     if (!response.ok) {
       throw new Error('Failed to fetch team players');
+    }
+    return response.json();
+  },
+
+
+  // ✅ existing methods (like getTeamPlayers, etc.)
+
+  getPlayerById: async (id: string) => {
+    try {
+      const res = await fetch(`/api/players?...`);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch player with id ${id}`);
+      }
+      const data = await res.json();
+      return data; // should be a Player object
+    } catch (err) {
+      console.error("Error fetching player by id:", err);
+      throw err;
+    }
+  },
+
+
+  getallplayers: async (): Promise<any[]> => {
+    const response = await fetch(`/api/players?...`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch all players');
     }
     return response.json();
   },
