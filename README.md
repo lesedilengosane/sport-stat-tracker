@@ -1,4 +1,3 @@
-
 ## How to Contribute
 
 ### Setting things up locally

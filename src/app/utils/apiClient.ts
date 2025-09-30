@@ -172,36 +172,29 @@ getPlayersByTeamIds: async (teamIds: string[]): Promise<Map<string, any[]>> => {
     return response.json();
   },
 
-  getTeamPlayers: async (coachId: string): Promise<any[]> => {
-    const response = await fetch(`/api/coach/fetchTeamPlayers?coachId=${coachId}`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch team players');
+
+  //The below API takes all the match data after saving a game then it sends it to backend where it will be used to update the DB
+  SaveGameData: async(CompleteGameData:any):Promise<any>=>{
+    console.log(`The game data received by the API from component :\n ${CompleteGameData}`)
+    const response=await fetch('/api/matches',{
+      method :'POST',
+      headers:{
+        'Content-Type':'application/json',
+      },
+      body:JSON.stringify(CompleteGameData),
+    });
+    if(!response.ok){
+      throw new Error('Error updating data for the complete game');
     }
     return response.json();
   },
 
 
-  // ✅ existing methods (like getTeamPlayers, etc.)
 
-  getPlayerById: async (id: string) => {
-    try {
-      const res = await fetch(`/api/players?...`);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch player with id ${id}`);
-      }
-      const data = await res.json();
-      return data; // should be a Player object
-    } catch (err) {
-      console.error("Error fetching player by id:", err);
-      throw err;
-    }
-  },
-
-
-  getallplayers: async (): Promise<any[]> => {
-    const response = await fetch(`/api/players?...`);
+  getTeamPlayers: async (coachId: string): Promise<any[]> => {
+    const response = await fetch(`/api/coach/fetchTeamPlayers?coachId=${coachId}`);
     if (!response.ok) {
-      throw new Error('Failed to fetch all players');
+      throw new Error('Failed to fetch team players');
     }
     return response.json();
   },
