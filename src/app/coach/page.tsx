@@ -13,6 +13,7 @@ import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 import { apiClient } from "../utils/apiClient";
 import TeamStats from "@/components/TeamStats/teamstats";
 import PlayersList from "@/app/players/PlayersList";
+import { Game } from "@/types/basketball";
 
 // Types
 interface Team {
@@ -27,18 +28,7 @@ interface Player {
   position?: string;
 }
 
-interface Game {
-  id: string;
-  match_id: string;
-  date: string;
-  time: string;
-  location: string;
-  homeTeam: Team;
-  awayTeam: Team;
-  homeLineup?: Player[];
-  awayLineup?: Player[];
-  isBooked?: boolean;
-}
+
 
 export default function CoachDashboard() {
   const router = useRouter();
