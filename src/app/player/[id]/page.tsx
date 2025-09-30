@@ -27,12 +27,11 @@ interface Player {
 }
 
 interface PlayerDashboardProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
-const { use } = require("react");
 
-export default function PlayerDashboard({ params }: PlayerDashboardProps) {
-  const { id } = use(params);
+export default async function PlayerDashboard({ params }: PlayerDashboardProps) {
+  const { id } = await params; // ✅ just destructure directly
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

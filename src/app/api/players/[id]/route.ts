@@ -2,12 +2,12 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../DatabaseApi/supabaseClient";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    const { id } = params;
+    // Extract the player id from the pathname
+    const url = new URL(request.url);
+    const pathSegments = url.pathname.split("/"); // ['', 'api', 'players', 'playerId']
+    const id = pathSegments[pathSegments.length - 1];
 
     const { data: player, error } = await supabase
       .from("players")
@@ -24,8 +24,8 @@ export async function GET(
     }
 
     return NextResponse.json(player);
-  } catch (error) {
-    console.error("Internal server error:", error);
+  } catch (err) {
+    console.error("Internal server error:", err);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
