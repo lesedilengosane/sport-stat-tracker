@@ -47,6 +47,7 @@ export interface Team {
   }
   
   export interface GameData {
+    analyst:string;
     match_id: string;
     date: string;
     homeTeam: Team;
