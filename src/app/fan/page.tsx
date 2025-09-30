@@ -11,6 +11,8 @@ import { PlayerCards } from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 
+import { apiClient } from "../utils/apiClient"
+import {Game} from "@/types/basketball"
 // Define dashboard data structure
 interface FanDashboardData {
   season_highlights: any
@@ -18,6 +20,25 @@ interface FanDashboardData {
   upcoming_games: any[]
   league_standings: any[]
 }
+
+interface Team {
+  team_id: string
+  name: string
+  icon_url: string
+}
+
+interface Match {
+  match_id: string
+  match_date: string
+  location: string | null
+  home_score: number
+  away_score: number
+  status: string
+  home_team_id: string
+  away_team_id: string
+}
+
+
 
 export default function FanDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
