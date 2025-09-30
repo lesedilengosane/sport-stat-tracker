@@ -69,7 +69,6 @@ export default function Dashboard() {
 
       console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.user_id} and their Auth_userid id ${user?.auth_user_id}`)
 
-
       if (matchesData && matchesData.length > 0) {
         // 2️⃣ Collect team IDs
         const teamIds = [
