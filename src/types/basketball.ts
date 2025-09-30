@@ -56,3 +56,19 @@ export interface Team {
     location?: string;
   }
   
+  export interface Game {
+  home_score?:number
+  away_score?:number
+  isBooked: boolean
+  match_id: string
+  analyst?: string
+  completed: boolean     
+  date: string
+  time: string
+  location: string
+  homeTeam: { team_id: string; name: string; logo: string }
+  awayTeam: { team_id: string; name: string; logo: string }
+  homeLineup?: Player[]
+  awayLineup?: Player[]
+  isSampleData?: boolean
+}
