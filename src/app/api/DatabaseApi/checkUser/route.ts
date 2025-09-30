@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         first_name: result.first_name,
         user_id:result.user_id,
         last_name: result.last_name,
+        auth_user_id:result.auth_user_id,
         hasTeam : result.hasTeam
       },
       { status: 200 }

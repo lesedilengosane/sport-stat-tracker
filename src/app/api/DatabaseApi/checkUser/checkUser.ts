@@ -9,6 +9,7 @@ export async function checkUser(
   first_name?: string;
   last_name?: string;
   user_id?: string;
+  auth_user_id?:string;
   hasTeam?: boolean;
   error?: string;
 }> {
@@ -36,6 +37,7 @@ export async function checkUser(
         role: undefined,
         first_name: undefined,
         last_name: undefined,
+        auth_user_id:undefined,
         hasTeam: undefined,
       };
     }
@@ -64,6 +66,7 @@ export async function checkUser(
       role: userData.role,
       first_name: userData.first_name,
       last_name: userData.last_name,
+      auth_user_id:userData.auth_user_id,
       hasTeam, 
     };
   } catch (error) {

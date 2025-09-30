@@ -8,6 +8,7 @@ type User = {
   first_name: string;
   last_name: string;
   user_role: "Coach" | "Fan" | "Analyst";
+  auth_user_id:string
 };
 
 type AuthContextType = {
@@ -38,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         if (checkResponse.ok) {
-          const { user_id, first_name, last_name, role } =
+          const { user_id, first_name, last_name, role ,auth_user_id} =
             await checkResponse.json();
 
           setUser({
@@ -46,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             first_name,
             last_name,
             user_role: role,
+            auth_user_id
           });
         }
       }

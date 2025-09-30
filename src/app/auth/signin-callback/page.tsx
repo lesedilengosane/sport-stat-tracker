@@ -36,7 +36,7 @@ export default function SignInCallback() {
       throw new Error(errorData.error || "Failed to check user existence");
     }
 
-    const { exists, role, first_name, last_name, user_id, hasTeam } =
+    const { exists, role, first_name, last_name, user_id, hasTeam,auth_user_id } =
       await checkResponse.json();
 
     // 3. Construct user object
@@ -45,6 +45,7 @@ export default function SignInCallback() {
       first_name,
       last_name,
       user_role: role,
+      auth_user_id,
     };
 
     // 4. Store in AuthContext
