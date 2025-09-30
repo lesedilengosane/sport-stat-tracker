@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { use } from "react";
 
 interface Player {
   player_id: string;
@@ -30,8 +31,8 @@ interface PlayerDashboardProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function PlayerDashboard({ params }: PlayerDashboardProps) {
-  const { id } = await params; // ✅ just destructure directly
+export default function PlayerDashboard({ params }: PlayerDashboardProps) {
+  const { id } = use(params); // Use React.use() to unwrap the Promise
   const [player, setPlayer] = useState<Player | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
