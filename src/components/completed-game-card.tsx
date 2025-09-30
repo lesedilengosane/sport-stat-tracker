@@ -32,7 +32,7 @@ export function CompletedGameCard({
   home_score,
   awayTeam,
   location,
-  isBooked: initialBooked = false,
+  booked: initialBooked = false,
 }: CompletedGameCardProps) {
   const router = useRouter();
   const [analystId, setAnalystId] = useState<string | null>(null);

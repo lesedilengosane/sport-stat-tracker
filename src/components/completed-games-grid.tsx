@@ -19,7 +19,7 @@ interface Player {
 }
 
 interface Game {
-  isBooked: boolean | undefined;
+  booked:boolean
   away_score?:number;
   home_score?:number;
   match_id: string
@@ -44,7 +44,7 @@ export function CompletedGamesGrid({ games }: GamesGridProps) {
   //console.log('Gamecard ',games)
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
-      <h2 className="text-2xl font-bold text-black mb-6">AVAILABLE GAMES</h2>
+      <h2 className="text-2xl font-bold text-black mb-6">Completed Games</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {games.map((game) => (
           <CompletedGameCard
@@ -58,7 +58,7 @@ export function CompletedGamesGrid({ games }: GamesGridProps) {
             location={game.location}
             homeTeam={game.homeTeam}
             awayTeam={game.awayTeam}
-            isBooked={game.isBooked}
+            booked={game.booked}
           />
         ))}
       </div>

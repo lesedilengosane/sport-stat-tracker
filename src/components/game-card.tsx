@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "../app/api/DatabaseApi/supabaseClient";
 import { BookingApiClient } from "../app/utils/BookGames";
 
+
 interface Team {
   team_id: string;
   name: string;
@@ -25,7 +26,7 @@ interface GameCardProps {
   homeTeam: Team;
   awayTeam: Team;
   location: string;
-  isBooked?: boolean;
+  booked: boolean;
   homeLineup?: Player[];
   awayLineup?: Player[];
 }
@@ -37,54 +38,69 @@ export function GameCard({
   homeTeam,
   awayTeam,
   location,
-  isBooked: initialBooked = false,
+  booked: initialBooked = false,
 }: GameCardProps) {
   const router = useRouter();
   const [analystId, setAnalystId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isBooked, setIsBooked] = useState<boolean>(initialBooked);
   const [loading, setLoading] = useState<boolean>(false);
-  
-  // fetch current user + role
+
+  // Fetch current user + role
   useEffect(() => {
     async function fetchUser() {
-      const { data } = await supabase.auth.getUser();
-      if (data.user) {
-        setAnalystId(data.user.id);
+      try {
+        const { data } = await supabase.auth.getUser();
+        if (data.user) {
+          setAnalystId(data.user.id);
 
-        // fetch role from 'users' table
-        const { data: userData, error } = await supabase
-          .from("users")
-          .select("role")
-          .eq("auth_user_id", data.user.id)
-          .maybeSingle();
+          // Fetch role from 'users' table
+          const { data: userData, error } = await supabase
+            .from("users")
+            .select("role")
+            .eq("auth_user_id", data.user.id)
+            .maybeSingle();
 
-        if (!error && userData) {
-          setUserRole(userData.role); // e.g., "Coach" or "Analyst"
+          if (!error && userData) {
+            setUserRole(userData.role);
+          }
         }
+      } catch (err) {
+        console.error("Error fetching user:", err);
       }
     }
 
     fetchUser();
   }, []);
 
+  // Sync prop changes with state
+  useEffect(() => {
+    setIsBooked(initialBooked);
+  }, [initialBooked]);
+
   const handleCardClick = () => {
-    if (isBooked) return;
+    // Navigate to details page
     router.push(`/analyst/${match_id}`);
   };
- 
+
   const handleBookClick = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (!analystId) {
       alert("You must be logged in as an analyst to book.");
       return;
     }
+
+    if (isBooked) {
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await BookingApiClient.bookGame(match_id, analystId);
       if (result.success) {
         setIsBooked(true);
-        alert(result.message);
+        alert(result.message || "Game booked successfully!");
       } else {
         if (
           result.message === "This match already has an analyst assigned ❌"
@@ -94,21 +110,28 @@ export function GameCard({
         alert(result.message || "Booking failed");
       }
     } catch (err) {
-      console.error(err);
+      console.error("Booking error:", err);
+      alert("An error occurred while booking. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    router.push(`/analyst/${match_id}`);
+  };
+
   return (
     <Card
       onClick={handleCardClick}
-      className={`bg-white border-[#FE563F] p-3 text-black transition-all duration-300 ease-in-out  ${
+      className={`bg-white border-[#FE563F] p-3 text-black transition-all duration-300 ease-in-out ${
         isBooked
-          ? "opacity-80 cursor-not-allowed"
+          ? "opacity-80 cursor-pointer hover:scale-[1.02] hover:shadow-lg"
           : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 cursor-pointer"
       }`}
     >
+      {/* Date and Time */}
       <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
         <div className="flex items-center gap-1">
           <Calendar size={12} />
@@ -120,6 +143,7 @@ export function GameCard({
         </div>
       </div>
 
+      {/* Teams */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col items-center flex-1">
           <div className="w-18 h-18 relative mb-0.5">
@@ -130,7 +154,7 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium">
+          <span className="text-xs text-black font-medium text-center">
             {homeTeam.name}
           </span>
         </div>
@@ -146,31 +170,39 @@ export function GameCard({
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium">
+          <span className="text-xs text-black font-medium text-center">
             {awayTeam.name}
           </span>
         </div>
       </div>
 
-      <div className="flex items-center justify-center text-slate-400 text-xs">
+      {/* Location */}
+      <div className="flex items-center justify-center text-slate-400 text-xs mt-2">
         <span>{location}</span>
       </div>
 
-      <div className="flex items-center justify-between text-xs font-medium mt-2">
+      {/* Action Buttons */}
+      <div className="flex items-center justify-between text-xs font-medium mt-3">
         {userRole === "Coach" ? (
           <div className="flex justify-center w-full">
-            <button className="text-blue-400 hover:underline">
+            <button
+              onClick={handleViewDetails}
+              className="text-blue-400 hover:underline"
+            >
               View Details
             </button>
           </div>
         ) : (
           <>
-            <button className="text-blue-400 hover:underline">
+            <button
+              onClick={handleViewDetails}
+              className="text-blue-400 hover:underline"
+            >
               View Details
             </button>
 
             {isBooked ? (
-              <div className="flex items-center gap-1 text-yellow-400">
+              <div className="flex items-center gap-1 text-green-500">
                 <Check size={14} />
                 <span>Booked</span>
               </div>
@@ -178,7 +210,7 @@ export function GameCard({
               <button
                 onClick={handleBookClick}
                 disabled={loading}
-                className="text-yellow-400 hover:underline disabled:opacity-50"
+                className="text-yellow-500 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Booking..." : "Book for Analysis"}
               </button>

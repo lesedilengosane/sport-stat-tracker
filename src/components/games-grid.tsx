@@ -36,7 +36,7 @@ export function GamesGrid({ games }: GamesGridProps) {
             location={game.location}
             homeTeam={game.homeTeam}
             awayTeam={game.awayTeam}
-            isBooked={game.isBooked}
+            booked={game.booked}
           />
         ))}
       </div>
