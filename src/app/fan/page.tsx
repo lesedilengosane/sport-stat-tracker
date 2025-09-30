@@ -11,6 +11,7 @@ import { PlayerCards } from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 import { apiClient } from "../utils/apiClient"
+import {Game} from "@/types/basketball"
 
 interface Team {
   team_id: string
@@ -29,14 +30,7 @@ interface Match {
   away_team_id: string
 }
 
-interface Game {
-  match_id: string
-  date: string
-  time: string
-  location: string
-  homeTeam: { team_id: string; name: string; logo: string }
-  awayTeam: { team_id: string; name: string; logo: string }
-}
+
 
 export default function FanDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
