@@ -187,12 +187,28 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto p-6">
         <CompletedGamesGrid
-          games={completedGames.map((game) => ({
-            ...game,
-            homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
-            awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
-          }))}
-        />
+        games={completedGames.map((game) => ({
+          ...game,
+          homeTeam: {
+            ...game.homeTeam,
+            color: "#000000",  // Add default values
+            score: game.home_score || 0,
+            timeouts: 0,
+            fouls: 0,
+            players: convertToPlayerDetails(game.homeLineup || [], "home")
+          },
+          awayTeam: {
+            ...game.awayTeam,
+            color: "#000000",  // Add default values
+            score: game.away_score || 0,
+            timeouts: 0,
+            fouls: 0,
+            players: convertToPlayerDetails(game.awayLineup || [], "away")
+          },
+          homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
+          awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
+        }))}
+      />
     </div>
   )
       default:
