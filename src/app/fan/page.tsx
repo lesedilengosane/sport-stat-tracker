@@ -11,7 +11,6 @@ import  PlayerCards  from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
 import { apiClient } from "../utils/apiClient"
-import PlayersList from "../players/PlayersList"
 import {Game} from "@/types/basketball"
 
 interface Team {

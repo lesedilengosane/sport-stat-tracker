@@ -308,6 +308,7 @@ export default function StatTrackerPage() {
             timeouts: 0,
             fouls: 0,
             players: formatPlayers(homeLineup, homeTeamId, "home"),
+            logo: homeLogo
           },
           awayTeam: {
             team_id: awayTeamId,
@@ -318,6 +319,7 @@ export default function StatTrackerPage() {
             timeouts: 0,
             fouls: 0,
             players: formatPlayers(awayLineup, awayTeamId, "away"),
+            logo: awayLogo
           },
           status: "live",
           location: searchParams.get("location") || "Court",
