@@ -5,6 +5,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  Row,
   useReactTable,
 } from "@tanstack/react-table";
 
@@ -17,14 +18,17 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onRowClick?: (row: Row<TData>) => void; // <-- row click handler
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -42,10 +46,7 @@ export function DataTable<TData, TValue>({
                 <TableHead key={header.id} className="border border-orange-500">
                   {header.isPlaceholder
                     ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                    : flexRender(header.column.columnDef.header, header.getContext())}
                 </TableHead>
               ))}
             </TableRow>
@@ -57,11 +58,12 @@ export function DataTable<TData, TValue>({
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className="hover:bg-orange-600/20"
+                className="hover:bg-orange-600/20 cursor-pointer transition-all duration-200 rounded-lg shadow-md mb-2"
+                onClick={() => onRowClick?.(row)} // <-- clickable row
                 data-state={row.getIsSelected() && "selected"}
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="border border-orange-500">
+                  <TableCell key={cell.id} className="border border-orange-500 p-4">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
