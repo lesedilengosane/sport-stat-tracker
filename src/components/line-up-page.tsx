@@ -48,12 +48,15 @@ export function Tabspage({
 
           <div className="flex w-full gap-6">
             <div className="w-1/2">
-              <DataTable columns={columns} data={homeLineup} />
+              <DataTable columns={columns} data={homeLineup}
+              onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
+               />
             </div>
 
             <div className="w-1/2">
             
-              <DataTable columns={columns} data={awayLineup} />
+              <DataTable columns={columns} data={awayLineup} onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
+               />
             </div>
           </div>
         </TabsContent>
