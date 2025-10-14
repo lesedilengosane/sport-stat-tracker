@@ -141,6 +141,10 @@ export default function Dashboard() {
     fetchMatches()
   }, [])
 
+//filter upcoming games that have not been played from all games
+
+const upcomingGames=allGames.filter((game)=>game.completed==false)
+
 //filter completed games
   const completedGames= allGames.filter(
       (game) => game.completed ==true &&
@@ -148,10 +152,12 @@ export default function Dashboard() {
     )
     
 
-    // filter booked games
 const bookedGames = allGames.filter(
-  (game) => game.booked === true && game.analyst === user?.auth_user_id
-)
+  (game) =>
+    game.booked === true &&
+    game.completed === false &&
+    game.analyst === user?.auth_user_id
+);
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -164,7 +170,7 @@ const bookedGames = allGames.filter(
         return (
           <div className="max-w-6xl mx-auto p-6">
             <GamesGrid
-              games={allGames.map((game) => ({
+              games={upcomingGames.map((game) => ({
                 ...game,
                 homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
                 awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
