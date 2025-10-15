@@ -10,6 +10,7 @@ const fanNavItems = [
   { id: "players", label: "Players", icon: Users },
   { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "standings", label: "Standings", icon: Trophy },
+  {id: "teams", label: "Teams", icon: Users}
 ]
 
 interface FanSideNavProps {
