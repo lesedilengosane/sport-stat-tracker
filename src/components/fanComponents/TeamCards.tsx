@@ -26,10 +26,6 @@ interface Team {
 type SortOption =
   | "name-asc"
   | "name-desc"
-  | "players-asc"
-  | "players-desc"
-  | "coach-asc"
-  | "coach-desc";
 
 export default function TeamCards() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -92,14 +88,6 @@ export default function TeamCards() {
           return a.team_name.localeCompare(b.team_name);
         case "name-desc":
           return b.team_name.localeCompare(a.team_name);
-        case "players-asc":
-          return (a.players?.length || 0) - (b.players?.length || 0);
-        case "players-desc":
-          return (b.players?.length || 0) - (a.players?.length || 0);
-        case "coach-asc":
-          return (a.coach_id || "").localeCompare(b.coach_id || "");
-        case "coach-desc":
-          return (b.coach_id || "").localeCompare(a.coach_id || "");
         default:
           return 0;
       }
@@ -190,10 +178,6 @@ export default function TeamCards() {
               <SelectContent className="bg-white border-gray-300 text-gray-900">
                 <SelectItem value="name-asc">Team Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Team Name (Z-A)</SelectItem>
-                <SelectItem value="players-asc">Fewest Players</SelectItem>
-                <SelectItem value="players-desc">Most Players</SelectItem>
-                <SelectItem value="coach-asc">Coach (A-Z)</SelectItem>
-                <SelectItem value="coach-desc">Coach (Z-A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
