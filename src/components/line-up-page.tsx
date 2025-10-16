@@ -6,6 +6,7 @@ import { DataTable } from "./Line-up-table/LineUp-table";
 import { columns, Player_details } from "@/app/analyst/column";
 import { LastMatchesTable, MatchDetails as PrevMatch } from "@/components/LastMatchesTable";
 import { useRouter } from "next/navigation";
+import BasketballTimeline from "./EventsSummary";
 
 interface LineupProps {
   homeLineup?: Player_details[];
@@ -17,6 +18,8 @@ interface LineupProps {
   date?: string;
   homePrevMatches?: PrevMatch[];
   awayPrevMatches?: PrevMatch[];
+  eventsData?:any[];
+
 }
 
 export function Tabspage({
@@ -29,6 +32,7 @@ export function Tabspage({
   date,
   homePrevMatches = [],
   awayPrevMatches = [],
+  eventsData=[],
 }: LineupProps) {
   const router=useRouter()
   return (
@@ -83,11 +87,15 @@ export function Tabspage({
 
         {/* Game Summary Tab */}
         <TabsContent value="summary">
-          <div className="text-center text-white p-8">
-            <h2 className="text-xl font-bold">Game Summary</h2>
-            <p className="mt-4">Game summary will be displayed here</p>
-          </div>
-        </TabsContent>
+  <div className="text-center text-white p-8">
+    <h2 className="text-xl font-bold mb-4">Game Summary</h2>
+    {eventsData && eventsData.length > 0 ? (
+      <BasketballTimeline events={eventsData} homeTeam={homeTeam} awayTeam={awayTeam} />
+    ) : (
+      <p>No events available for this match.</p>
+    )}
+  </div>
+</TabsContent>
       </Tabs>
     </div>
   );

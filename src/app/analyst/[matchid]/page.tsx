@@ -27,6 +27,7 @@ interface MatchData {
   };
   homePrevMatches: any[];
   awayPrevMatches: any[];
+  MatchEvents:any[];
 }
 
 type MatchPagePropsCustom = {
@@ -77,6 +78,7 @@ export default async function MatchPage({
         awayTeam={data.Teams.find((t) => t.team_id === awayTeamId)}
         homePrevMatches={data.homePrevMatches}
         awayPrevMatches={data.awayPrevMatches}
+        MatchEvents={data.MatchEvents}
       />
     );
   } catch (err) {

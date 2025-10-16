@@ -42,6 +42,7 @@ interface MatchDetailsProps {
   awayTeam: Team;
   homePrevMatches?: any[];
   awayPrevMatches?: any[];
+  MatchEvents?:any[];
 }
 
 export default function MatchDetails({
@@ -52,6 +53,7 @@ export default function MatchDetails({
   awayTeam,
   homePrevMatches,
   awayPrevMatches,
+  MatchEvents,
 }: MatchDetailsProps) {
   const router = useRouter();
   const [homeLineup, setHomeLineup] = useState<PlayerDetails[]>(homePlayers);
@@ -150,6 +152,7 @@ export default function MatchDetails({
   awayLogo={awayTeam.icon_url}
   homePrevMatches={homePrevMatches}
   awayPrevMatches={awayPrevMatches}
+  eventsData={MatchEvents}
 />
         </div>
       </div>
