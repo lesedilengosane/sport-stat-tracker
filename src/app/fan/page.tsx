@@ -10,6 +10,7 @@ import { LeagueStandings } from "@/components/fanComponents/leagueStanding"
 import  PlayerCards  from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
+import TeamCards from "@/components/fanComponents/TeamCards"
 
 import { apiClient } from "../utils/apiClient"
 import {Game} from "@/types/basketball"
@@ -118,6 +119,12 @@ export default function FanDashboard() {
     </div>
   )
 
+  const renderTeams = () => (
+    <div>
+      <TeamCards />
+    </div>
+  )
+
   const renderTabContent = () => {
     switch (activeTab) {
       case "overview":
@@ -128,6 +135,8 @@ export default function FanDashboard() {
         return renderUpcomingGames()
       case "standings":
         return renderStandings()
+      case "teams":
+        return renderTeams()
       default:
         return renderOverview()
     }
