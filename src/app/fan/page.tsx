@@ -7,11 +7,21 @@ import { SeasonHighlights } from "@/components/fanComponents/SeasonHighlights"
 import { TopScorers } from "@/components/fanComponents/TopScorers"
 import { GameSchedule } from "@/components/fanComponents/GameSchedule"
 import { LeagueStandings } from "@/components/fanComponents/leagueStanding"
-import { PlayerCards } from "@/components/fanComponents/PlayerCards"
+import  PlayerCards  from "@/components/fanComponents/PlayerCards"
 import { GamesGrid } from "@/components/games-grid"
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
+
 import { apiClient } from "../utils/apiClient"
 import {Game} from "@/types/basketball"
+
+// Define dashboard data structure
+interface FanDashboardData {
+  season_highlights: any
+  top_scorers: any[]
+  upcoming_games: any[]
+  league_standings: any[]
+}
+
 
 interface Team {
   team_id: string
@@ -34,94 +44,48 @@ interface Match {
 
 export default function FanDashboard() {
   const [activeTab, setActiveTab] = useState("overview")
-  const [games, setGames] = useState<Game[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [data, setData] = useState<FanDashboardData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const fetchUpcomingGames = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const matchesData = await apiClient.getMatches()
-
-      if (matchesData && matchesData.length > 0) {
-        const teamIds = [
-          ...new Set([
-            ...matchesData.map((m: Match) => m.home_team_id),
-            ...matchesData.map((m: Match) => m.away_team_id),
-          ]),
-        ]
-
-        const teamsData = await apiClient.getTeamsByIds(teamIds)
-
-        const teamsMap = new Map()
-        teamsData?.forEach((team: Team) => {
-          teamsMap.set(team.team_id, team)
-        })
-
-        const formattedGames: Game[] = matchesData.map((match: Match) => {
-          const homeTeam = teamsMap.get(match.home_team_id) || {}
-          const awayTeam = teamsMap.get(match.away_team_id) || {}
-
-          return {
-            match_id: match.match_id,
-            date: new Date(match.match_date).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-            time: new Date(match.match_date).toLocaleTimeString("en-US", {
-              hour: "2-digit",
-              minute: "2-digit",
-            }),
-            location: match.location || "Unknown",
-            homeTeam: {
-              team_id: match.home_team_id,
-              name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-              logo: homeTeam.icon_url || "/default_team.svg",
-            },
-            awayTeam: {
-              team_id: match.away_team_id,
-              name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-              logo: awayTeam.icon_url || "/default_team.svg",
-            },
-          }
-        })
-
-        setGames(formattedGames)
-      }
-    } catch (err: any) {
-      console.error("Error fetching games:", err)
-      setError("Failed to load games.")
-      setGames([])
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const [teamId, setTeamId] = useState<string | null>(null)
 
   useEffect(() => {
-    if (activeTab === "upcoming-games") {
-      fetchUpcomingGames()
+    const fetchData = async () => {
+      setIsLoading(true)
+      try {
+        const res = await fetch("/api/fan")
+        if (!res.ok) throw new Error("Failed to fetch dashboard data")
+        const json = await res.json()
+        setData(json)
+      } catch (err: any) {
+        setError(err.message || "Failed to load dashboard data")
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [activeTab])
+    fetchData()
+  }, [])
 
-  const renderOverview = () => (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
-      <SeasonHighlights />
+  const renderOverview = () => {
+    if (!data) return null
+    return (
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        <SeasonHighlights highlights={data.season_highlights} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <GameSchedule compact />
-        <TopScorers />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <GameSchedule compact games={data.upcoming_games} />
+          <TopScorers players={data.top_scorers} />
+        </div>
+
+        <LeagueStandings compact standings={data.league_standings} />
       </div>
-
-      <LeagueStandings compact />
-    </div>
-  )
+    )
+  }
 
   const renderPlayers = () => (
     <div className="max-w-7xl mx-auto p-6">
       <PlayerCards />
+      {/*<PlayersList teamId={teamId} />*/}
     </div>
   )
 
@@ -143,14 +107,14 @@ export default function FanDashboard() {
         {error && (
           <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg mb-6">{error}</div>
         )}
-        <GamesGrid games={games} />
+        <GamesGrid games={data?.upcoming_games || []} />
       </div>
     )
   }
 
   const renderStandings = () => (
     <div className="max-w-7xl mx-auto p-6">
-      <LeagueStandings />
+      <LeagueStandings standings={data?.league_standings || []} />
     </div>
   )
 

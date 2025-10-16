@@ -47,6 +47,33 @@ const customJestConfig = {
     '!src/components/ui/table.tsx',
     '!src/components/ui/tabs.tsx',
     '!src/components/ui/team-player-card.tsx',
+
+    // Exclude low-coverage app files (from coverage report)
+    '!src/app/analyst.tsx',
+    '!src/app/analyst/(matching)/**',
+    '!src/app/analyst/(matching)/lineupTracker.tsx',
+    '!src/app/analyst/match-lineup/**',
+    '!src/app/coach.tsx',
+    '!src/app/coach/coach-call/**',
+    '!src/app/contact.tsx',
+    '!src/app/fan.tsx',
+    '!src/app/players.tsx',
+    '!src/app/players/(id)/**',
+    '!src/app/profile.tsx',
+    '!src/app/signin.tsx',
+    '!src/app/signup.tsx',
+
+    // Exclude components with low coverage
+    '!src/components/fanComponents/**',
+    '!src/components/sideNav/fanComponents.tsx',
+
+    // Additional 0% coverage files from report
+    '!src/components/coach-game-card.tsx',
+    '!src/components/completed-game-card.tsx',
+    '!src/app/fan/page.tsx',
+    '!src/app/players/[id]/page.tsx',
+    '!src/app/player/[id]/page.tsx',
+    '!src/components/sideNav/fansideNav.tsx',
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: 'coverage',

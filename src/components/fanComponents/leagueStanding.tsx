@@ -1,15 +1,11 @@
 "use client"
 
 interface TeamStanding {
-  rank: number
+  team_id: string
   team: string
-  abbr: string
   wins: number
   losses: number
-  pct: number
-  gb: string
-  l10: string
-  strk: string
+  pct: number | null
 }
 
 interface LeagueStandingsProps {
@@ -18,38 +14,63 @@ interface LeagueStandingsProps {
 }
 
 export function LeagueStandings({ standings, compact = false }: LeagueStandingsProps) {
-  // const [conference, setConference] = useState<"eastern" | "western">("eastern")
+  // Use the provided standings data or empty array if none provided
+  const displayStandings = standings || []
 
-  // Default sample data - should be calculated from matches table
-  // Query: Calculate wins/losses from matches where team_id = home_team_id OR team_id = away_team_id
-  const defaultStandings: TeamStanding[] = [
-    { rank: 1, team: "Boston Celtics", abbr: "BOS", wins: 49, losses: 23, pct: 0.681, gb: "-", l10: "7-3", strk: "W4" },
-    {
-      rank: 2,
-      team: "Milwaukee Bucks",
-      abbr: "MIL",
-      wins: 47,
-      losses: 25,
-      pct: 0.653,
-      gb: "2.0",
-      l10: "6-4",
-      strk: "W2",
-    },
-    {
-      rank: 3,
-      team: "Philadelphia 76ers",
-      abbr: "PHI",
-      wins: 45,
-      losses: 27,
-      pct: 0.625,
-      gb: "4.0",
-      l10: "7-3",
-      strk: "L1",
-    },
-    { rank: 4, team: "Miami Heat", abbr: "MIA", wins: 43, losses: 29, pct: 0.597, gb: "6.0", l10: "5-5", strk: "W1" },
-  ]
+  // Transform the data to match the component's expected format and calculate missing fields
+  const transformedStandings = displayStandings
+    .map((team, index) => {
+      // Calculate rank based on wins (descending) and losses (ascending)
+      const sortedByWins = [...displayStandings].sort((a, b) => {
+        if (b.wins !== a.wins) return b.wins - a.wins
+        return a.losses - b.losses
+      })
+      const rank = sortedByWins.findIndex(t => t.team_id === team.team_id) + 1
 
-  const displayStandings = standings || defaultStandings
+      // Generate abbreviation from team name (first 3 characters)
+      const abbr = team.team.substring(0, 3).toUpperCase()
+
+      // Calculate PCT if null, otherwise use provided value
+      const pct = team.pct !== null ? team.pct : team.wins + team.losses > 0 ? team.wins / (team.wins + team.losses) : 0
+
+      // Calculate Games Behind (GB) - simplified version
+      const maxWins = Math.max(...displayStandings.map(t => t.wins))
+      const gb = maxWins > 0 ? ((maxWins - team.wins) + (team.losses - Math.min(...displayStandings.map(t => t.losses)))) / 2 : 0
+      const gbDisplay = gb === 0 ? "-" : gb.toFixed(1)
+
+      // Default values for L10 and STRK since they're not in the JSON
+      const l10 = "0-0"
+      const strk = "-"
+
+      return {
+        rank,
+        team: team.team,
+        abbr,
+        wins: team.wins,
+        losses: team.losses,
+        pct,
+        gb: gbDisplay,
+        l10,
+        strk,
+        team_id : team.team_id
+      }
+    })
+    // Sort by rank
+    .sort((a, b) => a.rank - b.rank)
+
+  // If no standings provided, show nothing or a message
+  if (transformedStandings.length === 0) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className={`text-${compact ? "2xl" : "3xl"} font-bold text-white`}>League Standings</h2>
+        </div>
+        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden p-6">
+          <p className="text-white text-center">No standings data available</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -104,8 +125,8 @@ export function LeagueStandings({ standings, compact = false }: LeagueStandingsP
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10">
-              {displayStandings.map((team) => (
-                <tr key={team.rank} className="hover:bg-white/5 transition-colors">
+              {transformedStandings.map((team) => (
+                <tr key={team.team_id} className="hover:bg-white/5 transition-colors">
                   <td
                     className={`px-${compact ? "4" : "6"} py-${compact ? "3" : "4"} text-white font-${compact ? "semibold" : "bold"} ${!compact && "text-lg"}`}
                   >
@@ -136,7 +157,7 @@ export function LeagueStandings({ standings, compact = false }: LeagueStandingsP
                   <td
                     className={`text-center text-white font-semibold px-${compact ? "2" : "4"} py-${compact ? "3" : "4"}`}
                   >
-                    {team.pct}
+                    {team.pct.toFixed(3)}
                   </td>
                   <td
                     className={`text-center text-white font-semibold px-${compact ? "2" : "4"} py-${compact ? "3" : "4"}`}
@@ -150,7 +171,7 @@ export function LeagueStandings({ standings, compact = false }: LeagueStandingsP
                   </td>
                   <td className={`text-center px-${compact ? "2" : "4"} py-${compact ? "3" : "4"}`}>
                     <span
-                      className={`font-${compact ? "semibold" : "bold"} ${team.strk.startsWith("W") ? "text-green-400" : "text-red-400"}`}
+                      className={`font-${compact ? "semibold" : "bold"} ${team.strk.startsWith("W") ? "text-green-400" : team.strk.startsWith("L") ? "text-red-400" : "text-gray-400"}`}
                     >
                       {team.strk}
                     </span>
