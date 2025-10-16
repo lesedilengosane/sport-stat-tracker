@@ -296,7 +296,7 @@ export default function StatTrackerPage() {
 };
 
         const gameData: GameData = {
-          analyst: user?.user_id ?? "",
+          analyst: user?.auth_user_id ?? "",
           match_id: gameId,
           date: date,
           homeTeam: {

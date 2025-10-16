@@ -81,34 +81,78 @@ const Lineups={homeLineup,awayLineup}
  
 
 //The above for fetching lineups works well
-//3 last 5 matches for home team
-    const { data: homePrevMatches, error: homeError } = await supabase
-    .from("matches")
-    .select("*")
-    .or(`home_team_id.eq.${homeTeamId},away_team_id.eq.${awayTeamId}`)
-    .eq("completed", true)
-    .order("match_date", { ascending: false })
-    .limit(5);
+// last 5 matches for home team
+const { data: homePrevMatches, error: homeError } = await supabase
+  .from("matches")
+  .select(`
+    match_id,
+    home_team_id,
+    away_team_id,
+    home_score,
+    away_score,
+    match_date,
+    completed,
+    home_team:home_team_id (
+      team_id,
+      team_name,
+      icon_url,
+      coach_id
+    ),
+    away_team:away_team_id (
+      team_id,
+      team_name,
+      icon_url,
+      coach_id
+    )
+  `)
+  .or(`home_team_id.eq.${homeTeamId},away_team_id.eq.${homeTeamId}`)
+  .eq("completed", true)
+  .order("match_date", { ascending: false })
+  .limit(5);
 
-    if(homeError){
-      console.log(`There was an error fetching prev matches for Home team`)
-        return NextResponse.json({error:homeError.message},{status:500})
-    }
- console.log(`The 4th fetch was perfomed well`)
+if (homeError) {
+  console.log("There was an error fetching prev matches for Home team");
+  return NextResponse.json({ error: homeError.message }, { status: 500 });
+}
+
+console.log("✅ The 4th fetch was performed well");
+
+
 // last 5 matches for away team
-    const { data: awayPrevMatches, error: awayError } = await supabase
-    .from("matches")
-    .select("*")
-    .or(`home_team_id.eq.${homeTeamId},away_team_id.eq.${awayTeamId}`)
-    .eq("completed", true)
-    .order("match_date", { ascending: false })
-    .limit(5);
+const { data: awayPrevMatches, error: awayError } = await supabase
+  .from("matches")
+  .select(`
+    match_id,
+    home_team_id,
+    away_team_id,
+    home_score,
+    away_score,
+    match_date,
+    completed,
+    home_team:home_team_id (
+      team_id,
+      team_name,
+      icon_url,
+      coach_id
+    ),
+    away_team:away_team_id (
+      team_id,
+      team_name,
+      icon_url,
+      coach_id
+    )
+  `)
+  .or(`home_team_id.eq.${awayTeamId},away_team_id.eq.${awayTeamId}`)
+  .eq("completed", true)
+  .order("match_date", { ascending: false })
+  .limit(5);
 
-    if (awayError){
-      console.log(`There was an error fetching prev matches for Home team`)
-        return NextResponse.json({error:awayError.message},{status:500})
-    }
-     console.log(`The 5th fetch was perfomed well`)
+if (awayError) {
+  console.log("There was an error fetching prev matches for Away team");
+  return NextResponse.json({ error: awayError.message }, { status: 500 });
+}
+
+console.log("✅ The 5th fetch was performed well");
 //Now we need to combine the two Jsons
  return NextResponse.json({
     matchMetaData,

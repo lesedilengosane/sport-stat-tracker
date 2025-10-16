@@ -1,9 +1,11 @@
 // src/components/line-up-page.tsx
+// components/Tabspage.tsx
 "use client";
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "./Line-up-table/LineUp-table";
 import { columns, Player_details } from "@/app/analyst/column";
+import { LastMatchesTable, MatchDetails as PrevMatch } from "@/components/LastMatchesTable";
+import { useRouter } from "next/navigation";
 
 interface LineupProps {
   homeLineup?: Player_details[];
@@ -13,6 +15,8 @@ interface LineupProps {
   homeLogo?: string;
   awayLogo?: string;
   date?: string;
+  homePrevMatches?: PrevMatch[];
+  awayPrevMatches?: PrevMatch[];
 }
 
 export function Tabspage({
@@ -23,7 +27,10 @@ export function Tabspage({
   homeLogo,
   awayLogo,
   date,
+  homePrevMatches = [],
+  awayPrevMatches = [],
 }: LineupProps) {
+  const router=useRouter()
   return (
     <div className="flex w-full max-w-7xl flex-col gap-6 mx-auto p-6">
       <Tabs defaultValue="lineups">
@@ -36,49 +43,41 @@ export function Tabspage({
         {/* Lineups Tab */}
         <TabsContent value="lineups" className="w-full">
           {date && (
-            <h2 className="text-center text-white text-xl font-bold mb-6">
-              {date}
-            </h2>
+            <h2 className="text-center text-white text-xl font-bold mb-6">{date}</h2>
           )}
 
           <div className="flex w-full gap-6">
-            {/* Home Team */}
             <div className="w-1/2">
-              <div className="flex flex-col items-center mb-4">
-                {homeLogo && (
-                  <img
-                    src={homeLogo}
-                    alt={`${homeTeam} Logo`}
-                    className="w-16 h-16 mb-2 rounded-full"
-                  />
-                )}
-                <h3 className="text-lg font-bold text-white">{homeTeam}</h3>
-              </div>
-              <DataTable columns={columns} data={homeLineup} />
+              <DataTable columns={columns} data={homeLineup}
+              onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
+               />
             </div>
 
-            {/* Away Team */}
             <div className="w-1/2">
-              <div className="flex flex-col items-center mb-4">
-                {awayLogo && (
-                  <img
-                    src={awayLogo}
-                    alt={`${awayTeam} Logo`}
-                    className="w-16 h-16 mb-2 rounded-full"
-                  />
-                )}
-                <h3 className="text-lg font-bold text-white">{awayTeam}</h3>
-              </div>
-              <DataTable columns={columns} data={awayLineup} />
+            
+              <DataTable columns={columns} data={awayLineup} onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
+               />
             </div>
           </div>
         </TabsContent>
 
         {/* Last Games Tab */}
-        <TabsContent value="lastgames">
-          <div className="text-center text-white p-8">
-            <h2 className="text-xl font-bold">Last 5 Games</h2>
-            <p className="mt-4">Game statistics will be displayed here</p>
+        <TabsContent value="lastgames" className="w-full">
+          <div className="flex flex-col md:flex-row gap-8 mt-6">
+            <div className="w-full md:w-1/2">
+              <LastMatchesTable
+                data={homePrevMatches}
+                title={`Last 5 games - ${homeTeam}`}
+                onRowClick={(match) => router.push(`/analyst/${match.match_id}`)}
+              />
+            </div>
+            <div className="w-full md:w-1/2">
+              <LastMatchesTable
+                data={awayPrevMatches}
+                title={`Last 5 games - ${awayTeam}`}
+                onRowClick={(match) => router.push(`/analyst/${match.match_id}`)}
+              />
+            </div>
           </div>
         </TabsContent>
 

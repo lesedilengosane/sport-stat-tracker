@@ -72,7 +72,7 @@ export function Tabspage({
                 />
                 <h4 className="text-xl font-bold">{homeTeam}</h4>
               </div>
-              <DataTable columns={columns} data={homeLineup} />
+              <DataTable columns={columns} data={homeLineup}  />
             </div>
 
             {/* Away Team */}

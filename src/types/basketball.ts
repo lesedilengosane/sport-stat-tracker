@@ -48,7 +48,7 @@ export interface Team {
   }
   
   export interface GameData {
-    analyst:string;
+    analyst:string|null
     match_id: string;
     date: string;
     homeTeam: Team;
@@ -66,7 +66,7 @@ export interface GameCardProps {
   homeTeam: Team;
   awayTeam: Team;
   location: string;
-  isBooked?: boolean;
+  booked: boolean;
   homeLineup?: Player[];
   awayLineup?: Player[];
 }
@@ -82,7 +82,7 @@ export interface CompletedGameCardProps {
   homeTeam: Team;
   awayTeam: Team;
   location: string;
-  isBooked?: boolean;
+  booked: boolean;
   homeLineup?: Player[];
   awayLineup?: Player[];
 }
@@ -92,7 +92,7 @@ export interface CompletedGameCardProps {
 export interface Game {
   home_score?:number
   away_score?:number
-  isBooked: boolean
+  booked:boolean
   match_id: string
   analyst?: string
   completed: boolean     
@@ -115,8 +115,25 @@ export interface Match {
   home_score: number
   away_score: number
   completed:boolean
-  isBooked:boolean
+  booked:boolean
   home_team_id: string
   away_team_id: string
 }
 
+
+export // In your dashboard file or a types file
+interface CompletedGame {
+  home_score: number
+  away_score: number
+  booked:boolean
+  match_id: string
+  analyst?: string
+  completed: boolean     
+  date: string
+  time: string
+  location: string
+  homeTeam: { team_id: string; name: string; logo: string }
+  awayTeam: { team_id: string; name: string; logo: string }
+  homeLineup?: Player[]
+  awayLineup?: Player[]
+}

@@ -95,7 +95,7 @@ export default function Dashboard() {
     match_id: match.match_id,
     analyst: match.analyst,          
     completed: match.completed,
-    isBooked:match.isBooked, 
+    booked:match.booked, 
     away_score:match.away_score,
     home_score:match.home_score,
     location:match.location,           
@@ -141,12 +141,24 @@ export default function Dashboard() {
     fetchMatches()
   }, [])
 
+//filter upcoming games that have not been played from all games
+
+const upcomingGames=allGames.filter((game)=>game.completed==false)
+
 //filter completed games
   const completedGames= allGames.filter(
       (game) => game.completed ==true &&
         game.analyst === user?.auth_user_id
     )
     
+
+const bookedGames = allGames.filter(
+  (game) =>
+    game.booked === true &&
+    game.completed === false &&
+    game.analyst === user?.auth_user_id
+);
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     router.push("/")
@@ -158,7 +170,7 @@ export default function Dashboard() {
         return (
           <div className="max-w-6xl mx-auto p-6">
             <GamesGrid
-              games={allGames.map((game) => ({
+              games={upcomingGames.map((game) => ({
                 ...game,
                 homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
                 awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
@@ -167,14 +179,17 @@ export default function Dashboard() {
           </div>
         )
       case "booked-games":
-        return (
-          <div className="max-w-6xl mx-auto p-6">
-            <div className="bg-black/50 backdrop-blur-sm border border-orange-500/20 rounded-lg p-8 text-center">
-              <h2 className="text-2xl font-bold text-white mb-4">Booked Games</h2>
-              <p className="text-gray-300">This is where booked games for analysis will be shown</p>
-            </div>
-          </div>
-        )
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      <GamesGrid
+        games={bookedGames.map((game) => ({
+          ...game,
+          homeLineup: convertToPlayerDetails(game.homeLineup || [], "home"),
+          awayLineup: convertToPlayerDetails(game.awayLineup || [], "away"),
+        }))}
+      />
+    </div>
+  )
       case "live":
         return (
           <div className="max-w-6xl mx-auto p-6">

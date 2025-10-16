@@ -20,9 +20,11 @@ interface Match {
   home_score: number
   away_score: number
   status: string
-  home_team_id: string
-  away_team_id: string
+  home_team: { team_name: string; icon_url?: string };
+  away_team: { team_name: string; icon_url?: string };
 }
+
+
 
 
 interface Team {
@@ -38,8 +40,8 @@ interface MatchDetailsProps {
   awayPlayers: PlayerDetails[];
   homeTeam: Team;
   awayTeam: Team;
-  homePrevMatches: Match[];
-  awayPrevMatches: Match[];
+  homePrevMatches?: any[];
+  awayPrevMatches?: any[];
 }
 
 export default function MatchDetails({
@@ -92,7 +94,9 @@ export default function MatchDetails({
             {/* Match Date */}
             <div className="text-center text-black drop-shadow">
               <div className="text-2xl font-bold">
-                {homePrevMatches[0]?.match_date || "Date not specified"}
+                {homePrevMatches && homePrevMatches[0]?.match_date
+                  ? homePrevMatches[0].match_date
+                  : "Date not specified"}
               </div>
             </div>
 
@@ -137,7 +141,16 @@ export default function MatchDetails({
 
         {/* Lineups Tab Page */}
         <div className="bg-white/5 backdrop-blur-xl border border-orange-400/20 rounded-xl p-4 shadow-lg shadow-orange-500/10">
-          <Tabspage homeLineup={homeLineup} awayLineup={awayLineup} />
+          <Tabspage
+  homeLineup={homeLineup}
+  awayLineup={awayLineup}
+  homeTeam={homeTeam.team_name}
+  awayTeam={awayTeam.team_name}
+  homeLogo={homeTeam.icon_url}
+  awayLogo={awayTeam.icon_url}
+  homePrevMatches={homePrevMatches}
+  awayPrevMatches={awayPrevMatches}
+/>
         </div>
       </div>
     </div>
