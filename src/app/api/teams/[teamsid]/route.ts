@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../DatabaseApi/supabaseClient";
 
 export async function GET(request: NextRequest, { params }: { params: { teamsid: string } }) {
-  const { teamsid: teamId } = params;
+  const { teamsid: teamId } = await params;
 
   try {
     // 1️⃣ Fetch team details and coach_id

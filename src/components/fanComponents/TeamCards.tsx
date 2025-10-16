@@ -1,13 +1,12 @@
 "use client";
 
-import React from 'react'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Users, SortAsc } from 'lucide-react';
+import { Search, Users, SortAsc, ArrowLeft } from "lucide-react";
+import TeamDetails from "./TeamDetails";
 
 interface Player {
   player_id: string;
@@ -24,43 +23,39 @@ interface Team {
   players: Player[];
 }
 
-type SortOption = 'name-asc' | 'name-desc' | 'players-asc' | 'players-desc' | 'coach-asc' | 'coach-desc';
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "players-asc"
+  | "players-desc"
+  | "coach-asc"
+  | "coach-desc";
 
-const AllTeamsPage = () => {
+export default function TeamCards() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState<SortOption>('name-asc');
-  
-  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("name-asc");
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAllTeams = async () => {
       try {
         setError(null);
-        console.log('Fetching ALL teams from API...');
-        
-        // Use the API route to fetch all teams
-        const response = await fetch('/api/teams');
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);
-        }
-        
-        const teamsData = await response.json();
-        console.log('Teams data from API:', teamsData);
+        const response = await fetch("/api/teams");
+        if (!response.ok) throw new Error(`Failed to fetch teams: ${response.status}`);
+        const data = await response.json();
 
-        // Handle both array response and nested data structures
-        const teamsArray = Array.isArray(teamsData) ? teamsData : teamsData.teams || teamsData.data || [];
-        
-        console.log('Processed teams array:', teamsArray);
+        const teamsArray = Array.isArray(data)
+          ? data
+          : data.teams || data.data || [];
+
         setTeams(teamsArray);
         setFilteredTeams(teamsArray);
       } catch (err: any) {
-        console.error("Error fetching all teams from API:", err);
-        setError(err.message || 'Failed to load teams from API');
+        setError(err.message || "Failed to load teams");
       } finally {
         setLoading(false);
       }
@@ -69,39 +64,42 @@ const AllTeamsPage = () => {
     fetchAllTeams();
   }, []);
 
-  // Filter and sort teams based on search term and sort option
+  // Filter + Sort logic
   useEffect(() => {
     let result = teams;
 
-    // Apply search filter
+    // Search
     if (searchTerm) {
-      const lowercasedSearch = searchTerm.toLowerCase();
-      result = result.filter(team => 
-        team.team_name.toLowerCase().includes(lowercasedSearch) ||
-        (team.coach_id && team.coach_id.toLowerCase().includes(lowercasedSearch)) ||
-        (team.players && team.players.some(player => 
-          player.first_name.toLowerCase().includes(lowercasedSearch) ||
-          player.last_name.toLowerCase().includes(lowercasedSearch) ||
-          player.position.toLowerCase().includes(lowercasedSearch)
-        ))
+      const lower = searchTerm.toLowerCase();
+      result = result.filter(
+        (t) =>
+          t.team_name.toLowerCase().includes(lower) ||
+          (t.coach_id && t.coach_id.toLowerCase().includes(lower)) ||
+          (t.players &&
+            t.players.some(
+              (p) =>
+                p.first_name.toLowerCase().includes(lower) ||
+                p.last_name.toLowerCase().includes(lower) ||
+                p.position.toLowerCase().includes(lower)
+            ))
       );
     }
 
-    // Apply sorting
+    // Sort
     result = [...result].sort((a, b) => {
       switch (sortOption) {
-        case 'name-asc':
+        case "name-asc":
           return a.team_name.localeCompare(b.team_name);
-        case 'name-desc':
+        case "name-desc":
           return b.team_name.localeCompare(a.team_name);
-        case 'players-asc':
+        case "players-asc":
           return (a.players?.length || 0) - (b.players?.length || 0);
-        case 'players-desc':
+        case "players-desc":
           return (b.players?.length || 0) - (a.players?.length || 0);
-        case 'coach-asc':
-          return (a.coach_id || '').localeCompare(b.coach_id || '');
-        case 'coach-desc':
-          return (b.coach_id || '').localeCompare(a.coach_id || '');
+        case "coach-asc":
+          return (a.coach_id || "").localeCompare(b.coach_id || "");
+        case "coach-desc":
+          return (b.coach_id || "").localeCompare(a.coach_id || "");
         default:
           return 0;
       }
@@ -111,215 +109,128 @@ const AllTeamsPage = () => {
   }, [teams, searchTerm, sortOption]);
 
   const handleTeamClick = (teamId: string) => {
-    router.push(`/team/${teamId}`);
+    setSelectedTeamId(teamId);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const handleBackToList = () => {
+    setSelectedTeamId(null);
   };
 
-  const handleSortChange = (value: string) => {
-    setSortOption(value as SortOption);
-  };
-
-  const clearFilters = () => {
-    setSearchTerm('');
-    setSortOption('name-asc');
-  };
-
-  const refreshTeams = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/teams');
-      if (!response.ok) throw new Error('Failed to fetch teams');
-      const teamsData = await response.json();
-      const teamsArray = Array.isArray(teamsData) ? teamsData : teamsData.teams || teamsData.data || [];
-      setTeams(teamsArray);
-      setFilteredTeams(teamsArray);
-    } catch (err: any) {
-      setError(err.message || 'Failed to refresh teams');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
+  // === Team Details View ===
+  if (selectedTeamId) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-300 text-lg mb-4">Loading all teams from API...</p>
-          <div className="animate-pulse text-gray-500">Fetching team data from /api/teams...</div>
-        </div>
+      <div className="relative z-10 min-h-screen">
+        <Button
+          onClick={handleBackToList}
+          variant="outline"
+          className="mb-6 bg-white/30 border-gray-300 text-gray-800 hover:bg-white/60"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to All Teams
+        </Button>
+        <TeamDetails teamId={selectedTeamId} />
       </div>
     );
   }
 
-  if (error) {
+  // === Loading & Error States ===
+  if (loading)
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-8">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-red-400 text-lg mb-4">Error loading teams</p>
-          <p className="text-gray-400 mb-4">{error}</p>
-          <div className="space-x-4">
-            <Button 
-              onClick={refreshTeams}
-              className="bg-orange-600 hover:bg-orange-700"
-            >
-              Try Again
-            </Button>
-            <Button 
-              onClick={() => window.location.reload()}
-              variant="outline"
-              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-            >
-              Reload Page
-            </Button>
-          </div>
-        </div>
+      <div className="text-center text-gray-700 mt-10">Loading teams...</div>
+    );
+
+  if (error)
+    return (
+      <div className="text-center text-red-500 mt-10">
+        <p>{error}</p>
+        <Button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+        >
+          Reload
+        </Button>
       </div>
     );
-  }
 
+  // === Team List View ===
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="relative z-10">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Title */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-orange-400 mb-2">
-            All Teams in Database
+          <h1 className="text-3xl font-bold text-orange-500 mb-2">
+            All Teams
           </h1>
-          <p className="text-gray-400">
-            Showing {filteredTeams.length} of {teams.length} team{teams.length !== 1 ? 's' : ''} from API
+          <p className="text-gray-700">
+            Showing {filteredTeams.length} of {teams.length} teams
           </p>
-          <Button 
-            onClick={refreshTeams}
-            variant="outline" 
-            size="sm"
-            className="mt-2 bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-          >
-            Refresh Teams
-          </Button>
         </div>
 
-        {/* Search and Sort Controls */}
+        {/* Search + Sort Controls */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8 max-w-4xl mx-auto">
-          {/* Search Input */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
             <Input
-              type="text"
-              placeholder="Search all teams, players, coaches, or positions..."
+              placeholder="Search teams, coaches, or players..."
               value={searchTerm}
-              onChange={handleSearchChange}
-              className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-white/70 border-gray-300 text-gray-900 placeholder:text-gray-600 focus:ring-2 focus:ring-orange-400"
             />
           </div>
 
-          {/* Sort Dropdown */}
           <div className="w-full sm:w-64">
-            <Select value={sortOption} onValueChange={handleSortChange}>
-              <SelectTrigger className="bg-gray-800 border-gray-700 text-white">
-                <SortAsc className="h-4 w-4 mr-2" />
+            <Select
+              value={sortOption}
+              onValueChange={(v) => setSortOption(v as SortOption)}
+            >
+              <SelectTrigger className="bg-white/70 border-gray-300 text-gray-900">
+                <SortAsc className="h-4 w-4 mr-2 text-gray-600" />
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
-              <SelectContent className="bg-gray-800 border-gray-700 text-white">
+              <SelectContent className="bg-white border-gray-300 text-gray-900">
                 <SelectItem value="name-asc">Team Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Team Name (Z-A)</SelectItem>
-                <SelectItem value="players-asc">Players (Fewest First)</SelectItem>
-                <SelectItem value="players-desc">Players (Most First)</SelectItem>
+                <SelectItem value="players-asc">Fewest Players</SelectItem>
+                <SelectItem value="players-desc">Most Players</SelectItem>
                 <SelectItem value="coach-asc">Coach (A-Z)</SelectItem>
                 <SelectItem value="coach-desc">Coach (Z-A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
-
-          {/* Clear Filters Button */}
-          {(searchTerm || sortOption !== 'name-asc') && (
-            <Button
-              variant="outline"
-              onClick={clearFilters}
-              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
-            >
-              Clear Filters
-            </Button>
-          )}
         </div>
 
-        {/* No Results Message */}
-        {filteredTeams.length === 0 && teams.length > 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg mb-4">No teams found matching your search.</p>
-            <Button
-              onClick={clearFilters}
-              className="bg-orange-600 hover:bg-orange-700 text-white"
-            >
-              Clear Search
-            </Button>
-          </div>
-        )}
-
         {/* Teams Grid */}
-        {filteredTeams.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredTeams.map((team) => (
-              <Card
-                key={team.team_id}
-                className="cursor-pointer hover:scale-105 transition-all duration-300 bg-gradient-to-br from-gray-800 via-gray-900 to-black border border-gray-700 shadow-lg hover:shadow-xl"
-              >
-                <CardContent className="p-6 text-center space-y-4">
-                  {/* Team Name */}
-                  <h2 className="text-xl font-semibold text-white truncate">
-                    {team.team_name}
-                  </h2>
-                  
-                  {/* Coach */}
-                  <p className="text-gray-400 text-sm">
-                    Coach: <span className="text-blue-400">{team.coach_id || 'Unassigned'}</span>
-                  </p>
-                  
-                  {/* Player Count */}
-                  <div className="flex items-center justify-center text-sm text-gray-500">
-                    <Users className="h-4 w-4 mr-2" />
-                    {team.players?.length || 0} player{(team.players?.length || 0) !== 1 ? 's' : ''}
-                  </div>
-
-                  {/* Positions (if any players) */}
-                  {team.players && team.players.length > 0 && (
-                    <div className="text-xs text-gray-500">
-                      Positions: {Array.from(new Set(team.players.map(p => p.position))).join(', ')}
-                    </div>
-                  )}
-
-                  {/* View Team Button */}
-                  <Button
-                    className="w-full bg-orange-600 hover:bg-orange-700 text-white mt-2"
-                    onClick={() => handleTeamClick(team.team_id)}
-                  >
-                    View Team Details
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-
-        {/* No Teams in Database */}
-        {teams.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-gray-400 text-lg mb-4">No teams found in the database.</p>
-            <p className="text-gray-500 text-sm">The API returned an empty teams list.</p>
-            <Button 
-              onClick={refreshTeams}
-              className="bg-orange-600 hover:bg-orange-700 text-white mt-4"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredTeams.map((team) => (
+            <Card
+              key={team.team_id}
+              className="cursor-pointer hover:scale-105 transition-all duration-300 bg-white/60 backdrop-blur-md border border-gray-300 shadow-lg"
             >
-              Refresh Teams
-            </Button>
-          </div>
-        )}
+              <CardContent className="p-6 text-center space-y-4">
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {team.team_name}
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Coach:{" "}
+                  <span className="text-orange-500">
+                    {team.coach_id || "Unassigned"}
+                  </span>
+                </p>
+                <div className="flex items-center justify-center text-sm text-gray-500">
+                  <Users className="h-4 w-4 mr-2 text-orange-400" />
+                  {team.players?.length || 0} players
+                </div>
+                <Button
+                  onClick={() => handleTeamClick(team.team_id)}
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white mt-2"
+                >
+                  View Team Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
-
-export default AllTeamsPage;
