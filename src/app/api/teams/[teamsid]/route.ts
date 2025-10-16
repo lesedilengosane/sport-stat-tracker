@@ -1,46 +1,48 @@
+// /app/api/teams/[teamsid]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../DatabaseApi/supabaseClient";
 
-export async function GET(request: NextRequest, { params }: { params: { teamsid: string } }) {
-  const { teamsid: teamId } = await params;
+export async function GET(req: NextRequest) {
+  // Extract teamsid from the URL
+  const url = new URL(req.url);
+  const segments = url.pathname.split("/");
+  const teamId = segments[segments.length - 1]; // last segment
 
   try {
-    // 1️⃣ Fetch team details and coach_id
     const { data: teamData, error: teamError } = await supabase
       .from("teams")
       .select("team_id, team_name, created_at, icon_url, coach_id")
       .eq("team_id", teamId)
-      .single();
+      .maybeSingle();
 
     if (teamError) throw teamError;
+    if (!teamData) return NextResponse.json({ error: "Team not found" }, { status: 404 });
 
-    // 2️⃣ Fetch coach info if coach_id exists
+    // Fetch coach
     let coachData = null;
     if (teamData.coach_id) {
       const { data: coach, error: coachError } = await supabase
         .from("coaches")
         .select("coach_id, user_id")
         .eq("coach_id", teamData.coach_id)
-        .single();
+        .maybeSingle();
 
       if (coachError) throw coachError;
 
-      // Fetch the user details for this coach
-      const { data: user, error: userError } = await supabase
-        .from("users")
-        .select("first_name, last_name, role")
-        .eq("user_id", coach.user_id)
-        .single();
+      if (coach) {
+        const { data: user, error: userError } = await supabase
+          .from("users")
+          .select("first_name, last_name, role")
+          .eq("user_id", coach.user_id)
+          .maybeSingle();
 
-      if (userError) throw userError;
+        if (userError) throw userError;
 
-      coachData = {
-        ...coach,
-        user: user,
-      };
+        coachData = { ...coach, user };
+      }
     }
 
-    // 3️⃣ Fetch all players in this team
+    // Fetch players
     const { data: players, error: playersError } = await supabase
       .from("players")
       .select(
@@ -51,7 +53,7 @@ export async function GET(request: NextRequest, { params }: { params: { teamsid:
 
     if (playersError) throw playersError;
 
-    // 4️⃣ Fetch matches where this team participated (home or away)
+    // Fetch matches
     const { data: matches, error: matchesError } = await supabase
       .from("matches")
       .select(`
@@ -69,12 +71,8 @@ export async function GET(request: NextRequest, { params }: { params: { teamsid:
 
     if (matchesError) throw matchesError;
 
-    // ✅ Return all combined
     return NextResponse.json({
-      team: {
-        ...teamData,
-        coach: coachData,
-      },
+      team: { ...teamData, coach: coachData },
       players,
       matches,
     });
