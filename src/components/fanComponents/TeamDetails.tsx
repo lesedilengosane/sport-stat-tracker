@@ -47,17 +47,22 @@ export default function TeamDetails({ teamId }: TeamDetailsProps) {
 
         const resTeam = await fetch("/api/all");
         if (!resTeam.ok) throw new Error("Failed to fetch team data");
-        const { coaches, matches } = await resTeam.json();
+        const { coaches, teams, matches } = await resTeam.json();
 
-        const teamCoach = coaches.find((c: any) => c.teams?.team_id === teamId);
+        // Find the team by its ID
+        const teamData = teams.find((t: any) => t.team_id === teamId);
+
+        // Try to find its coach (optional)
+        const teamCoach = coaches.find((c: any) => c.team_id === teamId);
 
         const teamInfo: Team = {
-          name: teamCoach?.teams?.team_name || "Unknown Team",
-          coach: teamCoach
-            ? `${teamCoach.users.first_name} ${teamCoach.users.last_name}`
-            : "No Coach",
-          icon_url: teamCoach?.teams?.icon_url || null,
+        name: teamData?.team_name || "Unknown Team",
+        coach: teamCoach
+         ? `${teamCoach.users.first_name} ${teamCoach.users.last_name}`
+          : "No Coach",
+        icon_url: teamData?.icon_url || null,
         };
+
 
         const teamMatches = matches.filter(
           (m: Match) =>
@@ -80,9 +85,9 @@ export default function TeamDetails({ teamId }: TeamDetailsProps) {
 
   if (loading) return <p className="text-center mt-10 text-white">Loading...</p>;
   if (error) return <p className="text-center mt-10 text-red-400">{error}</p>;
-  if (players.length === 0)
+  /*if (players.length === 0)
     return <p className="text-center mt-10 text-white">No players found for this team.</p>;
-
+*/
   const totalPoints = players.reduce((sum, p) => sum + p.points, 0);
   const totalAssists = players.reduce((sum, p) => sum + p.assists, 0);
   const totalRebounds = players.reduce((sum, p) => sum + p.rebounds, 0);
