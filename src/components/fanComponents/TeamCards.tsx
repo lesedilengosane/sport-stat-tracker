@@ -26,10 +26,6 @@ interface Team {
 type SortOption =
   | "name-asc"
   | "name-desc"
-  | "players-asc"
-  | "players-desc"
-  | "coach-asc"
-  | "coach-desc";
 
 export default function TeamCards() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -92,14 +88,6 @@ export default function TeamCards() {
           return a.team_name.localeCompare(b.team_name);
         case "name-desc":
           return b.team_name.localeCompare(a.team_name);
-        case "players-asc":
-          return (a.players?.length || 0) - (b.players?.length || 0);
-        case "players-desc":
-          return (b.players?.length || 0) - (a.players?.length || 0);
-        case "coach-asc":
-          return (a.coach_id || "").localeCompare(b.coach_id || "");
-        case "coach-desc":
-          return (b.coach_id || "").localeCompare(a.coach_id || "");
         default:
           return 0;
       }
@@ -190,10 +178,6 @@ export default function TeamCards() {
               <SelectContent className="bg-white border-gray-300 text-gray-900">
                 <SelectItem value="name-asc">Team Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Team Name (Z-A)</SelectItem>
-                <SelectItem value="players-asc">Fewest Players</SelectItem>
-                <SelectItem value="players-desc">Most Players</SelectItem>
-                <SelectItem value="coach-asc">Coach (A-Z)</SelectItem>
-                <SelectItem value="coach-desc">Coach (Z-A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -210,15 +194,15 @@ export default function TeamCards() {
                 <h2 className="text-xl font-semibold text-gray-900">
                   {team.team_name}
                 </h2>
-                <p className="text-gray-600 text-sm">
+                {/*<p className="text-gray-600 text-sm">
                   Coach:{" "}
                   <span className="text-orange-500">
                     {team.coach_id || "Unassigned"}
                   </span>
-                </p>
+                </p>*/}
                 <div className="flex items-center justify-center text-sm text-gray-500">
-                  <Users className="h-4 w-4 mr-2 text-orange-400" />
-                  {team.players?.length || 0} players
+                  {/*<Users className="h-4 w-4 mr-2 text-orange-400" />
+                  {team.players?.length || 0} players */}
                 </div>
                 <Button
                   onClick={() => handleTeamClick(team.team_id)}
