@@ -160,15 +160,9 @@ export default function TeamCards() {
               className="cursor-pointer hover:scale-105 transition-all duration-300 bg-black/10 border border-white shadow-lg"
             >
               <CardContent className="p-6 text-center space-y-4">
-
-                <h2 className="text-xl font-semibold text-gray-900">{team.team_name}</h2>
-                <p className="text-gray-600 text-sm">
-                  Coach: <span className="text-orange-500">{team.coach_id || "Unassigned"}</span>
-                </p>
-                <div className="flex items-center justify-center text-sm text-gray-600">
-                  <Users className="h-4 w-4 mr-2 text-orange-500" />
-                  {team.players?.length || 0} players
-                </div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {team.team_name}
+                </h2>
                 <Button
                   onClick={() => handleTeamClick(team.team_id)}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white mt-2"
