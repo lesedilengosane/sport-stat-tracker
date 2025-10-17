@@ -33,24 +33,24 @@ export function TopScorers({ players }: TopScorersProps) {
   return (
     <div>
       <h2 className="text-2xl font-bold text-white mb-4">Top Scorers</h2>
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden">
+      <div className="bg-black/7 backdrop-blur-md border border-white/50 rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-white/5 border-b border-white/10">
               <tr>
-                <th className="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 py-3">
+                <th className="text-left text-xs font-semibold text-black uppercase tracking-wider px-4 py-3">
                   Player
                 </th>
-                <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-3">
+                <th className="text-center text-xs font-semibold text-black uppercase tracking-wider px-2 py-3">
                   PPG
                 </th>
-                <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-3">
+                <th className="text-center text-xs font-semibold text-black uppercase tracking-wider px-2 py-3">
                   RPG
                 </th>
-                <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-3">
+                <th className="text-center text-xs font-semibold text-black uppercase tracking-wider px-2 py-3">
                   APG
                 </th>
-                <th className="text-center text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 py-3">
+                <th className="text-center text-xs font-semibold text-black uppercase tracking-wider px-2 py-3">
                   FG%
                 </th>
               </tr>

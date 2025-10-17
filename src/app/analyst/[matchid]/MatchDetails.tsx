@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tabspage } from "@/components/line-up-page";
+import { MatchMetaData } from "@/types/basketball";
 
 interface PlayerDetails {
   id: string;
@@ -42,6 +43,8 @@ interface MatchDetailsProps {
   awayTeam: Team;
   homePrevMatches?: any[];
   awayPrevMatches?: any[];
+  MatchEvents?:any[];
+  metadata:MatchMetaData
 }
 
 export default function MatchDetails({
@@ -52,10 +55,13 @@ export default function MatchDetails({
   awayTeam,
   homePrevMatches,
   awayPrevMatches,
+  MatchEvents,
+  metadata
 }: MatchDetailsProps) {
   const router = useRouter();
   const [homeLineup, setHomeLineup] = useState<PlayerDetails[]>(homePlayers);
   const [awayLineup, setAwayLineup] = useState<PlayerDetails[]>(awayPlayers);
+ // console.log("Metadata inside MatchDetails:", JSON.stringify(metadata, null, 2));
 
   return (
     <div className="relative min-h-screen">
@@ -145,11 +151,15 @@ export default function MatchDetails({
   homeLineup={homeLineup}
   awayLineup={awayLineup}
   homeTeam={homeTeam.team_name}
+  homeTeamID={homeTeam.team_id}
+  awayTeamID={awayTeam.team_id}
   awayTeam={awayTeam.team_name}
   homeLogo={homeTeam.icon_url}
   awayLogo={awayTeam.icon_url}
   homePrevMatches={homePrevMatches}
   awayPrevMatches={awayPrevMatches}
+  eventsData={MatchEvents}
+  metadata={metadata}
 />
         </div>
       </div>

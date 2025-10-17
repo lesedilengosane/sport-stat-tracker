@@ -15,7 +15,7 @@ import TeamCards from "@/components/fanComponents/TeamCards"
 import { apiClient } from "../utils/apiClient"
 import {Game} from "@/types/basketball"
 
-// Define dashboard data structure
+
 interface FanDashboardData {
   season_highlights: any
   top_scorers: any[]
@@ -147,7 +147,7 @@ export default function FanDashboard() {
       <FanSideNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div className="fixed inset-0 z-0">
-        <Image src="/bgr.jpg" alt="Background" fill priority className="object-cover" />
+        <Image src="/background/ballBG.jpeg" alt="Background" fill priority className="object-cover" />
         <div className="absolute inset-0 bg-white/40 backdrop-blur-lg" />
       </div>
 

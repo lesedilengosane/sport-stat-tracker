@@ -1,5 +1,7 @@
 // app/analyst/[matchid]/page.tsx
+import { metadata } from "@/app/layout";
 import MatchDetails from "./MatchDetails";
+import { MatchMetaData } from "@/types/basketball";
 
 interface PlayerDetails {
   id: string;
@@ -19,6 +21,7 @@ interface LineupPlayer {
   };
 }
 
+
 interface MatchData {
   Teams: any[];
    lineups: {
@@ -27,6 +30,8 @@ interface MatchData {
   };
   homePrevMatches: any[];
   awayPrevMatches: any[];
+  MatchEvents:any[];
+  matchMetaData:MatchMetaData
 }
 
 type MatchPagePropsCustom = {
@@ -68,6 +73,7 @@ export default async function MatchPage({
     const homePlayers = mapLineup(homeLineupRaw, "home");
     const awayPlayers = mapLineup(awayLineupRaw, "away");
 
+    //console.log(`The metadata object before passing data to match details is ->\n ${metadata}`)
     return (
       <MatchDetails
         matchId={matchid}
@@ -77,6 +83,8 @@ export default async function MatchPage({
         awayTeam={data.Teams.find((t) => t.team_id === awayTeamId)}
         homePrevMatches={data.homePrevMatches}
         awayPrevMatches={data.awayPrevMatches}
+        MatchEvents={data.MatchEvents}
+        metadata={data.matchMetaData}
       />
     );
   } catch (err) {
