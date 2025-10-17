@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Search, User, Users, X } from "lucide-react"
 import Image from "next/image"
-import type { SearchResult, PlayerResult, TeamResult } from "@/types/search"
+import type { SearchResults, SearchPlayer, SearchTeam } from "@/types/search"
 
 interface SearchDropdownProps {
   query: string
@@ -12,7 +12,7 @@ interface SearchDropdownProps {
 }
 
 export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
-  const [results, setResults] = useState<SearchResult | null>(null)
+  const [results, setResults] = useState<SearchResults | null>(null)
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<"all" | "players" | "teams">("all")
   const router = useRouter()
@@ -54,12 +54,12 @@ export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [onClose])
 
-  const handlePlayerClick = (player: PlayerResult) => {
-    router.push(`/players/${player.player_id}`)
+  const handlePlayerClick = (player: SearchPlayer) => {
+    router.push(`/player/${player.player_id}`)
     onClose()
   }
 
-  const handleTeamClick = (team: TeamResult) => {
+  const handleTeamClick = (team: SearchTeam) => {
     router.push(`/fan/team/${team.team_id}`)
     onClose()
   }
@@ -78,7 +78,7 @@ export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
   return (
     <div
       ref={dropdownRef}
-      className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border-2 border-orange-500/20 max-h-[500px] overflow-hidden z-50"
+      className="absolute top-full left-0 right-0 mt-2 bg-white/90 rounded-2xl shadow-2xl border-2 border-orange-500/20 max-h-[500px] overflow-hidden z-50"
     >
       {/* Header with tabs */}
       <div className="border-b border-gray-200 p-4">
@@ -147,12 +147,12 @@ export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
                   <button
                     key={player.player_id}
                     onClick={() => handlePlayerClick(player)}
-                    className="w-full flex items-center gap-3 p-3 hover:bg-orange-50 rounded-lg transition-colors text-left"
+                    className="w-full flex items-center gap-3 p-3 hover:bg-orange-100 rounded-lg transition-colors text-left"
                   >
                     <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                      {player.profile_pic_url ? (
+                      {player.avatar_url ? (
                         <Image
-                          src={player.profile_pic_url || "/placeholder.svg"}
+                          src={player.avatar_url || "/placeholder.svg"}
                           alt={`${player.first_name} ${player.last_name}`}
                           fill
                           className="object-cover"
@@ -169,7 +169,8 @@ export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
                         {player.first_name} {player.last_name}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {player.position} • #{player.jersey_number}
+                        {player.position}
+                        {player.jersey_number && ` • #${player.jersey_number}`}
                       </p>
                     </div>
                   </button>

@@ -1,9 +1,9 @@
-// Search-related types
 export interface SearchPlayer {
     player_id: string
     first_name: string
     last_name: string
     position: string
+    jersey_number: number | null
     avatar_url: string | null
     team_id: string | null
   }

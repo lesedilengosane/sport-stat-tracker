@@ -121,8 +121,8 @@ export default function TeamCards() {
     <div className="relative z-10">
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">All Teams</h1>
-          <p className="text-white">
+          <h1 className="text-3xl font-bold text-black mb-2">All Teams</h1>
+          <p className="text-gray-500">
             Showing {filteredTeams.length} of {teams.length} teams
           </p>
         </div>
@@ -140,7 +140,7 @@ export default function TeamCards() {
 
           <div className="w-full sm:w-64">
             <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
-              <SelectTrigger className="bg-white border-2 border-orange-500 text-gray-900">
+              <SelectTrigger className="bg-black/10 border border-white text-gray-900">
                 <SortAsc className="h-4 w-4 mr-2 text-gray-600" />
                 <SelectValue placeholder="Sort by..." />
               </SelectTrigger>
@@ -160,7 +160,7 @@ export default function TeamCards() {
           {filteredTeams.map((team) => (
             <Card
               key={team.team_id}
-              className="cursor-pointer hover:scale-105 transition-all duration-300 bg-white border-2 border-orange-500 shadow-lg"
+              className="cursor-pointer hover:scale-105 transition-all duration-300 bg-black/10 border border-white shadow-lg"
             >
               <CardContent className="p-6 text-center space-y-4">
                 <h2 className="text-xl font-semibold text-gray-900">{team.team_name}</h2>

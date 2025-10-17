@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     const { data: players, error: playersError } = await supabase
       .from("players")
-      .select("player_id, first_name, last_name, team_id")
+      .select("player_id, first_name, last_name, position, jersey_number, team_id")
       .or(`first_name.ilike.%${searchTerm}%,last_name.ilike.%${searchTerm}%`)
       .limit(10)
 
