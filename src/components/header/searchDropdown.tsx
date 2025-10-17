@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { Search, User, Users, X } from "lucide-react"
 import Image from "next/image"
 import type { SearchResults, SearchPlayer, SearchTeam } from "@/types/search"
+import TeamDetails from "../fanComponents/TeamDetails"
 
 interface SearchDropdownProps {
   query: string
@@ -60,7 +61,9 @@ export function SearchDropdown({ query, onClose }: SearchDropdownProps) {
   }
 
   const handleTeamClick = (team: SearchTeam) => {
-    router.push(`/fan/team/${team.team_id}`)
+    console.log("TeamID", team);
+    router.push(`/team/${team.team_id}`)
+    //return <TeamDetails teamId="team" />
     onClose()
   }
 
