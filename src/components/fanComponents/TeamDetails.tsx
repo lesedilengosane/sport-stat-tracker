@@ -25,6 +25,7 @@ export default function TeamDetails({ teamId }: TeamDetailsProps) {
 
         const teamPlayers = playersData.filter((p) => p.team_id === teamId)
 
+
         const resTeam = await fetch("/api/all")
         if (!resTeam.ok) throw new Error("Failed to fetch team data")
         const { coaches, matches } = await resTeam.json()
@@ -36,6 +37,8 @@ export default function TeamDetails({ teamId }: TeamDetailsProps) {
           coach: teamCoach ? `${teamCoach.users.first_name} ${teamCoach.users.last_name}` : "No Coach",
           icon_url: teamCoach?.teams?.icon_url || null,
         }
+
+
 
         const teamMatches = matches.filter(
           (m: TeamMatch) => m.home_team?.team_id === teamId || m.away_team?.team_id === teamId,

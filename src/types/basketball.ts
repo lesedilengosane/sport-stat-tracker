@@ -137,3 +137,19 @@ interface CompletedGame {
   homeLineup?: Player[]
   awayLineup?: Player[]
 }
+
+export interface MatchMetaData {
+  idx: number;
+  match_id: string;
+  home_team_id: string;
+  away_team_id: string;
+  match_date: string;
+  location: string;
+  season: string;
+  created_at: string;
+  completed: boolean;
+  home_score: number;
+  away_score: number;
+  analyst: string;
+  booked: boolean;
+}

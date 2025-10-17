@@ -9,6 +9,7 @@ import { Search, Users, SortAsc, ArrowLeft } from "lucide-react"
 import TeamDetails from "./TeamDetails"
 import type { Team, SortOption } from "@/types/team"
 
+
 export default function TeamCards() {
   const [teams, setTeams] = useState<Team[]>([])
   const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
@@ -147,10 +148,6 @@ export default function TeamCards() {
               <SelectContent className="bg-white border-gray-300 text-gray-900">
                 <SelectItem value="name-asc">Team Name (A-Z)</SelectItem>
                 <SelectItem value="name-desc">Team Name (Z-A)</SelectItem>
-                <SelectItem value="players-asc">Fewest Players</SelectItem>
-                <SelectItem value="players-desc">Most Players</SelectItem>
-                <SelectItem value="coach-asc">Coach (A-Z)</SelectItem>
-                <SelectItem value="coach-desc">Coach (Z-A)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -163,6 +160,7 @@ export default function TeamCards() {
               className="cursor-pointer hover:scale-105 transition-all duration-300 bg-black/10 border border-white shadow-lg"
             >
               <CardContent className="p-6 text-center space-y-4">
+
                 <h2 className="text-xl font-semibold text-gray-900">{team.team_name}</h2>
                 <p className="text-gray-600 text-sm">
                   Coach: <span className="text-orange-500">{team.coach_id || "Unassigned"}</span>

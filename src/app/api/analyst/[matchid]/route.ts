@@ -153,13 +153,42 @@ if (awayError) {
 }
 
 console.log("✅ The 5th fetch was performed well");
+
+// 2. Fetch events for this match with player info
+const { data: MatchEvents, error: eventsError } = await supabase
+  .from("match_events")
+  .select(`
+    id,
+    match_id,
+    timestamp,
+    team_id,
+    action,
+    points,
+    player_id,
+    players (
+      player_id,
+      first_name,
+      last_name,
+      position,
+      jersey_number,
+      team_id
+    )
+  `)
+  .eq("match_id", matchid)
+  .order("timestamp", { ascending: true });
+
+  if(eventsError){
+    console.log(`There was an error fetching game events`)
+    return NextResponse.json({error :eventsError.message},{status:500})
+  }
 //Now we need to combine the two Jsons
  return NextResponse.json({
     matchMetaData,
     Teams,
     lineups: Lineups,
     awayPrevMatches,
-    homePrevMatches
+    homePrevMatches,
+     MatchEvents
  })
 
         
