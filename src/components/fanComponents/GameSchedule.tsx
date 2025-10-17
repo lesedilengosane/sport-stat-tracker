@@ -20,9 +20,9 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
   if (displayGames.length === 0) {
     return (
       <div>
-        <h2 className="text-2xl font-bold text-white mb-4">{compact ? "Game Schedule" : "Full Schedule"}</h2>
-        <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden p-6">
-          <p className="text-white text-center">No upcoming games scheduled</p>
+        <h2 className="text-2xl font-bold text-black mb-4">{compact ? "Game Schedule" : "Full Schedule"}</h2>
+        <div className="bg-white rounded-xl overflow-hidden p-6 shadow-lg">
+          <p className="text-gray-600 text-center">No upcoming games scheduled</p>
         </div>
       </div>
     )
@@ -31,12 +31,12 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
   return (
     <div>
       <h2 className="text-2xl font-bold text-white mb-4">{compact ? "Game Schedule" : "Full Schedule"}</h2>
-      <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl overflow-hidden">
+      <div className="bg-black/10  border border-white/60 rounded-xl overflow-hidden shadow-lg">
         <div className={`space-y-${compact ? "2" : "4"} p-${compact ? "4" : "6"}`}>
           {displayGames.map((game, index) => (
             <div
               key={index}
-              className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-lg p-${compact ? "4" : "6"} hover:bg-white/10 transition-colors`}
+              className={`bg-orange-50  rounded-lg p-${compact ? "4" : "6"} hover:bg-orange-100 transition-colors`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
@@ -48,7 +48,7 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
                       {game.away_team.substring(0, 3).toUpperCase()}
                     </span>
                     <span
-                      className={`text-white font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
+                      className={`text-black font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
                     >
                       {game.away_team}
                     </span>
@@ -61,7 +61,7 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
                       {game.home_team.substring(0, 3).toUpperCase()}
                     </span>
                     <span
-                      className={`text-white font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
+                      className={`text-black font-${compact ? "medium" : "semibold"} text-${compact ? "base" : "lg"}`}
                     >
                       {game.home_team}
                     </span>
@@ -69,19 +69,19 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
                 </div>
                 <div className="text-right">
                   <div
-                    className={`text-${compact ? "sm" : "lg"} font-${compact ? "semibold" : "bold"} text-orange-500 ${!compact && "mb-1"}`}
+                    className={`text-${compact ? "sm" : "lg"} font-${compact ? "semibold" : "bold"} text-orange-600 ${!compact && "mb-1"}`}
                   >
                     {game.date}
                   </div>
-                  <div className={`text-${compact ? "xs" : "sm"} text-gray-400`}>{game.time}</div>
+                  <div className={`text-${compact ? "xs" : "sm"} text-gray-600`}>{game.time}</div>
                 </div>
               </div>
             </div>
           ))}
         </div>
         {compact && (
-          <div className="border-t border-white/10 p-4 text-center">
-            <button className="text-orange-500 hover:text-orange-400 font-medium text-sm">View All Games</button>
+          <div className="border-t-2 border-orange-200 p-4 text-center bg-orange-50">
+            <button className="text-orange-600 hover:text-orange-700 font-semibold text-sm">View All Games</button>
           </div>
         )}
       </div>

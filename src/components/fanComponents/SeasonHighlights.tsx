@@ -11,13 +11,13 @@ interface HighlightCardProps {
 
 function HighlightCard({ title, value, change, icon }: HighlightCardProps) {
   return (
-    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6">
+    <div className="bg-black/10 border border-white/60 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-gray-300 text-sm">{title}</span>
+        <span className="text-black/70 text-sm font-medium">{title}</span>
         {icon}
       </div>
       <div className="text-4xl font-bold text-white mb-1">{value}</div>
-      {change && <div className="text-green-400 text-sm">{change}</div>}
+      {change && <div className="text-green-600 text-sm font-semibold">{change}</div>}
     </div>
   )
 }
