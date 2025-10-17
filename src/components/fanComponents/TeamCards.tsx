@@ -194,16 +194,6 @@ export default function TeamCards() {
                 <h2 className="text-xl font-semibold text-gray-900">
                   {team.team_name}
                 </h2>
-                {/*<p className="text-gray-600 text-sm">
-                  Coach:{" "}
-                  <span className="text-orange-500">
-                    {team.coach_id || "Unassigned"}
-                  </span>
-                </p>*/}
-                <div className="flex items-center justify-center text-sm text-gray-500">
-                  {/*<Users className="h-4 w-4 mr-2 text-orange-400" />
-                  {team.players?.length || 0} players */}
-                </div>
                 <Button
                   onClick={() => handleTeamClick(team.team_id)}
                   className="w-full bg-orange-500 hover:bg-orange-600 text-white mt-2"
