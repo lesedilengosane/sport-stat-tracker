@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Tabspage } from "@/components/line-up-page";
 import { MatchMetaData } from "@/types/basketball";
+import { useAuth } from "@/app/context/AuthContext";
+
+
 
 interface PlayerDetails {
   id: string;
@@ -61,6 +64,7 @@ export default function MatchDetails({
   const router = useRouter();
   const [homeLineup, setHomeLineup] = useState<PlayerDetails[]>(homePlayers);
   const [awayLineup, setAwayLineup] = useState<PlayerDetails[]>(awayPlayers);
+  const {user}=useAuth()
  // console.log("Metadata inside MatchDetails:", JSON.stringify(metadata, null, 2));
 
   return (
@@ -99,13 +103,33 @@ export default function MatchDetails({
 
             {/* Match Date */}
             <div className="text-center text-black drop-shadow">
-              <div className="text-2xl font-bold">
-                {homePrevMatches && homePrevMatches[0]?.match_date
-                  ? homePrevMatches[0].match_date
-                  : "Date not specified"}
-              </div>
-            </div>
-
+  {homePrevMatches && homePrevMatches[0]?.match_date ? (
+    <>
+      {/* Date line */}
+      <div className="text-2xl font-bold">
+        {new Date(homePrevMatches[0].match_date).toLocaleDateString("en-ZA", {
+          weekday: "short",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          timeZone: "Africa/Johannesburg",
+        })}
+      </div>
+      {/* Time line */}
+      <div className="text-lg font-medium text-gray-700">
+        {new Date(homePrevMatches[0].match_date).toLocaleTimeString("en-ZA", {
+          hour: "numeric",
+          minute: "2-digit",
+          hour12: true,
+          timeZone: "Africa/Johannesburg",
+        })}
+      </div>
+    </>
+  ) : (
+    "Date not specified"
+  )}
+</div>
+            
             {/* Away Team */}
             <div className="flex flex-col items-center">
               <Image
@@ -122,26 +146,28 @@ export default function MatchDetails({
           </div>
 
           {/* Add Stats Button */}
-          <button
-            onClick={() => {
-              const queryParams = new URLSearchParams({
-                gameId: matchId,
-                homeTeamId: homeTeam.team_id,
-                awayTeamId: awayTeam.team_id,
-                homeTeam: homeTeam.team_name,
-                awayTeam: awayTeam.team_name,
-                homeLogo: homeTeam.icon_url || "/placeholder.svg",
-                awayLogo: awayTeam.icon_url || "/placeholder.svg",
-                homeLineup: JSON.stringify(homeLineup),
-                awayLineup: JSON.stringify(awayLineup),
-              }).toString();
+          {metadata.analyst === user?.auth_user_id && !metadata.completed && (
+  <button
+    onClick={() => {
+      const queryParams = new URLSearchParams({
+        gameId: matchId,
+        homeTeamId: homeTeam.team_id,
+        awayTeamId: awayTeam.team_id,
+        homeTeam: homeTeam.team_name,
+        awayTeam: awayTeam.team_name,
+        homeLogo: homeTeam.icon_url || "/placeholder.svg",
+        awayLogo: awayTeam.icon_url || "/placeholder.svg",
+        homeLineup: JSON.stringify(homeLineup),
+        awayLineup: JSON.stringify(awayLineup),
+      }).toString();
 
-              router.push(`/analyst/${matchId}/tracker?${queryParams}`);
-            }}
-            className="mt-4 bg-orange-500/90 hover:bg-orange-600/90 text-white px-5 py-2 rounded-xl font-semibold shadow-lg shadow-orange-500/20 transition-all duration-200"
-          >
-            ADD STATS
-          </button>
+      router.push(`/analyst/${matchId}/tracker?${queryParams}`);
+    }}
+    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+  >
+    Open Tracker
+  </button>
+)}
         
         </header>
 
