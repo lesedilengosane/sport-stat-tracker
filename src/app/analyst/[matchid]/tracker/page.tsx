@@ -8,6 +8,8 @@ import type { GameData, Team, Player } from "@/types/basketball";
 import { apiClient } from "@/app/utils/apiClient";
 import { useAuth } from "@/app/context/AuthContext";
 import { toast } from "sonner";
+import { useMatches } from "@/app/context/MatchesContext";
+
 import {
   Item,
   ItemContent,
@@ -24,6 +26,8 @@ export default function StatTrackerPage() {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
+  const { triggerRefetch } = useMatches();
+
 
   useEffect(() => {
     const loadGameData = async () => {
@@ -143,9 +147,12 @@ const handleSaveGame = async (completeGameData: any) => {
       toast.success("Game saved! Download started.", {
         description: "Navigating to Analyst page...",
       });
+        triggerRefetch();
 
-      // ✅ Immediately navigate / reload page
-      window.location.href = "/analyst"; // or router.push("/analyst")
+  // Optionally navigate back to dashboard
+  router.push("/analyst");
+
+      
     } else {
       toast.error("Failed to save game data", {
         description: response.error || "Unknown error",
