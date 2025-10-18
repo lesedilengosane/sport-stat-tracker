@@ -2,7 +2,7 @@
 "use client"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { supabase } from "../api/DatabaseApi/supabaseClient"
 import { GamesGrid } from "@/components/games-grid"
 import { apiClient } from "../utils/apiClient"
@@ -12,6 +12,8 @@ import { AnalystSideNav } from "@/components/sideNav/analystSideNav"
 import { DashboardHeader } from "@/components/header/header"
 import { CompletedGamesGrid } from "@/components/completed-games-grid"
 import { Game,Match } from "@/types/basketball"
+import { useMatches } from "../context/MatchesContext"
+
 
 // Define TypeScript interfaces based on your schema
 interface Team {
@@ -47,116 +49,30 @@ const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
 export default function Dashboard() {
   const router = useRouter()
 
-  const [matches, setMatches] = useState<Game[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [usingSampleData, setUsingSampleData] = useState(false)
-  const [debugInfo, setDebugInfo] = useState<string>("")
-  const [allGames, setAllGames] = useState<Game[]>([])
-  const [activeTab, setActiveTab] = useState("upcoming-games")
-  const {user}=useAuth()
 
-  // Fetch matches data using the API client
-  const fetchMatches = async () => {
-    try {
-      setIsLoading(true)
-      setUsingSampleData(false)
-      setDebugInfo("Fetching matches from API...")
+    const { 
+    allGames, 
+    matches, 
+    isLoading, 
+    error,
+    triggerRefetch
+  } = useMatches(); // ✅ get everything from context
 
-      // 1️⃣ Get all matches
-      const matchesData = await apiClient.getMatches()
-      setDebugInfo(`Found ${matchesData?.length || 0} matches`)
+  const [activeTab, setActiveTab] = useState("upcoming-games");
+  const { user } = useAuth();
 
-      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.user_id} and their Auth_userid id ${user?.auth_user_id}`)
+  
 
-      if (matchesData && matchesData.length > 0) {
-        // 2️⃣ Collect team IDs
-        const teamIds = [
-          ...new Set([...matchesData.map((m: Match) => m.home_team_id), ...matchesData.map((m: Match) => m.away_team_id)]),
-        ]
 
-        setDebugInfo(`Fetching ${teamIds.length} teams...`)
 
-        // 3️⃣ Fetch all teams (for names + logos)
-        const teamsData = await apiClient.getTeamsByIds(teamIds)
 
-        // 4️⃣ Create a map team_id → team data
-        const teamsMap = new Map()
-        teamsData?.forEach((team: Team) => {
-          teamsMap.set(team.team_id, team)
-        })
 
-        // 5️⃣ Format matches (NO players/lineups)
-        const databaseGames: Game[] = matchesData.map((match: Match) => {
-          const homeTeam = teamsMap.get(match.home_team_id) || {}
-          const awayTeam = teamsMap.get(match.away_team_id) || {}
-//we added the status and analyst fields in the return
-          return {
-    match_id: match.match_id,
-    analyst: match.analyst,          
-    completed: match.completed,
-    booked:match.booked, 
-    away_score:match.away_score,
-    home_score:match.home_score,
-    location:match.location,           
-    date: new Date(match.match_date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-    time: new Date(match.match_date).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    homeTeam: {
-      id: match.home_team_id,
-      name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-      logo: homeTeam.icon_url || "/default_team.svg",
-    },
-    awayTeam: {
-      id: match.away_team_id,
-      name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-      logo: awayTeam.icon_url || "/default_team.svg",
-    },
-  }
-})
-
-        setMatches(databaseGames)
-        setAllGames([...databaseGames])
-        setDebugInfo(`Successfully loaded ${databaseGames.length} games`)
-      } else {
-        console.log("No matches found in database")
-        setUsingSampleData(true)
-      }
-    } catch (err: any) {
-      console.error("Error fetching matches:", err)
-      setError("Failed to load matches from database.")
-      setMatches([])
-      setUsingSampleData(true)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  useEffect(() => {
-    fetchMatches()
-  }, [])
-
-//filter upcoming games that have not been played from all games
-
-const upcomingGames=allGames.filter((game)=>game.completed==false)
-
-//filter completed games
-  const completedGames= allGames.filter(
-      (game) => game.completed ==true &&
-        game.analyst === user?.auth_user_id
-    )
-    
-
+const upcomingGames = allGames.filter(game => game.completed === false);
+const completedGames = allGames.filter(
+  game => game.completed === true && game.analyst === user?.auth_user_id
+);
 const bookedGames = allGames.filter(
-  (game) =>
-    game.booked === true &&
-    game.completed === false &&
-    game.analyst === user?.auth_user_id
+  game => game.booked === true && game.completed === false && game.analyst === user?.auth_user_id
 );
 
   const handleLogout = async () => {
