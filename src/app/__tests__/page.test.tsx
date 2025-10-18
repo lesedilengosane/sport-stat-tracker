@@ -83,7 +83,7 @@ describe('Home Component', () => {
     
     const image = screen.getByTestId('background-image');
     expect(image).toBeInTheDocument();
-    expect(image).toHaveAttribute('src', '/bgr.jpg');
+    expect(image).toHaveAttribute('src', '/background/landing.png');
     expect(image).toHaveAttribute('alt', 'Basketball player dunking');
   });
 
