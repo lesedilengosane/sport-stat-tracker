@@ -65,7 +65,8 @@ export default function MatchDetails({
   const [homeLineup, setHomeLineup] = useState<PlayerDetails[]>(homePlayers);
   const [awayLineup, setAwayLineup] = useState<PlayerDetails[]>(awayPlayers);
   const {user}=useAuth()
- // console.log("Metadata inside MatchDetails:", JSON.stringify(metadata, null, 2));
+  const [isLoading,setIsLoading]=useState(true)
+ 
 
   return (
     <div className="relative min-h-screen">

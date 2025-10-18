@@ -2,7 +2,7 @@
 "use client"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { supabase } from "../api/DatabaseApi/supabaseClient"
 import { GamesGrid } from "@/components/games-grid"
 import { apiClient } from "../utils/apiClient"
@@ -57,90 +57,110 @@ export default function Dashboard() {
   const {user}=useAuth()
 
   // Fetch matches data using the API client
-  const fetchMatches = async () => {
-    try {
-      setIsLoading(true)
-      setUsingSampleData(false)
-      setDebugInfo("Fetching matches from API...")
+    const hasFetched = useRef(false)
+  const gamesCache = useRef<Game[] | null>(null)
 
-      // 1️⃣ Get all matches
-      const matchesData = await apiClient.getMatches()
-      setDebugInfo(`Found ${matchesData?.length || 0} matches`)
+const fetchMatches = async () => {
+  try {
+    setIsLoading(true);
+    setError(null);
+    setUsingSampleData(false);
 
-      console.log(`the User who logged in while fetching games is ${user?.first_name} with id ${user?.user_id} and their Auth_userid id ${user?.auth_user_id}`)
-
-      if (matchesData && matchesData.length > 0) {
-        // 2️⃣ Collect team IDs
-        const teamIds = [
-          ...new Set([...matchesData.map((m: Match) => m.home_team_id), ...matchesData.map((m: Match) => m.away_team_id)]),
-        ]
-
-        setDebugInfo(`Fetching ${teamIds.length} teams...`)
-
-        // 3️⃣ Fetch all teams (for names + logos)
-        const teamsData = await apiClient.getTeamsByIds(teamIds)
-
-        // 4️⃣ Create a map team_id → team data
-        const teamsMap = new Map()
-        teamsData?.forEach((team: Team) => {
-          teamsMap.set(team.team_id, team)
-        })
-
-        // 5️⃣ Format matches (NO players/lineups)
-        const databaseGames: Game[] = matchesData.map((match: Match) => {
-          const homeTeam = teamsMap.get(match.home_team_id) || {}
-          const awayTeam = teamsMap.get(match.away_team_id) || {}
-//we added the status and analyst fields in the return
-          return {
-    match_id: match.match_id,
-    analyst: match.analyst,          
-    completed: match.completed,
-    booked:match.booked, 
-    away_score:match.away_score,
-    home_score:match.home_score,
-    location:match.location,           
-    date: new Date(match.match_date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }),
-    time: new Date(match.match_date).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }),
-    homeTeam: {
-      id: match.home_team_id,
-      name: homeTeam.name || homeTeam.team_name || "Unknown Team",
-      logo: homeTeam.icon_url || "/default_team.svg",
-    },
-    awayTeam: {
-      id: match.away_team_id,
-      name: awayTeam.name || awayTeam.team_name || "Unknown Team",
-      logo: awayTeam.icon_url || "/default_team.svg",
-    },
-  }
-})
-
-        setMatches(databaseGames)
-        setAllGames([...databaseGames])
-        setDebugInfo(`Successfully loaded ${databaseGames.length} games`)
-      } else {
-        console.log("No matches found in database")
-        setUsingSampleData(true)
-      }
-    } catch (err: any) {
-      console.error("Error fetching matches:", err)
-      setError("Failed to load matches from database.")
-      setMatches([])
-      setUsingSampleData(true)
-    } finally {
-      setIsLoading(false)
+    // 1️⃣ Try sessionStorage first
+    const cachedGames = sessionStorage.getItem("matches");
+    if (cachedGames) {
+      const parsedGames: Game[] = JSON.parse(cachedGames);
+      gamesCache.current = parsedGames;
+      hasFetched.current = true;
+      setAllGames(parsedGames);
+      setMatches(parsedGames);
+      setDebugInfo(`Loaded ${parsedGames.length} games from sessionStorage`);
+      return;
     }
-  }
-  useEffect(() => {
-    fetchMatches()
-  }, [])
 
+    // 2️⃣ If not in sessionStorage, check in-memory cache
+    if (hasFetched.current && gamesCache.current) {
+      setAllGames(gamesCache.current);
+      setMatches(gamesCache.current);
+      setDebugInfo(`Loaded ${gamesCache.current.length} games from memory cache`);
+      return;
+    }
+
+    // 3️⃣ Fetch from API
+    const matchesData = await apiClient.getMatches();
+
+    if (!matchesData || matchesData.length === 0) {
+      setUsingSampleData(true);
+      setDebugInfo("No matches found in database");
+      return;
+    }
+
+    const teamIds = [
+      ...new Set([
+        ...matchesData.map((m: { home_team_id: any }) => m.home_team_id),
+        ...matchesData.map((m: { away_team_id: any }) => m.away_team_id),
+      ]),
+    ];
+
+    const teamsData = await apiClient.getTeamsByIds(teamIds);
+    const teamsMap = new Map();
+    teamsData?.forEach((team: { team_id: any }) => teamsMap.set(team.team_id, team));
+
+    const databaseGames: Game[] = matchesData.map((match: { home_team_id: any; away_team_id: any; match_id: any; analyst: any; completed: any; booked: any; away_score: any; home_score: any; location: any; match_date: string | number | Date }) => {
+      const homeTeam = teamsMap.get(match.home_team_id) || {};
+      const awayTeam = teamsMap.get(match.away_team_id) || {};
+
+      return {
+        match_id: match.match_id,
+        analyst: match.analyst,
+        completed: match.completed,
+        booked: match.booked,
+        away_score: match.away_score,
+        home_score: match.home_score,
+        location: match.location,
+        date: new Date(match.match_date).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        time: new Date(match.match_date).toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        homeTeam: {
+          id: match.home_team_id,
+          name: homeTeam.name || homeTeam.team_name || "Unknown Team",
+          logo: homeTeam.icon_url || "/default_team.svg",
+        },
+        awayTeam: {
+          id: match.away_team_id,
+          name: awayTeam.name || awayTeam.team_name || "Unknown Team",
+          logo: awayTeam.icon_url || "/default_team.svg",
+        },
+      };
+    });
+
+    // 4️⃣ Cache in memory and sessionStorage
+    gamesCache.current = databaseGames;
+    hasFetched.current = true;
+    sessionStorage.setItem("matches", JSON.stringify(databaseGames));
+
+    setAllGames(databaseGames);
+    setMatches(databaseGames);
+    setDebugInfo(`Successfully loaded ${databaseGames.length} games from API`);
+  } catch (err) {
+    console.error("Error fetching matches:", err);
+    setError("Failed to load matches from database.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// ---------- Fetch only once ----------
+useEffect(() => {
+  if (!user) return; // wait until user is ready
+  fetchMatches();
+}, [user]);
 //filter upcoming games that have not been played from all games
 
 const upcomingGames=allGames.filter((game)=>game.completed==false)

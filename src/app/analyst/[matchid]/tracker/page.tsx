@@ -28,7 +28,8 @@ export default function StatTrackerPage() {
   useEffect(() => {
     const loadGameData = async () => {
       try {
-        setIsLoading(true);
+  
+        setIsLoading(true)
         setError(null);
 
         const gameId = searchParams.get("gameId") || "game-001";
