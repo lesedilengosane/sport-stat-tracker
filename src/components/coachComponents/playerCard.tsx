@@ -34,17 +34,6 @@ export function PlayerCard({ player,  isDragging = false }: PlayerCardProps) {
             {player.jerseyNumber}
           </div>
 
-          {/* Player Image */}
-          <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-600/30">
-            <Image
-              src={player.profileImage || "/placeholder.svg"}
-              alt={player.name}
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
           <div className="flex-1 flex items-center justify-between gap-2">
             {/* Player Info */}
             <div className="min-w-0 flex-1">

@@ -271,72 +271,71 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
         )}
       </div>
 
-      <div className="flex gap-6 h-[calc(130vh-160px)]">
-        {/* Basketball Court */}
-        <div className="flex-[7] relative">
-        <Card className="h-full overflow-hidden bg-transparent backdrop-blur-sm">
-          <CardContent className="p-0 pt-0 h-full relative">
-            <div
-              className="w-full h-full bg-cover bg-center bg-no-repeat relative"
-              style={{ backgroundImage: `url('/court/aerialView.png')` }}
-            >
-              <div className="absolute inset-0 bg-black/20"></div>
+     <div className="flex gap-6 h-[calc(130vh-160px)]">
+  {/* Basketball Court */}
+  <div className="flex-[7] relative">
+    <Card className="h-full overflow-hidden bg-transparent backdrop-blur-sm">
+      <CardContent className="p-0 pt-0 h-full relative">
+        <div
+          className="w-full h-full bg-cover bg-center bg-no-repeat relative"
+          style={{ backgroundImage: `url('/court/aerialView.png')` }}
+        >
+          <div className="absolute inset-0 bg-black/20"></div>
 
-              {courtPositions.map((position) => (
-                <React.Fragment key={position.id}>
-                  {/* Invisible Drop Zone - keeps functionality but no visual circle */}
-                  <div
-                    className="absolute w-20 h-20 rounded-full z-10"
-                    style={{
-                      left: `${position.x}%`,
-                      top: `${position.y}%`,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                    onDrop={(e) => handleDrop(e, position.id)}
-                    onDragOver={handleDragOver}
-                  />
-                  
-                  {/* Position Label */}
-                  <div
-                    className="absolute text-white font-bold text-sm bg-black/80 px-2 py-1 rounded z-30 pointer-events-none"
-                    style={{
-                      left: `${position.x}%`,
-                      top: `${position.y + 12}%`,
-                      transform: "translate(-50%, -50%)",
-                    }}
-                  >
-                    {position.label}
-                  </div>
-                </React.Fragment>
-              ))}
-
+          {courtPositions.map((position) => (
+            <React.Fragment key={position.id}>
+              {/* Visible Drop Zone with Circle */}
+              <div
+                className="absolute w-20 h-20 rounded-full z-10 border-2 border-dashed border-yellow-400/70 bg-yellow-400/20 transition-all duration-300 hover:border-solid hover:border-yellow-400 hover:bg-yellow-400/30 hover:scale-110 cursor-pointer"
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+                onDrop={(e) => handleDrop(e, position.id)}
+                onDragOver={handleDragOver}
+                title={`Drop player to ${position.label}`}
+              />
               
-                {/* Add this message when no starting lineup is set */}
-                {courtPlayers.size === 0 && (
-                  <div className="absolute inset-0 flex items-center justify-center z-0">
-                    <div className="text-white/50 text-lg font-bold bg-black/30 p-4 rounded-lg">
-                      No starting lineup set. Drag players from reserves to positions.
-                    </div>
-                  </div>
-                )}
-              {/* Render players on court using custom component */}
-              {courtPositions.map((position) => {
-                const player = courtPlayers.get(position.id)
-                return player ? (
-                  <CustomCourtPlayer
-                    key={`${position.id}-${player.playerID}`}
-                    player={player}
-                    position={{ x: position.x, y: position.y }}
-                    onDragStart={handleCourtPlayerDragStart}
-                  />
-                ) : null
-              })}
+              {/* Position Label */}
+              <div
+                className="absolute text-white font-bold text-sm bg-black/80 px-2 py-1 rounded z-30 pointer-events-none"
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y + 12}%`,
+                  transform: "translate(-50%, -50%)",
+                }}
+              >
+                {position.label}
+              </div>
+            </React.Fragment>
+          ))}
 
-
+          {/* Add this message when no starting lineup is set */}
+          {courtPlayers.size === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center z-0">
+              <div className="text-white/50 text-lg font-bold bg-black/30 p-4 rounded-lg">
+                No starting lineup set. Drag players from reserves to positions.
+              </div>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          )}
+
+          {/* Render players on court using custom component */}
+          {courtPositions.map((position) => {
+            const player = courtPlayers.get(position.id)
+            return player ? (
+              <CustomCourtPlayer
+                key={`${position.id}-${player.playerID}`}
+                player={player}
+                position={{ x: position.x, y: position.y }}
+                onDragStart={handleCourtPlayerDragStart}
+              />
+            ) : null
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  </div>
 
         {/* Reserves & Unassigned */}
         <div className="flex-[3] h-full flex flex-col gap-4">
@@ -344,52 +343,52 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
 
           {/* Unassigned Players Dialog */}
           <Dialog>
-            <DialogTrigger asChild>
-              <Button className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white border-none">
-                Add free Players
-              </Button>
-            </DialogTrigger>
-
-            <DialogContent className="max-w-md rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl shadow-2xl p-4">
-              <DialogHeader>
-                <DialogTitle className="text-white text-lg font-bold">Free Players</DialogTitle>
-              </DialogHeader>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={fetchUnassignedPlayers}
-                  disabled={fetchingUnassigned}
-                  className="bg-black/30 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl hover:ring-2 hover:ring-pink-500"
-                >
-                  {fetchingUnassigned ? "Loading..." : "Refresh List"}
+              <DialogTrigger asChild>
+                <Button className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white border-none">
+                  Add free Players
                 </Button>
+              </DialogTrigger>
 
-                {unassignedPlayers.length === 0 ? (
-                  <p className="text-gray-200 text-center py-4">No unassigned players available.</p>
-                ) : (
-                  <ul className="space-y-2">
-                    {unassignedPlayers.map((player) => (
-                      <li
-                        key={player.player_id}
-                        className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-white/50 backdrop-blur-md"
-                      >
-                        <span className="text-white text-sm">
-                          {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={() => assignPlayerToTeam(player.player_id)}
-                          className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+              <DialogContent className="max-w-md rounded-2xl bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-700 bg-opacity-80 backdrop-blur-xl shadow-2xl p-4">
+                <DialogHeader>
+                  <DialogTitle className="text-white text-lg font-bold">Free Players</DialogTitle>
+                </DialogHeader>
+
+                <div className="space-y-3">
+                  <Button
+                    onClick={fetchUnassignedPlayers}
+                    disabled={fetchingUnassigned}
+                    className="bg-black/30 backdrop-blur-md border border-white/20 text-white px-4 py-2 rounded-xl hover:ring-2 hover:ring-pink-500"
+                  >
+                    {fetchingUnassigned ? "Loading..." : "Refresh List"}
+                  </Button>
+
+                  {unassignedPlayers.length === 0 ? (
+                    <p className="text-gray-200 text-center py-4">No unassigned players available.</p>
+                  ) : (
+                    <div className="max-h-64 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
+                      {unassignedPlayers.map((player) => (
+                        <li
+                          key={player.player_id}
+                          className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-white/50 backdrop-blur-md list-none"
                         >
-                          Add
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+                          <span className="text-white text-sm">
+                            {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
+                          </span>
+                          <Button
+                            size="sm"
+                            onClick={() => assignPlayerToTeam(player.player_id)}
+                            className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+                          >
+                            Add
+                          </Button>
+                        </li>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
         </div>
       </div>
     </div>
