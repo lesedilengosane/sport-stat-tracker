@@ -52,6 +52,7 @@ async function getMatchData(matchid: string): Promise<MatchData> {
 export default async function MatchPage({ params }: MatchPagePropsCustom) {
   const { matchid } = await params;
   
+  
   let matchData: MatchData;
   
   try {
