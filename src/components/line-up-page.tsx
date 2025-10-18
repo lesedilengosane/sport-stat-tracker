@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import BasketballTimeline from "./EventsSummary";
 import { MatchMetaData } from "@/types/basketball";
 import BasketballCourtLineup from "./CourtLineUp";
+import { LastMatchesCards } from "./lastmatchesCard";
 
 interface LineupProps {
   homeLineup?: Player_details[];
@@ -72,23 +73,26 @@ export function Tabspage({
 
         {/* Last Games Tab */}
         <TabsContent value="lastgames" className="w-full">
-          <div className="flex flex-col md:flex-row gap-8 mt-6">
-            <div className="w-full md:w-1/2">
-              <LastMatchesTable
-                data={homePrevMatches}
-                title={`Last 5 games - ${homeTeam}`}
-                onRowClick={(match) => router.push(`/analyst/${match.match_id}`)}
-              />
-            </div>
-            <div className="w-full md:w-1/2">
-              <LastMatchesTable
-                data={awayPrevMatches}
-                title={`Last 5 games - ${awayTeam}`}
-                onRowClick={(match) => router.push(`/analyst/${match.match_id}`)}
-              />
-            </div>
-          </div>
-        </TabsContent>
+  <div className="flex flex-col md:flex-row gap-8 mt-6">
+    <div className="w-full md:w-1/2">
+      <LastMatchesCards
+        data={homePrevMatches}
+        title={`Last 5 games - ${homeTeam}`}
+        currentTeam={homeTeam}
+        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+      />
+    </div>
+    <div className="w-full md:w-1/2">
+      <LastMatchesCards
+        data={awayPrevMatches}
+        title={`Last 5 games - ${awayTeam}`}
+        currentTeam={awayTeam}
+        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+      />
+    </div>
+  </div>
+</TabsContent>
+       
 
         {/* Game Summary Tab */}
         <TabsContent value="summary">
