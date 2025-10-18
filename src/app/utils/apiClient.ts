@@ -1,4 +1,23 @@
 // app/utils/apiClient.ts
+
+import { supabase } from "../api/DatabaseApi/supabaseClient";
+
+
+//This is an emergency
+
+export async function getPlayerPerformance() {
+  try {
+    const { data, error } = await supabase.rpc("get_player_performance");
+    
+console.log("RPC data:", data);
+console.log("RPC error:", error)
+    console.log("RPC get_player_performance raw data:", data); // 🔹 log raw RPC result
+    return data;
+  } catch (err) {
+    console.error("getPlayerPerformance failed:", err);
+    return [];
+  }
+}
 // Client-side API calls
 export const apiClient = {
   // Matches API
@@ -200,4 +219,8 @@ SaveGameData: async (CompleteGameData: any): Promise<any> => {
     }
     return response.json();
   },
+
+  // Fetch player performance via Supabase RPC
+getPlayerPerformance,
+  
 };

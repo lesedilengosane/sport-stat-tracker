@@ -4,12 +4,15 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Clock, BookOpen, Play, CheckCircle, Menu, X, LogOut } from "lucide-react"
 import { supabase } from "@/app/api/DatabaseApi/supabaseClient"
+import { BarChart } from "lucide-react";
+
 
 const analystNavItems = [
   { id: "upcoming-games", label: "Upcoming Games", icon: Clock },
   { id: "booked-games", label: "Booked Games", icon: BookOpen },
   { id: "live", label: "Live", icon: Play },
   { id: "completed", label: "Completed", icon: CheckCircle },
+  { id: "player-insights", label: "Player Insights", icon: BarChart },
 ]
 
 interface AnalystSideNavProps {

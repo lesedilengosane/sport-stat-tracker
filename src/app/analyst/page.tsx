@@ -13,6 +13,7 @@ import { DashboardHeader } from "@/components/header/header"
 import { CompletedGamesGrid } from "@/components/completed-games-grid"
 import { Game,Match } from "@/types/basketball"
 import { useMatches } from "../context/MatchesContext"
+import PlayerInsightsPanel from "@/components/playerinsight"
 
 
 // Define TypeScript interfaces based on your schema
@@ -144,6 +145,8 @@ const bookedGames = allGames.filter(
       />
     </div>
   )
+  case "player-insights":
+    return <PlayerInsightsPanel/>
       default:
         return null
     }

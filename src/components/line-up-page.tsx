@@ -8,6 +8,7 @@ import { LastMatchesTable, MatchDetails as PrevMatch } from "@/components/LastMa
 import { useRouter } from "next/navigation";
 import BasketballTimeline from "./EventsSummary";
 import { MatchMetaData } from "@/types/basketball";
+import BasketballCourtLineup from "./CourtLineUp";
 
 interface LineupProps {
   homeLineup?: Player_details[];
@@ -55,24 +56,19 @@ export function Tabspage({
 
         {/* Lineups Tab */}
         <TabsContent value="lineups" className="w-full">
-          {date && (
-            <h2 className="text-center text-white text-xl font-bold mb-6">{date}</h2>
-          )}
+  {date && <h2 className="text-center text-white text-xl font-bold mb-6">{date}</h2>}
 
-          <div className="flex w-full gap-6">
-            <div className="w-1/2">
-              <DataTable columns={columns} data={homeLineup}
-              onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
-               />
-            </div>
+  <BasketballCourtLineup
+    homeTeam={homeTeam}
+    awayTeam={awayTeam}
+    homeLineup={homeLineup}       // order-preserved array: first 5 = starters
+    awayLineup={awayLineup}
+    onPlayerClick={(id) => router.push(`/player/${id}`)}
+    courtImageUrl="/court.png"    // optional; fallback used if not present
+  />
+</TabsContent>
+        
 
-            <div className="w-1/2">
-            
-              <DataTable columns={columns} data={awayLineup} onRowClick={(row)=>router.push(`/players/${row.original.id}`)}
-               />
-            </div>
-          </div>
-        </TabsContent>
 
         {/* Last Games Tab */}
         <TabsContent value="lastgames" className="w-full">
