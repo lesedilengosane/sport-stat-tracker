@@ -5,7 +5,8 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { apiClient } from "@/app/utils/apiClient"; // ✅ import apiClient
-
+import React from 'react';
+import Image from 'next/image'; // Add this import
 // Define Player type
 interface Player {
   player_id: string;
@@ -13,7 +14,7 @@ interface Player {
   last_name: string;
   position: string;
   jersey_number: number;
-  image_url?: string;
+  image: string;
 }
 
 export default function PlayersList({ teamId }: { teamId: string }) {
@@ -33,7 +34,7 @@ export default function PlayersList({ teamId }: { teamId: string }) {
           last_name: p.last_name,
           position: p.position,
           jersey_number: p.jersey_number,
-          image_url: p.image_url,
+          image: p.avatar_url,
         }));
         setPlayers(normalized);
       } catch (err) {
@@ -82,23 +83,34 @@ export default function PlayersList({ teamId }: { teamId: string }) {
             className="group rounded-2xl bg-white border-2 border-yellow-400 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
           >
             <Link href={`/players/${p.player_id}`} className="block h-full">
-              <div className="flex items-center gap-4">
-                <img
-                  src={p.image_url || "/avatars/player3.jpg"} // fixed fallback
-                  alt={`${p.first_name} ${p.last_name}`}
-                  className="w-14 h-14 rounded-full object-cover border-2 border-yellow-400"
-                />
-                <div className="flex items-center gap-2">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {p.first_name} {p.last_name}
-                  </h3>
-                  <span className="text-sm font-bold text-yellow-600">
-                    #{p.jersey_number}
-                  </span>
-                  <span className="text-sm text-gray-600">{p.position}</span>
+              <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-200 hover:border-yellow-400 hover:shadow-md transition-all duration-200">
+                <div className="relative w-16 h-16 flex-shrink-0">
+                  <Image
+                    src={p.image || "/avatars/player3.jpg"}
+                    alt={`${p.first_name} ${p.last_name}`}
+                    fill
+                    sizes="64px"
+                    className="rounded-full object-cover border-2 border-yellow-400"
+                    loading="eager" // Force immediate loading
+                  />
+                </div>
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+                      {p.first_name} {p.last_name}
+                    </h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-bold text-yellow-600 bg-yellow-50 px-2 py-1 rounded">
+                        #{p.jersey_number}
+                      </span>
+                      <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                        {p.position}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </Link>
+</Link>
           </li>
         ))}
 

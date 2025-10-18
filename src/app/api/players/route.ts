@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       first_name: player.first_name, 
       last_name: player.last_name,
       position: player.position || 'Unknown',
-      avatar_url: player.avatar_url || '/avatars/player3.jpg',
+      avatar_url: player.image || '/avatars/player3.jpg',
       jersey_number: player.jersey_number,
       team_id: player.team_id
     }));
