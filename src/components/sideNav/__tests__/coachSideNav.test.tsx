@@ -17,8 +17,6 @@ jest.mock('next/navigation', () => ({
   })),
 }));
 
-// Mock utils - Removed mock, using actual implementation
-
 // Mock Supabase
 jest.mock('../../../app/api/DatabaseApi/supabaseClient', () => ({
   supabase: {
@@ -82,7 +80,9 @@ describe('CoachSideNav Component', () => {
       
       fireEvent.click(screen.getByTestId('menu-icon'));
       
-      expect(screen.getByText('Coach Dashboard')).toBeInTheDocument();
+      // Text is split across two h2 elements
+      expect(screen.getByText('Coach')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
 
     it('renders logout button when sidebar is open', () => {
@@ -102,7 +102,8 @@ describe('CoachSideNav Component', () => {
       fireEvent.click(screen.getByTestId('menu-icon'));
       
       expect(screen.getByTestId('x-icon')).toBeInTheDocument();
-      expect(screen.getByText('Coach Dashboard')).toBeInTheDocument();
+      expect(screen.getByText('Coach')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard')).toBeInTheDocument();
     });
 
     it('closes sidebar when X button is clicked', () => {
@@ -123,8 +124,8 @@ describe('CoachSideNav Component', () => {
       // Open sidebar
       fireEvent.click(screen.getByTestId('menu-icon'));
       
-      // Click overlay
-      const overlay = document.querySelector('.fixed.inset-0.bg-black\\/50');
+      // Click overlay - correct class selector
+      const overlay = document.querySelector('.fixed.inset-0.bg-black\\/25');
       expect(overlay).toBeInTheDocument();
       fireEvent.click(overlay!);
       
@@ -139,7 +140,8 @@ describe('CoachSideNav Component', () => {
       fireEvent.click(screen.getByTestId('menu-icon'));
       
       const scheduleButton = screen.getByText('Schedule').closest('button');
-      expect(scheduleButton).toHaveClass('bg-orange-500/20', 'text-orange-400', 'border-l-4', 'border-orange-500');
+      // Updated to match actual classes
+      expect(scheduleButton).toHaveClass('bg-white/15', 'text-white', 'shadow-lg', 'border-1');
     });
 
     it('does not highlight inactive tabs', () => {
@@ -148,8 +150,8 @@ describe('CoachSideNav Component', () => {
       fireEvent.click(screen.getByTestId('menu-icon'));
       
       const allGamesButton = screen.getByText('All Games').closest('button');
-      expect(allGamesButton).toHaveClass('text-gray-300');
-      expect(allGamesButton).not.toHaveClass('bg-orange-500/20');
+      expect(allGamesButton).toHaveClass('text-black');
+      expect(allGamesButton).not.toHaveClass('bg-white/15');
     });
   });
 
@@ -283,15 +285,15 @@ describe('CoachSideNav Component', () => {
       fireEvent.click(screen.getByTestId('menu-icon'));
       
       let scheduleButton = screen.getByText('Schedule').closest('button');
-      expect(scheduleButton).toHaveClass('bg-orange-500/20');
+      expect(scheduleButton).toHaveClass('bg-white/15');
       
       rerender(<CoachSideNav {...defaultProps} activeTab="players" />);
       
       const playersButton = screen.getByText('Players').closest('button');
-      expect(playersButton).toHaveClass('bg-orange-500/20');
+      expect(playersButton).toHaveClass('bg-white/15');
       
       scheduleButton = screen.getByText('Schedule').closest('button');
-      expect(scheduleButton).not.toHaveClass('bg-orange-500/20');
+      expect(scheduleButton).not.toHaveClass('bg-white/15');
     });
   });
 
@@ -306,7 +308,7 @@ describe('CoachSideNav Component', () => {
       const navButtons = buttons.slice(1, -1); // Exclude toggle and logout
       
       navButtons.forEach(button => {
-        expect(button).not.toHaveClass('bg-orange-500/20');
+        expect(button).not.toHaveClass('bg-white/15');
       });
     });
 

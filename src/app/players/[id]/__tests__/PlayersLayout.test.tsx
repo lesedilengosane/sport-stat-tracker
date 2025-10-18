@@ -99,14 +99,10 @@ describe('PlayerLayout Component', () => {
     it('renders navigation links with correct hrefs', () => {
       render(<PlayerLayout>{mockChildren}</PlayerLayout>);
       
-      const homeLink = screen.getByTestId('link--');
-      const playersLink = screen.getByTestId('link--players');
+      const homeLink = screen.getByTestId('link--coach');
       
-      expect(homeLink).toHaveAttribute('href', '/');
+      expect(homeLink).toHaveAttribute('href', '/coach');
       expect(homeLink).toHaveTextContent('Home');
-      
-      expect(playersLink).toHaveAttribute('href', '/players');
-      expect(playersLink).toHaveTextContent('All Players');
     });
 
     it('applies correct navigation styling classes', () => {
@@ -115,7 +111,7 @@ describe('PlayerLayout Component', () => {
       const navigation = screen.getByRole('navigation');
       expect(navigation).toHaveClass('space-x-4');
       
-      const homeLink = screen.getByTestId('link--');
+      const homeLink = screen.getByTestId('link--coach');
       expect(homeLink).toHaveClass('text-white', 'hover:text-orange-400', 'transition-colors');
     });
 

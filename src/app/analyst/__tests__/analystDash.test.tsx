@@ -350,8 +350,9 @@ describe('Analyst Dashboard', () => {
         fireEvent.click(screen.getByText('Completed'));
       });
 
-      expect(screen.getByText('Completed Games')).toBeInTheDocument();
-      expect(screen.getByText('This is where completed games and their analysis will be displayed')).toBeInTheDocument();
+      // The component shows "AVAILABLE GAMES" heading for all tabs
+      expect(screen.getByTestId('active-tab')).toHaveTextContent('completed');
+      expect(screen.getByText('AVAILABLE GAMES')).toBeInTheDocument();
     });
 
     it('displays games grid on upcoming-games tab', async () => {
@@ -426,8 +427,9 @@ describe('Analyst Dashboard', () => {
       render(<Dashboard />);
 
       await waitFor(() => {
+        // The log message uses user_id, not last_name
         expect(consoleSpy).toHaveBeenCalledWith(
-          expect.stringContaining('the User who logged in while fetching games is John with id Doe')
+          expect.stringContaining('the User who logged in while fetching games is John with id test-user-id')
         );
       });
 

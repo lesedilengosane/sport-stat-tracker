@@ -315,9 +315,10 @@ describe('FanSideNav Component', () => {
 
     it('handles logout errors gracefully', async () => {
       // Suppress console.error for this test since we expect an error
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
-      mockSignOut.mockRejectedValue(new Error('Logout failed'));
+      // Mock signOut to return a rejected promise, not throw
+      mockSignOut.mockResolvedValue({ error: { message: 'Logout failed' } });
 
       render(<FanSideNav activeTab="overview" onTabChange={mockOnTabChange} />);
 
@@ -330,6 +331,9 @@ describe('FanSideNav Component', () => {
       await waitFor(() => {
         expect(mockSignOut).toHaveBeenCalled();
       });
+
+      // Should still be called even with error
+      expect(mockSignOut).toHaveBeenCalledTimes(1);
 
       // Restore console.error
       consoleSpy.mockRestore();

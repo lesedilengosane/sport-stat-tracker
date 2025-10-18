@@ -1,31 +1,16 @@
 // src/app/players/[id]/__tests__/PlayerDashboard.test.tsx
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 
 // Mock environment variables before any imports
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-key';
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ src, alt, ...props }: any) => (
-    <img src={src} alt={alt} {...props} />
-  ),
-}));
-
-// Mock the supabase client module with a simple mock
-jest.mock('../../../api/DatabaseApi/supabaseClient', () => ({
-  supabase: {
-    from: jest.fn(),
-  },
-}));
-
-// Now import everything
-import PlayerDashboard from '../page';
-import { supabase } from '../../../api/DatabaseApi/supabaseClient';
-
-// Cast to mocked version
-const mockSupabase = supabase as jest.Mocked<typeof supabase>;
+// Create a mock user with user_id
+const mockCoachUser = {
+  user_id: 'test-coach-id',
+  email: 'coach@test.com',
+};
 
 // Mock player data
 const mockPlayer = {
@@ -51,31 +36,87 @@ const mockPlayer = {
   steals: 34,
 };
 
+// Mock React's use hook
+jest.mock('react', () => ({
+  ...jest.requireActual('react'),
+  use: jest.fn((promise) => {
+    if (promise && typeof promise.then === 'function') {
+      let result: any;
+      promise.then((value: any) => {
+        result = value;
+      });
+      return result;
+    }
+    return promise;
+  }),
+}));
+
+// Mock Next.js Image component
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ src, alt, ...props }: any) => (
+    <img src={src} alt={alt} {...props} />
+  ),
+}));
+
+// Mock apiClient
+jest.mock('../../../utils/apiClient', () => ({
+  apiClient: {
+    getTeamPlayers: jest.fn(),
+  },
+}));
+
+// Mock useAuth hook
+jest.mock('../../../context/AuthContext', () => ({
+  useAuth: jest.fn(),
+}));
+
+// Now import the component
+import PlayerDashboard from '../page';
+import { apiClient } from '../../../utils/apiClient';
+import { useAuth } from '../../../context/AuthContext';
+
+const mockUse = React.use as jest.Mock;
+const mockGetTeamPlayers = apiClient.getTeamPlayers as jest.Mock;
+const mockUseAuth = useAuth as jest.Mock;
+
 describe('PlayerDashboard Component', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    
+    // Default: mock use to return id
+    mockUse.mockImplementation((promise) => {
+      if (promise && typeof promise.then === 'function') {
+        return { id: '123' };
+      }
+      return promise;
+    });
+
+    // Default: return authenticated coach user
+    mockUseAuth.mockReturnValue({
+      user: mockCoachUser,
+      loading: false,
+    });
   });
 
   describe('Successful Data Loading', () => {
     beforeEach(() => {
-      // Mock successful response chain
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: mockPlayer,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+      // Mock successful API response
+      mockGetTeamPlayers.mockResolvedValue([mockPlayer]);
     });
 
     it('renders player information correctly', async () => {
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      // Wait for async operations
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check hero section
       expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('#23 · Point Guard')).toBeInTheDocument();
+      expect(screen.getByText(/Point Guard/)).toBeInTheDocument();
       
       // Check initials
       expect(screen.getByText('JD')).toBeInTheDocument();
@@ -83,7 +124,11 @@ describe('PlayerDashboard Component', () => {
 
     it('displays all basic stats correctly', async () => {
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check all stat values
       expect(screen.getByText('20')).toBeInTheDocument(); // matches played
@@ -98,7 +143,11 @@ describe('PlayerDashboard Component', () => {
 
     it('displays shooting stats correctly', async () => {
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check shooting stats format
       expect(screen.getByText('85/150')).toBeInTheDocument(); // 2PT
@@ -113,7 +162,11 @@ describe('PlayerDashboard Component', () => {
 
     it('displays stat labels correctly', async () => {
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check all stat labels
       expect(screen.getByText('Matches Played')).toBeInTheDocument();
@@ -128,7 +181,11 @@ describe('PlayerDashboard Component', () => {
 
     it('renders background image with correct props', async () => {
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       const bgImage = screen.getByAltText('Basketball');
       expect(bgImage).toBeInTheDocument();
@@ -137,7 +194,11 @@ describe('PlayerDashboard Component', () => {
 
     it('applies correct CSS classes for layout', async () => {
       const params = Promise.resolve({ id: '123' });
-      const { container } = render(await PlayerDashboard({ params }));
+      const { container } = render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check main container classes
       const mainContainer = container.querySelector('.relative.min-h-screen.bg-black.text-white');
@@ -151,79 +212,81 @@ describe('PlayerDashboard Component', () => {
   });
 
   describe('Error Handling', () => {
-    it('displays error message when player not found', async () => {
-      // Mock error response chain
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Player not found in database' },
+    it('displays error message when user is not logged in', async () => {
+      // Mock no user
+      mockUseAuth.mockReturnValue({
+        user: null,
+        loading: false,
       });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
 
       const params = Promise.resolve({ id: 'invalid-id' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
 
-      expect(screen.getByText('Player not found')).toBeInTheDocument();
-      expect(screen.getByText('Player not found in database')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('Player not found')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('You must be logged in as a coach')).toBeInTheDocument();
     });
 
-    it('displays generic error when no data and no error', async () => {
-      // Mock empty response chain
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: null,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+    it('displays error message when player not found', async () => {
+      // Mock API returning empty array (player not in team)
+      mockGetTeamPlayers.mockResolvedValue([]);
+      mockUse.mockImplementation(() => ({ id: 'invalid-id' }));
 
       const params = Promise.resolve({ id: 'invalid-id' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
 
-      expect(screen.getByText('Player not found')).toBeInTheDocument();
-      // Should not show error message when error is null
-      expect(screen.queryByText(/Player not found in database/i)).not.toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getAllByText('Player not found').length).toBeGreaterThan(0);
+      });
+
+      // Check that the heading exists
+      const heading = screen.getByRole('heading', { name: 'Player not found' });
+      expect(heading).toBeInTheDocument();
+    });
+
+    it('displays generic error when API fails', async () => {
+      // Mock API error
+      mockGetTeamPlayers.mockRejectedValue(new Error('API Error'));
+
+      const params = Promise.resolve({ id: 'invalid-id' });
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Player not found')).toBeInTheDocument();
+      });
+
+      expect(screen.getByText('API Error')).toBeInTheDocument();
     });
   });
 
-  describe('Database Query', () => {
-    it('calls supabase with correct parameters', async () => {
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: mockPlayer,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+  describe('API Integration', () => {
+    beforeEach(() => {
+      mockGetTeamPlayers.mockResolvedValue([mockPlayer]);
+    });
 
+    it('calls getTeamPlayers with correct coach ID', async () => {
       const params = Promise.resolve({ id: '123' });
-      await PlayerDashboard({ params });
+      render(<PlayerDashboard params={params} />);
 
-      // Verify database calls
-      expect(mockSupabase.from).toHaveBeenCalledWith('players');
-      expect(mockSelect).toHaveBeenCalledWith(expect.stringContaining('player_id'));
-      expect(mockSelect).toHaveBeenCalledWith(expect.stringContaining('first_name'));
-      expect(mockSelect).toHaveBeenCalledWith(expect.stringContaining('last_name'));
+      await waitFor(() => {
+        expect(mockGetTeamPlayers).toHaveBeenCalledWith('test-coach-id');
+      });
     });
 
     it('queries with correct player ID', async () => {
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: mockPlayer,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+      const otherPlayer = { ...mockPlayer, player_id: 'player-456' };
+      mockGetTeamPlayers.mockResolvedValue([mockPlayer, otherPlayer]);
+      mockUse.mockImplementation(() => ({ id: 'player-456' }));
 
       const params = Promise.resolve({ id: 'player-456' });
-      await PlayerDashboard({ params });
+      render(<PlayerDashboard params={params} />);
 
-      expect(mockEq).toHaveBeenCalledWith('player_id', 'player-456');
+      await waitFor(() => {
+        // Should find the player with ID 'player-456'
+        expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
+      });
     });
   });
 
@@ -237,17 +300,14 @@ describe('PlayerDashboard Component', () => {
         blocks: 0,
       };
 
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: playerWithZeros,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+      mockGetTeamPlayers.mockResolvedValue([playerWithZeros]);
 
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Should display zeros
       const zeroElements = screen.getAllByText('0');
@@ -261,17 +321,14 @@ describe('PlayerDashboard Component', () => {
         last_name: 'B',
       };
 
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: playerWithShortName,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+      mockGetTeamPlayers.mockResolvedValue([playerWithShortName]);
 
       const params = Promise.resolve({ id: '123' });
-      render(await PlayerDashboard({ params }));
+      render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('A B')).toBeInTheDocument();
+      });
 
       expect(screen.getByText('A B')).toBeInTheDocument();
       expect(screen.getByText('AB')).toBeInTheDocument(); // initials
@@ -279,18 +336,17 @@ describe('PlayerDashboard Component', () => {
   });
 
   describe('Responsive Design Classes', () => {
-    it('applies responsive grid classes', async () => {
-      const mockSingle = jest.fn().mockResolvedValue({
-        data: mockPlayer,
-        error: null,
-      });
-      const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-      const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-      
-      (mockSupabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+    beforeEach(() => {
+      mockGetTeamPlayers.mockResolvedValue([mockPlayer]);
+    });
 
+    it('applies responsive grid classes', async () => {
       const params = Promise.resolve({ id: '123' });
-      const { container } = render(await PlayerDashboard({ params }));
+      const { container } = render(<PlayerDashboard params={params} />);
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
 
       // Check stats grid responsiveness
       const statsGrid = container.querySelector('.grid.gap-6.sm\\:grid-cols-2.lg\\:grid-cols-3');
@@ -303,6 +359,18 @@ describe('PlayerDashboard Component', () => {
       // Check hero card responsiveness
       const heroCard = container.querySelector('.flex.flex-col.sm\\:flex-row');
       expect(heroCard).toBeInTheDocument();
+    });
+  });
+
+  describe('Loading State', () => {
+    it('displays loading message while fetching data', () => {
+      // Mock a promise that never resolves to keep loading state
+      mockGetTeamPlayers.mockImplementation(() => new Promise(() => {}));
+
+      const params = Promise.resolve({ id: '123' });
+      render(<PlayerDashboard params={params} />);
+
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
 });

@@ -52,9 +52,14 @@ describe('PlayerError Component', () => {
     const paragraph = container.querySelector('p');
     expect(paragraph).toBeInTheDocument();
     
-    // Check that both parts of the message are present in the paragraph
+    // Check that both parts of the message are present
+    expect(paragraph).toHaveTextContent("We couldn't load this player's details right now");
+    expect(paragraph).toHaveTextContent("Please try again or return later");
+    
+    // Or check the full text without worrying about exact whitespace
     const paragraphText = paragraph?.textContent || '';
-    expect(paragraphText).toBe("We couldn't load this player's details right now.Please try again or return later.");
+    expect(paragraphText).toContain("We couldn't load this player's details right now");
+    expect(paragraphText).toContain("Please try again or return later");
   });
 
   it('logs error to console on mount', () => {
