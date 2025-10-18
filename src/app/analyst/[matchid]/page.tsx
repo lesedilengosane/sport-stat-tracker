@@ -1,8 +1,3 @@
-// app/analyst/[matchid]/page.tsx
-"use client";
-
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import MatchDetails from "./MatchDetails";
 import { MatchMetaData } from "@/types/basketball";
 
@@ -37,82 +32,34 @@ interface MatchData {
 }
 
 type MatchPagePropsCustom = {
-  params: { matchid: string };
+  params: Promise<{ matchid: string }>;
 };
 
-export default function MatchPage({ params }: MatchPagePropsCustom) {
-  const { matchid } = params;
-  const [matchData, setMatchData] = useState<MatchData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+async function getMatchData(matchid: string): Promise<MatchData> {
+  
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
+                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+                  'http://localhost:3000';
+  
+  const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
+    cache: 'force-cache', // Cache the response
+  });
+  
+  if (!res.ok) throw new Error("Failed to fetch match data");
+  return res.json();
+}
 
-  const router = useRouter();
-
-useEffect(() => {
-  if (!matchid) return;
-
-  const cached = sessionStorage.getItem(`matchData-${matchid}`);
-  if (cached) {
-    setMatchData(JSON.parse(cached));
-    setIsLoading(false); // cached → no loading needed
-    return;
-  }
-
-  const fetchMatchData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(`/api/analyst/${matchid}`);
-      if (!res.ok) throw new Error("Failed to fetch match data");
-      const data: MatchData = await res.json();
-      
-      setMatchData(data);
-
-      // ✅ cache it so next time we don't fetch again
-      sessionStorage.setItem(`matchData-${matchid}`, JSON.stringify(data));
-    } catch (err: any) {
-      setError(err.message || "Unknown error");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  fetchMatchData();
-}, [matchid]);
-
-
-  // ---------------- Loading Spinner ----------------
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-black">
-        <div className="text-center">
-          {/* Bouncing basketball */}
-          <div className="mx-auto mb-6 w-12 h-12 rounded-full bg-orange-500 relative animate-bounce-ball"></div>
-          <h1 className="text-2xl font-bold text-orange-500 mb-2">
-            Loading match details...
-          </h1>
-          <p className="text-gray-300">
-            Please wait while we fetch all match information. This should only take a few seconds.
-          </p>
-        </div>
-
-        <style jsx>{`
-          @keyframes bounce-ball {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-40px); }
-          }
-          .animate-bounce-ball {
-            animation: bounce-ball 0.6s ease-in-out infinite;
-          }
-        `}</style>
-      </div>
-    );
-  }
-
-  // ---------------- Error Handling ----------------
-  if (error) {
+export default async function MatchPage({ params }: MatchPagePropsCustom) {
+  const { matchid } = await params;
+  
+  let matchData: MatchData;
+  
+  try {
+    matchData = await getMatchData(matchid);
+  } catch (error) {
     return (
       <div className="min-h-screen bg-gray-900 text-white p-4">
-        Error loading match data: {error}
+        Error loading match data: {error instanceof Error ? error.message : 'Unknown error'}
       </div>
     );
   }
@@ -156,4 +103,5 @@ useEffect(() => {
     />
   );
 }
+
 
