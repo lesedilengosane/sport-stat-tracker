@@ -17,7 +17,7 @@ const customJestConfig = {
     '!src/**/__tests__/**',
     '!src/app/globals.css',
 
-    // Ignore untested components
+    // Ignore specific untested components (not folders)
     '!src/components/BookedGameButton.tsx',
     '!src/components/Booked_Games.tsx',
     '!src/components/UserCard.tsx',
@@ -28,10 +28,15 @@ const customJestConfig = {
     '!src/components/historicaldata.tsx',
     '!src/components/last5games.tsx',
     '!src/components/line-up-page.tsx',
-    '!src/components/Line-up-table/**',
-    '!src/components/TeamStats/**',
-    '!src/components/coachComponents/**',
-    '!src/components/header/**',
+    '!src/components/coach-game-card.tsx',
+    '!src/components/completed-game-card.tsx',
+
+    // NOW INCLUDING these folders in coverage:
+    // - src/components/Line-up-table/**
+    // - src/components/TeamStats/**
+    // - src/components/coachComponents/**
+    // - src/components/header/**
+    // - src/components/fanComponents/**
 
     // Exclude only untested ui files, keep NavBar + TabBar
     '!src/components/ui/action-buttons.tsx',
@@ -57,22 +62,16 @@ const customJestConfig = {
     '!src/app/coach/coach-call/**',
     '!src/app/contact.tsx',
     '!src/app/fan.tsx',
+    '!src/app/fan/page.tsx',
     '!src/app/players.tsx',
     '!src/app/players/(id)/**',
+    '!src/app/players/[id]/page.tsx',
+    '!src/app/player/[id]/page.tsx',
     '!src/app/profile.tsx',
     '!src/app/signin.tsx',
     '!src/app/signup.tsx',
 
-    // Exclude components with low coverage
-    '!src/components/fanComponents/**',
-    '!src/components/sideNav/fanComponents.tsx',
-
-    // Additional 0% coverage files from report
-    '!src/components/coach-game-card.tsx',
-    '!src/components/completed-game-card.tsx',
-    '!src/app/fan/page.tsx',
-    '!src/app/players/[id]/page.tsx',
-    '!src/app/player/[id]/page.tsx',
+    // Keep excluding specific sideNav file with low coverage
     '!src/components/sideNav/fansideNav.tsx',
   ],
   coverageReporters: ['text', 'lcov', 'html'],
