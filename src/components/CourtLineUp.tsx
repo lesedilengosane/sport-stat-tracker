@@ -88,7 +88,7 @@ export default function BasketballCourtLineup({
 
       <div className="relative w-full h-[500px] rounded-xl overflow-hidden border-2 border-gray-800 shadow-2xl">
         <Image
-          src={"/court/court3.jpg" || "/placeholder.svg"}
+          src="/court/court3.jpg"
           alt="Basketball court"
           fill
           className="object-cover"
