@@ -26,6 +26,7 @@ interface Player {
   freeThrowsAttempted: number
   matches_played: number
   steals: number
+  image : string ;
 }
 
 interface PlayerDashboardProps {
@@ -123,11 +124,13 @@ export default function PlayerDashboard({ params }: PlayerDashboardProps) {
               {/* Player Avatar */}
               <div className="relative z-10">
                 <div className="w-56 h-56 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 p-2 shadow-2xl">
-                  <div className="w-full h-full rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white">
-                    <span className="text-8xl font-bold text-white">
-                      {player.first_name.charAt(0)}
-                      {player.last_name.charAt(0)}
-                    </span>
+                  <div className="w-full h-full rounded-full overflow-hidden bg-white/20 backdrop-blur-sm flex items-center justify-center border-4 border-white">
+                 <Image
+                  src = {player.image|| "/placeholder.svg?height=400&width=300"}
+                  alt = {`${player.first_name} ${player.last_name}`}
+                  fill
+                  className="object-cover"
+                 />
                   </div>
                 </div>
                 {/* Jersey Number Badge */}

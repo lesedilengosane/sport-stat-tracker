@@ -57,7 +57,7 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
               value={searchQuery}
               onChange={handleSearchChange}
               onFocus={handleSearchFocus}
-              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-4xl placeholder-gray-400 text-gray-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent transition"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-4xl placeholder-gray-400 text-gray-800 shadow-sm focus:outline-none focus:ring focus:ring-orange-400 focus:border-transparent transition"
             />
           </div>
 
