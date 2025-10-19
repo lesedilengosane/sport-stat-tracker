@@ -42,8 +42,9 @@ async function getMatchData(matchid: string): Promise<MatchData> {
                   'http://localhost:3000';
   
   const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
-    cache: 'force-cache', // Cache the response
+    cache: 'no-store', // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
   });
+  
   
   if (!res.ok) throw new Error("Failed to fetch match data");
   return res.json();
@@ -51,12 +52,15 @@ async function getMatchData(matchid: string): Promise<MatchData> {
 
 export default async function MatchPage({ params }: MatchPagePropsCustom) {
   const { matchid } = await params;
+
+  
   
   
   let matchData: MatchData;
   
   try {
     matchData = await getMatchData(matchid);
+  
   } catch (error) {
     return (
       <div className="min-h-screen bg-gray-900 text-white p-4">

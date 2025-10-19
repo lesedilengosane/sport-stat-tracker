@@ -3,21 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { PlayerCard } from '../playerCard';
 import type { Player } from '@/types/player';
 
-// Mock Next.js Image component
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ src, alt, width, height, className }: any) => (
-    <img
-      src={src}
-      alt={alt}
-      width={width}
-      height={height}
-      className={className}
-      data-testid="player-image"
-    />
-  ),
-}));
-
 // Helper function to create a mock dataTransfer object
 const createMockDataTransfer = () => ({
   setData: jest.fn(),
@@ -61,36 +46,6 @@ describe('PlayerCard', () => {
       expect(screen.getByText('23')).toBeInTheDocument();
     });
 
-    it('should render player image with correct src', () => {
-      render(<PlayerCard player={mockPlayer} />);
-      
-      const image = screen.getByTestId('player-image');
-      expect(image).toHaveAttribute('src', '/lebron.jpg');
-    });
-
-    it('should render player image with correct alt text', () => {
-      render(<PlayerCard player={mockPlayer} />);
-      
-      const image = screen.getByAltText('LeBron James');
-      expect(image).toBeInTheDocument();
-    });
-
-    it('should render player image with correct dimensions', () => {
-      render(<PlayerCard player={mockPlayer} />);
-      
-      const image = screen.getByTestId('player-image');
-      expect(image).toHaveAttribute('width', '40');
-      expect(image).toHaveAttribute('height', '40');
-    });
-
-    it('should use placeholder image when profileImage is null', () => {
-      const playerWithoutImage = { ...mockPlayer, profileImage: '' };
-      render(<PlayerCard player={playerWithoutImage} />);
-      
-      const image = screen.getByTestId('player-image');
-      expect(image).toHaveAttribute('src', '/placeholder.svg');
-    });
-
     it('should render different player correctly', () => {
       const differentPlayer: Player = {
         playerID: 'player-2',
@@ -107,7 +62,6 @@ describe('PlayerCard', () => {
       expect(screen.getByText('Stephen Curry')).toBeInTheDocument();
       expect(screen.getByText('PG')).toBeInTheDocument();
       expect(screen.getByText('30')).toBeInTheDocument();
-      expect(screen.getByTestId('player-image')).toHaveAttribute('src', '/curry.jpg');
     });
   });
 
@@ -310,17 +264,14 @@ describe('PlayerCard', () => {
       expect(flexContainer).toBeInTheDocument();
     });
 
-    it('should have player image container with correct styling', () => {
+    it('should have jersey number as first element in flex container', () => {
       const { container } = render(<PlayerCard player={mockPlayer} />);
       
-      const imageContainer = screen.getByTestId('player-image').parentElement;
-      expect(imageContainer).toHaveClass(
-        'w-10',
-        'h-10',
-        'rounded-full',
-        'overflow-hidden',
-        'bg-gray-600/30'
-      );
+      const flexContainer = container.querySelector('.flex.items-center.gap-3');
+      const firstChild = flexContainer?.firstElementChild;
+      
+      expect(firstChild).toHaveClass('w-8', 'h-8', 'bg-orange-500', 'rounded-full');
+      expect(firstChild?.textContent).toBe('23');
     });
   });
 });

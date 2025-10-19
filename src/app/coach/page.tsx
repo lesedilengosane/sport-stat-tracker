@@ -28,8 +28,6 @@ interface Player {
   position?: string;
 }
 
-
-
 export default function CoachDashboard() {
   const router = useRouter();
   const { user } = useAuth();
@@ -41,7 +39,8 @@ export default function CoachDashboard() {
   const [activeTab, setActiveTab] = useState("schedule");
   const [teamID, setTeamID] = useState<string>("");
 
-  const name = (user?.first_name || "") + " " + (user?.last_name || "") || "User";
+  const name =
+    (user?.first_name || "") + " " + (user?.last_name || "") || "User";
   const user_ID = user?.user_id || "No ID";
 
   const handleLogout = async () => {
@@ -130,6 +129,8 @@ export default function CoachDashboard() {
     setError(null);
     try {
       const matchesData = await apiClient.getMatches();
+      //console.log("🔍 [All Games] Raw matches data:", matchesData); // Debug
+
       if (!matchesData || matchesData.length === 0) {
         setAllGames([]);
         return;
@@ -152,30 +153,41 @@ export default function CoachDashboard() {
         });
       });
 
-      const formattedGames: Game[] = matchesData.map((match: any) => ({
-        id: match.match_id,
-        date: new Date(match.match_date).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        time: new Date(match.match_date).toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-        location: match.location || "Unknown",
-        homeTeam: teamsMap.get(match.home_team_id) || {
-          team_id: match.home_team_id,
-          name: "Unknown Team",
-          logo: "/default_team.svg",
-        },
-        awayTeam: teamsMap.get(match.away_team_id) || {
-          team_id: match.away_team_id,
-          name: "Unknown Team",
-          logo: "/default_team.svg",
-        },
-      }));
+      const formattedGames: Game[] = matchesData.map((match: any) => {
+        // console.log("🔍 Processing match:", {
+        //   match_id: match.match_id,
+        //   id: match.id,
+        //   home_team: match.home_team_id,
+        //   away_team: match.away_team_id,
+        // }); // Debug each match
 
+        return {
+          id: match.match_id,
+          match_id: match.match_id, // ✅ ADD THIS LINE - this was missing!
+          date: new Date(match.match_date).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          }),
+          time: new Date(match.match_date).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          location: match.location || "Unknown",
+          homeTeam: teamsMap.get(match.home_team_id) || {
+            team_id: match.home_team_id,
+            name: "Unknown Team",
+            logo: "/default_team.svg",
+          },
+          awayTeam: teamsMap.get(match.away_team_id) || {
+            team_id: match.away_team_id,
+            name: "Unknown Team",
+            logo: "/default_team.svg",
+          },
+        };
+      });
+
+      //console.log("✅ [All Games] Formatted games:", formattedGames); // Debug
       setAllGames(formattedGames);
     } catch (err) {
       console.error("[CoachDashboard] Error fetching all matches:", err);
@@ -250,14 +262,18 @@ export default function CoachDashboard() {
       case "team-stats":
         return <TeamStats />;
 
-      case "players":
+      case "My Players":
         return (
           <div>
-            <h1 className="text-2xl font-bold mb-6 text-center">Team Players</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              Team Players
+            </h1>
             {teamID ? (
               <PlayersList teamId={teamID} />
             ) : (
-              <p className="text-gray-300 text-center mt-4">Loading team info...</p>
+              <p className="text-gray-300 text-center mt-4">
+                Loading team info...
+              </p>
             )}
           </div>
         );

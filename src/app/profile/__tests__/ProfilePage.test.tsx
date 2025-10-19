@@ -52,15 +52,14 @@ jest.mock('../../api/DatabaseApi/supabaseClient', () => ({
 
 // Mock components with correct props based on actual implementation
 jest.mock('../../../components/UserCard', () => {
-  return function MockUserCard({ name, email, role }: { 
+  return function MockUserCard({ name, role }: { 
     name: string; 
-    email: string; 
     role: string; 
   }) {
     return (
       <div data-testid="user-card">
         <span data-testid="user-name">{name}</span>
-        <span data-testid="user-email">{email}</span>
+        <span data-testid="user-email"></span>
         <span data-testid="user-role">{role}</span>
       </div>
     );
@@ -68,12 +67,12 @@ jest.mock('../../../components/UserCard', () => {
 });
 
 jest.mock('../../../components/historicaldata', () => {
-  return function MockHistoricalData({ team, league }: { team: string; league: string }) {
+  return function MockHistoricalData() {
     return (
       <div data-testid="historical-data">
         <span>Mocked HistoricalData</span>
-        <span data-testid="team-prop">{team}</span>
-        <span data-testid="league-prop">{league}</span>
+        <span data-testid="team-prop"></span>
+        <span data-testid="league-prop"></span>
       </div>
     );
   };
@@ -165,25 +164,67 @@ describe('ProfilePage', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    jest.restoreAllMocks(); // This will restore console.error
+    jest.restoreAllMocks();
   });
 
   describe('Initial Rendering', () => {
     it('renders the ProfilePage component with loading state', async () => {
+      // Make fetch return a pending promise to catch loading state
+      let resolveFetch: any;
+      mockFetch.mockReturnValue(new Promise(resolve => {
+        resolveFetch = resolve;
+      }));
+
       await act(async () => {
         render(<ProfilePage />);
       });
       
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // Component shows UserCard with "Loading..." in loading state
+      expect(screen.getByTestId('user-card')).toBeInTheDocument();
+      expect(screen.getByTestId('user-name')).toHaveTextContent('Loading...');
+
+      // Clean up
+      await act(async () => {
+        resolveFetch({
+          ok: true,
+          json: async () => ({
+            exists: true,
+            user_id: 'test-user-id',
+            first_name: 'John',
+            last_name: 'Doe',
+            role: 'Fan',
+          }),
+        });
+      });
     });
 
     it('shows loading state initially', async () => {
+      // Make fetch return a pending promise to catch loading state
+      let resolveFetch: any;
+      mockFetch.mockReturnValue(new Promise(resolve => {
+        resolveFetch = resolve;
+      }));
+
       await act(async () => {
         render(<ProfilePage />);
       });
       
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
-      expect(screen.queryByText(/YOUR STATS. YOUR GAME./)).toBeInTheDocument(); // This text is always rendered
+      expect(screen.getByTestId('user-name')).toHaveTextContent('Loading...');
+      expect(screen.queryByText(/YOUR STATS. YOUR GAME./)).toBeInTheDocument();
+
+      // Clean up
+      await act(async () => {
+        resolveFetch({
+          ok: true,
+          json: async () => ({
+            exists: true,
+            user_id: 'test-user-id',
+            first_name: 'John',
+            last_name: 'Doe',
+            role: 'Fan',
+          }),
+        });
+      });
     });
 
     it('renders welcome message with user name after loading', async () => {
@@ -191,7 +232,7 @@ describe('ProfilePage', () => {
         render(<ProfilePage />);
       });
       
-      // Wait for animations and data loading
+      // Wait for data loading
       await act(async () => {
         jest.advanceTimersByTime(1000);
       });
@@ -218,14 +259,15 @@ describe('ProfilePage', () => {
       });
     });
 
-    it('renders historical data and external API components', async () => {
+    it('renders historical data component', async () => {
       await act(async () => {
         render(<ProfilePage />);
       });
       
       await waitFor(() => {
         expect(screen.getByTestId('historical-data')).toBeInTheDocument();
-        expect(screen.getByTestId('ext-api')).toBeInTheDocument();
+        // ExtApi is commented out in the actual component
+        expect(screen.queryByTestId('ext-api')).not.toBeInTheDocument();
       });
     });
 
@@ -243,7 +285,7 @@ describe('ProfilePage', () => {
         expect(screen.getByTestId('user-name')).toHaveTextContent('John Doe');
         expect(screen.getByTestId('user-role')).toHaveTextContent('Fan');
         
-        // Check historical data props (empty strings as per component)
+        // Check historical data is rendered
         expect(screen.getByTestId('team-prop')).toBeInTheDocument();
         expect(screen.getByTestId('league-prop')).toBeInTheDocument();
       });
@@ -358,12 +400,9 @@ describe('ProfilePage', () => {
       });
       
       await waitFor(() => {
-        // When user is null, the UserCard should not render because of the conditional rendering
-        // {!isLoading && user && (<UserCard ... />)}
-        // But other components should still render
+        // UserCard still renders with loading state, other components should render
         expect(screen.getByText(/YOUR STATS. YOUR GAME./)).toBeInTheDocument();
         expect(screen.getByTestId('historical-data')).toBeInTheDocument();
-        expect(screen.getByTestId('ext-api')).toBeInTheDocument();
       });
     });
 
@@ -557,12 +596,18 @@ describe('ProfilePage', () => {
 
   describe('Loading States and Animations', () => {
     it('shows proper loading sequence', async () => {
+      // Make fetch return a pending promise to catch loading state
+      let resolveFetch: any;
+      mockFetch.mockReturnValue(new Promise(resolve => {
+        resolveFetch = resolve;
+      }));
+
       await act(async () => {
         render(<ProfilePage />);
       });
       
-      // Initially should show Loading...
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      // Initially should show Loading... in the UserCard
+      expect(screen.getByTestId('user-name')).toHaveTextContent('Loading...');
       
       // Text should start invisible
       const welcomeText = screen.getByText(/YOUR STATS. YOUR GAME./);
@@ -581,6 +626,20 @@ describe('ProfilePage', () => {
       });
       
       expect(screen.getByText('Dashboard')).toHaveClass('opacity-100');
+
+      // Clean up - resolve the fetch
+      await act(async () => {
+        resolveFetch({
+          ok: true,
+          json: async () => ({
+            exists: true,
+            user_id: 'test-user-id',
+            first_name: 'John',
+            last_name: 'Doe',
+            role: 'Fan',
+          }),
+        });
+      });
     });
 
     it('handles image loading', async () => {
@@ -591,7 +650,7 @@ describe('ProfilePage', () => {
       // Background image should be present
       const backgroundImage = screen.getByTestId('background-image');
       expect(backgroundImage).toBeInTheDocument();
-      expect(backgroundImage).toHaveAttribute('src', '/bgr.jpg');
+      expect(backgroundImage).toHaveAttribute('src', '/background/ballBG.jpeg');
       expect(backgroundImage).toHaveAttribute('alt', 'Basketball player dunking');
     });
   });

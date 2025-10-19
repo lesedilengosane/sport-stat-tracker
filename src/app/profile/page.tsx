@@ -21,12 +21,11 @@ export default function ProfilePage() {
     team_name?: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  // State for background blur effect
 
+  // State for background blur effect and text/buttons animation
   const [blurActive, setBlurActive] = useState(false);
   const [showText, setShowText] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
   const name_surname = `${userInfo?.first_name} ${userInfo?.last_name}`;
 
@@ -82,18 +81,15 @@ export default function ProfilePage() {
     if (user?.user_role === "Fan") router.push("/fan");
     else if (user?.user_role === "Coach") router.push("/coach");
     else if (user?.user_role === "Analyst") router.push("/analyst");
-    //router.push("/analyst");
   };
 
   // Animate text/buttons on mount
   useEffect(() => {
     const t1 = setTimeout(() => setShowText(true), 200);
     const t2 = setTimeout(() => setShowButtons(true), 600);
-    const t3 = setTimeout(() => setIsLoading(false), 800); // mark loading finished after animation
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
-      clearTimeout(t3);
     };
   }, []);
 
@@ -102,17 +98,16 @@ export default function ProfilePage() {
   }, []);
 
   return (
-    <div className="relative w-full min-h-screen overflow-auto bg-black">
+    <div className="relative w-full min-h-screen overflow-auto bg-white">
       {/* Background Image */}
       <Image
-        src="/bgr.jpg"
+        src="/background/ballBG.jpeg"
         alt="Basketball player dunking"
         fill
         priority
-        onLoad={() => setIsLoading(false)}
         className={`object-cover transition-all duration-1000 ease-out ${
           blurActive ? "blur-sm" : ""
-        } ${!isLoading ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
+        } ${!loading ? "opacity-100 scale-100" : "opacity-0 scale-110"}`}
       />
 
       {/* Dark overlay */}
@@ -128,9 +123,7 @@ export default function ProfilePage() {
             }`}
           >
             <span className="text-orange-500">
-              {isLoading
-                ? "Loading..."
-                : `WELCOME, ${name_surname || "PLAYER"}.`}
+              {loading ? "Loading..." : `WELCOME, ${name_surname || "PLAYER"}.`}
             </span>
           </h1>
           <h1
@@ -153,15 +146,17 @@ export default function ProfilePage() {
         </p>
 
         {/* Profile card */}
-        {!isLoading && user && (
-          <div className="mb-8 flex justify-center">
+        <div className="mb-8 flex justify-center">
+          {loading ? (
+            // Loading skeleton
+            <UserCard name={"Loading..."} role={"Loading..."} />
+          ) : 
             <UserCard
               name={name_surname || "No name"}
-              email={`${name_surname}@gmail.com` || "No email"}
               role={userInfo?.role || "User"}
             />
-          </div>
-        )}
+          }
+        </div>
 
         {/* Buttons / actions */}
         <div className="flex flex-wrap gap-4 justify-center mb-12">
@@ -175,23 +170,12 @@ export default function ProfilePage() {
           >
             Dashboard
           </button>
-
-          {/* <button
-            className={`border-2 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-3 text-lg font-semibold hover:scale-105 rounded-xl transition-all duration-700 ${
-              showButtons ? "opacity-100" : "opacity-0"
-            }`}
-            onMouseEnter={() => setBlurActive(true)}
-            onMouseLeave={() => setBlurActive(false)}
-            onClick={() => router.push("/players")}
-          >
-            View Players
-          </button> */}
         </div>
 
         {/* Extra components */}
         <div className="space-y-8">
-          <Historicaldata team="" league="" />
-          <ExtApi />
+          <Historicaldata  />
+          {/*<ExtApi />*/}
         </div>
       </div>
     </div>

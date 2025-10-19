@@ -15,7 +15,7 @@ jest.mock('../completed-game-card', () => ({
     home_score,
     away_score,
     completed,
-    isBooked,
+    booked,
   }: any) => (
     <div data-testid={`game-card-${match_id}`}>
       <div data-testid="date">{date}</div>
@@ -26,7 +26,7 @@ jest.mock('../completed-game-card', () => ({
       <div data-testid="home-score">{home_score}</div>
       <div data-testid="away-score">{away_score}</div>
       <div data-testid="completed">{completed.toString()}</div>
-      <div data-testid="is-booked">{isBooked?.toString()}</div>
+      <div data-testid="is-booked">{booked !== undefined ? booked.toString() : ''}</div>
     </div>
   ),
 }));
@@ -81,6 +81,7 @@ describe('CompletedGamesGrid Component', () => {
       awayTeam: mockTeam2,
       home_score: 105,
       away_score: 98,
+      booked: true,
       isBooked: true,
       homeLineup: [{ player_id: 'p1', name: 'LeBron James', position: 'Forward' }],
       awayLineup: [{ player_id: 'p2', name: 'Stephen Curry', position: 'Guard' }],
@@ -96,6 +97,7 @@ describe('CompletedGamesGrid Component', () => {
       awayTeam: mockTeam1,
       home_score: 110,
       away_score: 102,
+      booked: false,
       isBooked: false,
       homeLineup: [],
       awayLineup: [],
@@ -105,12 +107,12 @@ describe('CompletedGamesGrid Component', () => {
   describe('Basic Rendering', () => {
     it('renders without crashing', () => {
       render(<CompletedGamesGrid games={mockGames} />);
-      expect(screen.getByText('AVAILABLE GAMES')).toBeInTheDocument();
+      expect(screen.getByText('Completed Games')).toBeInTheDocument();
     });
 
     it('renders the main heading', () => {
       render(<CompletedGamesGrid games={mockGames} />);
-      const heading = screen.getByText('AVAILABLE GAMES');
+      const heading = screen.getByText('Completed Games');
       expect(heading).toBeInTheDocument();
       expect(heading.tagName).toBe('H2');
     });
@@ -123,7 +125,7 @@ describe('CompletedGamesGrid Component', () => {
 
     it('applies correct styling classes to heading', () => {
       render(<CompletedGamesGrid games={mockGames} />);
-      const heading = screen.getByText('AVAILABLE GAMES');
+      const heading = screen.getByText('Completed Games');
       expect(heading).toHaveClass('text-2xl', 'font-bold', 'text-black', 'mb-6');
     });
   });
@@ -181,7 +183,7 @@ describe('CompletedGamesGrid Component', () => {
   describe('Empty States', () => {
     it('renders without games', () => {
       render(<CompletedGamesGrid games={[]} />);
-      expect(screen.getByText('AVAILABLE GAMES')).toBeInTheDocument();
+      expect(screen.getByText('Completed Games')).toBeInTheDocument();
       expect(screen.queryByTestId(/^game-card-/)).not.toBeInTheDocument();
     });
 
@@ -192,6 +194,7 @@ describe('CompletedGamesGrid Component', () => {
           match_id: 'game-3',
           home_score: undefined,
           away_score: undefined,
+          booked: true,
         },
       ];
       
@@ -207,6 +210,7 @@ describe('CompletedGamesGrid Component', () => {
         {
           ...mockGames[0],
           match_id: 'game-4',
+          booked: undefined as any,
           isBooked: undefined,
         },
       ];
@@ -214,11 +218,9 @@ describe('CompletedGamesGrid Component', () => {
       render(<CompletedGamesGrid games={gamesWithUndefinedBooked} />);
       
       const card = screen.getByTestId('game-card-game-4');
-      // When isBooked is undefined, the mock renders it as empty string
       const isBookedElement = within(card).getByTestId('is-booked');
       expect(isBookedElement).toBeInTheDocument();
-      // Check that it's either empty or contains 'undefined'
-      expect(isBookedElement.textContent).toMatch(/^(undefined)?$/);
+      expect(isBookedElement.textContent).toBe('');
     });
   });
 
@@ -288,6 +290,7 @@ describe('CompletedGamesGrid Component', () => {
         match_id: 'game-5',
         homeLineup: [],
         awayLineup: [],
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[gameWithEmptyLineups]} />);
@@ -305,6 +308,7 @@ describe('CompletedGamesGrid Component', () => {
         awayTeam: mockTeam2,
         home_score: 100,
         away_score: 95,
+        booked: false,
         isBooked: false,
       };
       
@@ -341,6 +345,7 @@ describe('CompletedGamesGrid Component', () => {
         ...mockGames[0],
         match_id: 'sample-1',
         isSampleData: true,
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[sampleGame]} />);
@@ -352,6 +357,7 @@ describe('CompletedGamesGrid Component', () => {
         ...mockGames[0],
         match_id: 'analyzed-1',
         analyst: 'John Analyst',
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[gameWithAnalyst]} />);
@@ -369,6 +375,7 @@ describe('CompletedGamesGrid Component', () => {
         awayTeam: mockTeam2,
         home_score: 90,
         away_score: 85,
+        booked: true,
         isBooked: true,
       };
       
@@ -383,6 +390,7 @@ describe('CompletedGamesGrid Component', () => {
         ...mockGames[0],
         match_id: 'long-location',
         location: 'The Very Long Name of an International Basketball Stadium Complex',
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[gameWithLongLocation]} />);
@@ -402,6 +410,7 @@ describe('CompletedGamesGrid Component', () => {
         ...mockGames[0],
         match_id: 'long-team-name',
         homeTeam: longNameTeam,
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[game]} />);
@@ -417,6 +426,7 @@ describe('CompletedGamesGrid Component', () => {
         match_id: 'zero-scores',
         home_score: 0,
         away_score: 0,
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[gameWithZeroScores]} />);
@@ -431,6 +441,7 @@ describe('CompletedGamesGrid Component', () => {
         match_id: 'high-scores',
         home_score: 999,
         away_score: 998,
+        booked: true,
       };
       
       render(<CompletedGamesGrid games={[gameWithHighScores]} />);
