@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Save } from "lucide-react"
+import { Save, CheckCircle, Sparkles } from "lucide-react"
 import { Reserves } from "@/components/coachComponents/reserves"
 import type { Player, CourtPosition } from "@/types/player"
 import { getDefaultLineup } from "@/app/utils/lineups"
@@ -35,6 +35,17 @@ interface UnassignedPlayer {
 
 interface TeamManagementProps {
   coachTeamId: string
+}
+
+interface TeamManagementState {
+  reservePlayers: Player[]
+  courtPlayers: Map<string, Player>
+  unassignedPlayers: UnassignedPlayer[]
+  loading: boolean
+  saving: boolean
+  fetchingUnassigned: boolean
+  dialogOpen: boolean
+  recentlySignedPlayers: Set<string>
 }
 
 // Custom Court Player Component with React.memo
@@ -91,21 +102,26 @@ CustomCourtPlayer.displayName = 'CustomCourtPlayer'
 
 export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
   // Combined state to reduce re-renders
-  const [state, setState] = useState({
+  const [state, setState] = useState<TeamManagementState>({
     reservePlayers: [] as Player[],
     courtPlayers: new Map<string, Player>(),
     unassignedPlayers: [] as UnassignedPlayer[],
     loading: true,
     saving: false,
     fetchingUnassigned: false,
-    dialogOpen: false
+    dialogOpen: false,
+    recentlySignedPlayers: new Set<string>() // Track recently signed players
   })
 
-  const { reservePlayers, courtPlayers, unassignedPlayers, loading, saving, fetchingUnassigned, dialogOpen } = state
+  const { reservePlayers, courtPlayers, unassignedPlayers, loading, saving, fetchingUnassigned, dialogOpen, recentlySignedPlayers } = state
 
-  // Helper to update state
-  const updateState = useCallback((updates: Partial<typeof state>) => {
-    setState(prev => ({ ...prev, ...updates }))
+  // Helper to update state - accepts either object or function
+  const updateState = useCallback((updates: Partial<TeamManagementState> | ((prev: TeamManagementState) => Partial<TeamManagementState>)) => {
+    if (typeof updates === 'function') {
+      setState(prev => ({ ...prev, ...updates(prev) }));
+    } else {
+      setState(prev => ({ ...prev, ...updates }));
+    }
   }, [])
 
   // Optimized fetchLineup with useCallback
@@ -275,8 +291,13 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
     }
   }, [courtPlayers, reservePlayers, updateState]);
 
-  // Assign player to team
-  const assignPlayerToTeam = useCallback(async (playerId: string) => {
+  // Assign player to team with immediate UI feedback
+  const assignPlayerToTeam = useCallback(async (playerId: string, playerName: string) => {
+    // Immediately update UI - remove button and show success
+    updateState((prev: TeamManagementState) => ({
+      recentlySignedPlayers: new Set(prev.recentlySignedPlayers).add(playerId)
+    }));
+
     try {
       const res = await fetch("/api/coach/assign-player", {
         method: "POST",
@@ -290,14 +311,29 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
           fetchLineup(),
           fetchUnassignedPlayers()
         ]);
+        
+        // Remove from recently signed after a delay
+        setTimeout(() => {
+          updateState((prev: TeamManagementState) => ({
+            recentlySignedPlayers: new Set([...prev.recentlySignedPlayers].filter(id => id !== playerId))
+          }));
+        }, 3000);
       } else {
         const errData = await res.json();
         console.error("Error assigning player:", errData.error);
+        // Remove from recently signed if there was an error
+        updateState((prev: TeamManagementState) => ({
+          recentlySignedPlayers: new Set([...prev.recentlySignedPlayers].filter(id => id !== playerId))
+        }));
       }
     } catch (err) {
       console.error("Error assigning player:", err);
+      // Remove from recently signed if there was an error
+      updateState((prev: TeamManagementState) => ({
+        recentlySignedPlayers: new Set([...prev.recentlySignedPlayers].filter(id => id !== playerId))
+      }));
     }
-  }, [coachTeamId, fetchLineup, fetchUnassignedPlayers]);
+  }, [coachTeamId, fetchLineup, fetchUnassignedPlayers, updateState]);
 
   // Memoized court player render
   const renderedCourtPlayers = useMemo(() => {
@@ -428,23 +464,42 @@ export default function TeamManagement({ coachTeamId }: TeamManagementProps) {
                   <p className="text-gray-200 text-center py-4">No unassigned players available.</p>
                 ) : (
                   <div className="max-h-64 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
-                    {unassignedPlayers.map((player) => (
-                      <li
-                        key={player.player_id}
-                        className="flex justify-between items-center border border-white/20 p-2 rounded-xl bg-white/50 backdrop-blur-md list-none"
-                      >
-                        <span className="text-white text-sm">
-                          {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={() => assignPlayerToTeam(player.player_id)}
-                          className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600"
+                    {unassignedPlayers.map((player) => {
+                      const isRecentlySigned = recentlySignedPlayers.has(player.player_id);
+                      
+                      return (
+                        <li
+                          key={player.player_id}
+                          className={`flex justify-between items-center border p-2 rounded-xl backdrop-blur-md list-none transition-all duration-300 ${
+                            isRecentlySigned 
+                              ? 'border-green-400 bg-green-500/20' 
+                              : 'border-white/20 bg-white/50'
+                          }`}
                         >
-                          Add
-                        </Button>
-                      </li>
-                    ))}
+                          <span className={`text-sm ${
+                            isRecentlySigned ? 'text-green-100' : 'text-white'
+                          }`}>
+                            {player.first_name} {player.last_name} — {player.position} #{player.jersey_number}
+                          </span>
+                          
+                          {isRecentlySigned ? (
+                            <div className="flex items-center gap-1 text-green-300 animate-pulse">
+                              <CheckCircle className="h-4 w-4" />
+                              <Sparkles className="h-3 w-3" />
+                              <span className="text-xs font-bold">Signed!</span>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => assignPlayerToTeam(player.player_id, `${player.first_name} ${player.last_name}`)}
+                              className="bg-pink-500 text-white px-3 py-1 rounded-lg hover:bg-pink-600 transition-all"
+                            >
+                              Add
+                            </Button>
+                          )}
+                        </li>
+                      );
+                    })}
                   </div>
                 )}
               </div>

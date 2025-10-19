@@ -8,6 +8,7 @@ import UserCard from "@/components/UserCard";
 import Historicaldata from "@/components/historicaldata";
 import ExtApi from "@/components/ExtApi";
 import { supabase } from "../api/DatabaseApi/supabaseClient";
+import Hiking from "../../components/ExternalApis/Hiking";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -174,6 +175,7 @@ export default function ProfilePage() {
 
         {/* Extra components */}
         <div className="space-y-8">
+        <Hiking />
           <Historicaldata  />
           {/*<ExtApi />*/}
         </div>

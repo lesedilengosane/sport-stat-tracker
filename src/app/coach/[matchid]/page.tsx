@@ -1,3 +1,4 @@
+// src\app\coach\[matchid]\page.tsx
 import MatchDetails from "./MatchDetails";
 import { MatchMetaData } from "@/types/basketball";
 
@@ -36,16 +37,15 @@ type MatchPagePropsCustom = {
 };
 
 async function getMatchData(matchid: string): Promise<MatchData> {
-  
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
-                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                  'http://localhost:3000';
-  
-  const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
-    cache: 'no-store', // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000";
+
+  const res = await fetch(`${baseUrl}/api/coach/${matchid}`, {
+    cache: "no-store", // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
   });
-  
-  
+
   if (!res.ok) throw new Error("Failed to fetch match data");
   return res.json();
 }
@@ -53,18 +53,15 @@ async function getMatchData(matchid: string): Promise<MatchData> {
 export default async function MatchPage({ params }: MatchPagePropsCustom) {
   const { matchid } = await params;
 
-  
-  
-  
   let matchData: MatchData;
-  
+
   try {
     matchData = await getMatchData(matchid);
-  
   } catch (error) {
     return (
       <div className="min-h-screen bg-gray-900 text-white p-4">
-        Error loading match data: {error instanceof Error ? error.message : 'Unknown error'}
+        Error loading match data:{" "}
+        {error instanceof Error ? error.message : "Unknown error"}
       </div>
     );
   }
@@ -79,7 +76,9 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
 
   // ---------------- Map Lineups ----------------
   const homeTeamId = matchData.Teams[0]?.team_id;
-  const awayTeamId = matchData.Teams.find((t) => t.team_id !== homeTeamId)?.team_id;
+  const awayTeamId = matchData.Teams.find(
+    (t) => t.team_id !== homeTeamId
+  )?.team_id;
 
   const mapLineup = (lineup: any[], team: string): PlayerDetails[] =>
     lineup.map((l, idx) => ({
@@ -87,7 +86,7 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
       name: l.player?.first_name || "Player",
       surname: l.player?.last_name || "Unknown",
       position: l.position || "Unknown",
-      avatarUrl: l.player?.image || "/avatars/player3.jpg",
+      avatarUrl: l.player?.avatar_url || "/avatars/player3.jpg",
     }));
 
   const homePlayers = mapLineup(matchData.lineups.homeLineup || [], "home");
@@ -108,5 +107,3 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
     />
   );
 }
-
-

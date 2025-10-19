@@ -244,11 +244,15 @@ export default function CoachDashboard() {
       case "players":
         return (
           <div>
-            <h1 className="text-2xl font-bold mb-6 text-center">Team Players</h1>
+            <h1 className="text-2xl font-bold mb-6 text-center">
+              Team Players
+            </h1>
             {teamID ? (
               <PlayersList teamId={teamID} />
             ) : (
-              <p className="text-gray-300 text-center mt-4">Loading team info...</p>
+              <p className="text-gray-300 text-center mt-4">
+                Loading team info...
+              </p>
             )}
           </div>
         )

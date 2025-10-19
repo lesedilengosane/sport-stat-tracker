@@ -1,3 +1,4 @@
+//src\components\game-card.tsx
 "use client";
 
 import { Card } from "@/components/ui/card";
@@ -15,6 +16,8 @@ import {
 } from "react";
 import { supabase } from "../app/api/DatabaseApi/supabaseClient";
 import { BookingApiClient } from "../app/utils/BookGames";
+import { useMatches } from "@/app/context/MatchesContext";
+import { toast } from "sonner";
 
 /* -------------------------------------------------------------
    🧠 Context-based user cache (prevents duplicate Supabase calls)
@@ -247,6 +250,7 @@ const AnalystGameCard = memo(
     const { id: analystId } = useUserData();
     const [isBooked, setIsBooked] = useState(booked);
     const [booking, setBooking] = useState(false);
+    const {triggerRefetch}=useMatches()
 
     const handleBookClick = useCallback(
       async (e: React.MouseEvent) => {
@@ -258,6 +262,12 @@ const AnalystGameCard = memo(
           const result = await BookingApiClient.bookGame(match_id, analystId);
           if (result.success) {
             setIsBooked(true);
+            triggerRefetch();
+            toast.success("Game Booked Successfully.", {
+        description: "Refreshing...",
+      });
+        
+
           }
           alert(result.message || "Booking status updated.");
         } catch {
@@ -316,7 +326,7 @@ const CoachGameCard = memo(
     const handleView = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
-        router.push(`/analyst/${match_id}`);
+        router.push(`/coach/${match_id}`);
       },
       [router, match_id]
     );

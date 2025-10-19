@@ -62,7 +62,7 @@ console.log(`The 1st fetch has been perfomed\n The match metaData is : ${matchMe
       first_name,
       last_name,
       player_id,
-      team_id,image
+      team_id
     )
   `)
   .in("team_id", [awayTeamId, homeTeamId]);  // only filter by team_id
@@ -72,7 +72,7 @@ console.log(`The 1st fetch has been perfomed\n The match metaData is : ${matchMe
       console.log(`There was an error fetching default lineups for the teams`)
          return NextResponse.json({error :lineupError.message},{status :500})
         }
-console.log(`The 3td fetch was perfomed well`)
+console.log(`The 3rd fetch was perfomed well`)
 
 
 const homeLineup = defaultLineups.filter(l => l.team_id === homeTeamId);

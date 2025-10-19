@@ -115,7 +115,7 @@ describe('MatchPage', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       `http://localhost:3000/api/analyst/${mockMatchId}`,
-      { cache: 'force-cache' }
+      { cache: 'no-store' }
     );
     expect(screen.getByTestId('match-details')).toBeInTheDocument();
 
@@ -437,7 +437,7 @@ describe('MatchPage', () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       `http://localhost:3000/api/analyst/${customMatchId}`,
-      { cache: 'force-cache' }
+      { cache: 'no-store' }
     );
     
     const callProps = (MatchDetails as jest.Mock).mock.calls[0][0];
