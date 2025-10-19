@@ -68,13 +68,26 @@ export function DashboardHeader({ placeholder = "Search players and teams..." }:
         {/* Profile Section */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
-            <span className="text-sm text-orange-500">Hello, {user?.first_name + " " + user?.last_name || "User"}</span>
-            <Badge
-              className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium  text-md hover:cursor-pointer"
-              onClick={() => router.push("/profile")}
-            >
-              {user?.first_name?.[0]?.toUpperCase() || "U"}
-            </Badge>
+            {!user?.first_name || !user?.last_name ? (
+              <>
+                {/* Loading skeleton for name */}
+                <div className="h-5 w-32 bg-orange-500/30 rounded animate-pulse" />
+                {/* Loading skeleton for avatar */}
+                <div className="h-10 w-10 rounded-full bg-orange-500/30 animate-pulse" />
+              </>
+            ) : (
+              <>
+                <span className="text-sm text-orange-500">
+                  Hello, {user.first_name} {user.last_name}
+                </span>
+                <Badge
+                  className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-medium text-md hover:cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
+                  {user.first_name[0].toUpperCase()}
+                </Badge>
+              </>
+            )}
           </div>
         </div>
       </div>
