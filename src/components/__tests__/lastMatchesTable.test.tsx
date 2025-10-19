@@ -1,80 +1,79 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { LastMatchesTable, MatchDetails, matchColumns } from '../LastMatchesTable'
-
-// Mock the DataTable component
-jest.mock('../Line-up-table/LineUp-table', () => ({
-  DataTable: ({ columns, data, onRowClick }: any) => (
-    <div data-testid="data-table">
-      <table>
-        <thead>
-          <tr>
-            {columns.map((col: any, idx: number) => (
-              <th key={idx}>{col.header}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row: any, rowIdx: number) => (
-            <tr
-              key={rowIdx}
-              onClick={() => onRowClick?.({ original: row })}
-              data-testid={`table-row-${rowIdx}`}
-            >
-              {columns.map((col: any, colIdx: number) => (
-                <td key={colIdx}>
-                  {col.cell ? col.cell({ row: { getValue: (key: string) => row[key], original: row } }) : row[col.accessorKey]}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  ),
-}))
+import { LastMatchesTable, MatchDetails } from '../LastMatchesTable'
 
 describe('LastMatchesTable', () => {
   const mockMatches: MatchDetails[] = [
     {
       match_id: '1',
-      home_team_name: 'Lakers',
-      away_team_name: 'Warriors',
-      home_icon_url: '/logos/lakers.png',
-      away_icon_url: '/logos/warriors.png',
+      home_team_id: 'team-1',
+      away_team_id: 'team-2',
       home_score: 105,
       away_score: 98,
       match_date: '2025-10-20',
       completed: true,
+      home_team: {
+        team_id: 'team-1',
+        team_name: 'Lakers',
+        icon_url: '/logos/lakers.png',
+        coach_id: 'coach-1',
+      },
+      away_team: {
+        team_id: 'team-2',
+        team_name: 'Warriors',
+        icon_url: '/logos/warriors.png',
+        coach_id: 'coach-2',
+      },
     },
     {
       match_id: '2',
-      home_team_name: 'Celtics',
-      away_team_name: 'Bulls',
-      home_icon_url: '/logos/celtics.png',
-      away_icon_url: '/logos/bulls.png',
+      home_team_id: 'team-3',
+      away_team_id: 'team-4',
       home_score: 110,
       away_score: 102,
       match_date: '2025-10-18',
       completed: true,
+      home_team: {
+        team_id: 'team-3',
+        team_name: 'Celtics',
+        icon_url: '/logos/celtics.png',
+        coach_id: 'coach-3',
+      },
+      away_team: {
+        team_id: 'team-4',
+        team_name: 'Bulls',
+        icon_url: '/logos/bulls.png',
+        coach_id: 'coach-4',
+      },
     },
     {
       match_id: '3',
-      home_team_name: 'Heat',
-      away_team_name: 'Knicks',
-      home_icon_url: '/logos/heat.png',
-      away_icon_url: '/logos/knicks.png',
-      home_score: 0,
-      away_score: 0,
+      home_team_id: 'team-5',
+      away_team_id: 'team-6',
+      home_score: 95,
+      away_score: 100,
       match_date: '2025-10-25',
-      completed: false,
+      completed: true,
+      home_team: {
+        team_id: 'team-5',
+        team_name: 'Heat',
+        icon_url: '/logos/heat.png',
+        coach_id: 'coach-5',
+      },
+      away_team: {
+        team_id: 'team-6',
+        team_name: 'Knicks',
+        icon_url: '/logos/knicks.png',
+        coach_id: 'coach-6',
+      },
     },
   ]
 
   const defaultProps = {
     data: mockMatches,
     title: 'Last 5 Matches',
-    onRowClick: jest.fn(),
+    currentTeam: 'Lakers',
+    onMatchClick: jest.fn(),
   }
 
   beforeEach(() => {
@@ -82,330 +81,369 @@ describe('LastMatchesTable', () => {
   })
 
   describe('Rendering', () => {
-    it('renders the title', () => {
-      render(<LastMatchesTable {...defaultProps} />)
-      
-      expect(screen.getByText('Last 5 Matches')).toBeInTheDocument()
-    })
-
-    it('renders the DataTable component', () => {
-      render(<LastMatchesTable {...defaultProps} />)
-      
-      expect(screen.getByTestId('data-table')).toBeInTheDocument()
-    })
-
-    it('passes correct data to DataTable', () => {
+    it('renders the component with correct title', () => {
       render(<LastMatchesTable {...defaultProps} />)
       
       expect(screen.getByText('Lakers')).toBeInTheDocument()
+    })
+
+    it('renders with custom current team', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Warriors" />)
+      
       expect(screen.getByText('Warriors')).toBeInTheDocument()
-      expect(screen.getByText('Celtics')).toBeInTheDocument()
-      expect(screen.getByText('Bulls')).toBeInTheDocument()
     })
 
-    it('renders all table headers', () => {
+    it('renders game results', () => {
       render(<LastMatchesTable {...defaultProps} />)
       
-      expect(screen.getByText('Date')).toBeInTheDocument()
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Away')).toBeInTheDocument()
-      expect(screen.getByText('Score')).toBeInTheDocument()
+      // Check for opponent names
+      expect(screen.getByText('vs Warriors')).toBeInTheDocument()
     })
 
-    it('renders all matches in table rows', () => {
+    it('displays correct number of games (max 5)', () => {
       render(<LastMatchesTable {...defaultProps} />)
       
-      expect(screen.getByTestId('table-row-0')).toBeInTheDocument()
-      expect(screen.getByTestId('table-row-1')).toBeInTheDocument()
-      expect(screen.getByTestId('table-row-2')).toBeInTheDocument()
+      const gameCards = document.querySelectorAll('[class*="bg-orange-50"]')
+      expect(gameCards.length).toBeLessThanOrEqual(5)
+    })
+
+    it('renders all game cards', () => {
+      render(<LastMatchesTable {...defaultProps} />)
+      
+      expect(screen.getByText('vs Warriors')).toBeInTheDocument()
+      expect(screen.getByText('105-98')).toBeInTheDocument()
     })
   })
 
-  describe('Column Definitions', () => {
-    it('has correct number of columns', () => {
-      expect(matchColumns).toHaveLength(4)
+  describe('Win/Loss Display', () => {
+    it('displays W for wins', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
+      
+      // Lakers won 105-98
+      const winIndicators = screen.getAllByText('W')
+      expect(winIndicators.length).toBeGreaterThan(0)
     })
 
-    it('has Date column with correct configuration', () => {
-      const dateColumn = matchColumns[0] as any
-      expect(dateColumn.accessorKey).toBe('match_date')
-      expect(dateColumn.header).toBe('Date')
+    it('displays L for losses', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Heat" />)
+      
+      // Heat lost 95-100
+      const lossIndicators = screen.getAllByText('L')
+      expect(lossIndicators.length).toBeGreaterThan(0)
     })
 
-    it('has Home column with correct configuration', () => {
-      const homeColumn = matchColumns[1] as any
-      expect(homeColumn.accessorKey).toBe('home_team_name')
-      expect(homeColumn.header).toBe('Home')
+    it('applies green background to wins', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
+      
+      const greenCircles = container.querySelectorAll('.bg-green-500')
+      expect(greenCircles.length).toBeGreaterThan(0)
     })
 
-    it('has Away column with correct configuration', () => {
-      const awayColumn = matchColumns[2] as any
-      expect(awayColumn.accessorKey).toBe('away_team_name')
-      expect(awayColumn.header).toBe('Away')
-    })
-
-    it('has Score column with correct configuration', () => {
-      const scoreColumn = matchColumns[3] as any
-      expect(scoreColumn.accessorKey).toBe('score')
-      expect(scoreColumn.header).toBe('Score')
+    it('applies red background to losses', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} currentTeam="Heat" />)
+      
+      const redCircles = container.querySelectorAll('.bg-red-500')
+      expect(redCircles.length).toBeGreaterThan(0)
     })
   })
 
-  describe('Date Formatting', () => {
-    it('formats dates correctly', () => {
-      render(<LastMatchesTable {...defaultProps} />)
+  describe('Opponent Display', () => {
+    it('shows correct opponent for home games', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      // Dates should be formatted using toLocaleDateString
-      const formattedDate1 = new Date('2025-10-20').toLocaleDateString()
-      const formattedDate2 = new Date('2025-10-18').toLocaleDateString()
-      
-      expect(screen.getByText(formattedDate1)).toBeInTheDocument()
-      expect(screen.getByText(formattedDate2)).toBeInTheDocument()
-    })
-  })
-
-  describe('Team Display', () => {
-    it('renders home team logos', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
-      
-      const lakersLogo = container.querySelector('img[src="/logos/lakers.png"]')
-      const celticsLogo = container.querySelector('img[src="/logos/celtics.png"]')
-      
-      expect(lakersLogo).toBeInTheDocument()
-      expect(celticsLogo).toBeInTheDocument()
+      // Lakers (home) vs Warriors (away)
+      expect(screen.getByText('vs Warriors')).toBeInTheDocument()
     })
 
-    it('renders away team logos', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
+    it('shows correct opponent for away games', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Warriors" />)
       
-      const warriorsLogo = container.querySelector('img[src="/logos/warriors.png"]')
-      const bullsLogo = container.querySelector('img[src="/logos/bulls.png"]')
-      
-      expect(warriorsLogo).toBeInTheDocument()
-      expect(bullsLogo).toBeInTheDocument()
+      // Warriors (away) vs Lakers (home)
+      expect(screen.getByText('vs Lakers')).toBeInTheDocument()
     })
 
-    it('sets alt text for home team logos', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
+    it('displays opponent logos', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      const homeLogos = container.querySelectorAll('img[alt="home logo"]')
-      expect(homeLogos.length).toBeGreaterThan(0)
+      const opponentLogo = container.querySelector('img[alt="Warriors logo"]')
+      expect(opponentLogo).toBeInTheDocument()
     })
 
-    it('sets alt text for away team logos', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
+    it('renders logo with correct src', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      const awayLogos = container.querySelectorAll('img[alt="away logo"]')
-      expect(awayLogos.length).toBeGreaterThan(0)
-    })
-
-    it('renders team names with logos', () => {
-      render(<LastMatchesTable {...defaultProps} />)
-      
-      expect(screen.getByText('Lakers')).toBeInTheDocument()
-      expect(screen.getByText('Warriors')).toBeInTheDocument()
+      const logo = container.querySelector('img[src="/logos/warriors.png"]')
+      expect(logo).toBeInTheDocument()
     })
   })
 
   describe('Score Display', () => {
-    it('displays scores in correct format', () => {
-      render(<LastMatchesTable {...defaultProps} />)
+    it('displays correct score format', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      expect(screen.getByText('105 - 98')).toBeInTheDocument()
-      expect(screen.getByText('110 - 102')).toBeInTheDocument()
+      expect(screen.getByText('105-98')).toBeInTheDocument()
     })
 
-    it('displays scores for incomplete matches', () => {
-      render(<LastMatchesTable {...defaultProps} />)
+    it('shows team score first for home games', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      expect(screen.getByText('0 - 0')).toBeInTheDocument()
+      // Lakers (home) 105 vs Warriors (away) 98
+      expect(screen.getByText('105-98')).toBeInTheDocument()
     })
 
-    it('displays scores with correct spacing', () => {
-      render(<LastMatchesTable {...defaultProps} />)
+    it('shows team score first for away games', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Warriors" />)
       
-      const scoreText = screen.getByText('105 - 98')
-      expect(scoreText.textContent).toBe('105 - 98')
-    })
-  })
-
-  describe('Row Click Handling', () => {
-    it('calls onRowClick when a row is clicked', () => {
-      const mockOnRowClick = jest.fn()
-      render(<LastMatchesTable {...defaultProps} onRowClick={mockOnRowClick} />)
-      
-      const firstRow = screen.getByTestId('table-row-0')
-      fireEvent.click(firstRow)
-      
-      expect(mockOnRowClick).toHaveBeenCalledWith(mockMatches[0])
-      expect(mockOnRowClick).toHaveBeenCalledTimes(1)
+      // Warriors (away) 98 vs Lakers (home) 105
+      expect(screen.getByText('98-105')).toBeInTheDocument()
     })
 
-    it('calls onRowClick with correct match data', () => {
-      const mockOnRowClick = jest.fn()
-      render(<LastMatchesTable {...defaultProps} onRowClick={mockOnRowClick} />)
+    it('displays multiple scores correctly', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
       
-      const secondRow = screen.getByTestId('table-row-1')
-      fireEvent.click(secondRow)
-      
-      expect(mockOnRowClick).toHaveBeenCalledWith(mockMatches[1])
-    })
-
-    it('handles multiple row clicks', () => {
-      const mockOnRowClick = jest.fn()
-      render(<LastMatchesTable {...defaultProps} onRowClick={mockOnRowClick} />)
-      
-      const firstRow = screen.getByTestId('table-row-0')
-      const secondRow = screen.getByTestId('table-row-1')
-      
-      fireEvent.click(firstRow)
-      fireEvent.click(secondRow)
-      
-      expect(mockOnRowClick).toHaveBeenCalledTimes(2)
-    })
-
-    it('does not throw when onRowClick is undefined', () => {
-      render(<LastMatchesTable {...defaultProps} onRowClick={undefined} />)
-      
-      const firstRow = screen.getByTestId('table-row-0')
-      expect(() => fireEvent.click(firstRow)).not.toThrow()
+      expect(screen.getByText('105-98')).toBeInTheDocument()
     })
   })
 
-  describe('Edge Cases', () => {
+  describe('Click Handling', () => {
+    it('calls onMatchClick when game card is clicked', () => {
+      const mockOnMatchClick = jest.fn()
+      render(<LastMatchesTable {...defaultProps} onMatchClick={mockOnMatchClick} />)
+      
+      const gameCard = screen.getByText('vs Warriors').closest('div')
+      if (gameCard) {
+        fireEvent.click(gameCard)
+      }
+      
+      expect(mockOnMatchClick).toHaveBeenCalledTimes(1)
+      expect(mockOnMatchClick).toHaveBeenCalledWith(mockMatches[0])
+    })
+
+    it('applies hover styles when onMatchClick is provided', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} onMatchClick={jest.fn()} />)
+      
+      const clickableCard = container.querySelector('.cursor-pointer')
+      expect(clickableCard).toBeInTheDocument()
+    })
+
+    it('does not apply cursor-pointer when onMatchClick is not provided', () => {
+      const { onMatchClick, ...propsWithoutClick } = defaultProps
+      const { container } = render(<LastMatchesTable {...propsWithoutClick} />)
+      
+      const cards = container.querySelectorAll('[class*="bg-orange-50"]')
+      cards.forEach(card => {
+        expect(card).not.toHaveClass('cursor-pointer')
+      })
+    })
+
+    it('does not crash when clicking without onMatchClick', () => {
+      const { onMatchClick, ...propsWithoutClick } = defaultProps
+      render(<LastMatchesTable {...propsWithoutClick} />)
+      
+      const gameCard = screen.getByText('vs Warriors').closest('div')
+      expect(() => {
+        if (gameCard) fireEvent.click(gameCard)
+      }).not.toThrow()
+    })
+
+    it('calls onMatchClick with correct match data', () => {
+      const mockOnMatchClick = jest.fn()
+      render(<LastMatchesTable {...defaultProps} onMatchClick={mockOnMatchClick} currentTeam="Celtics" />)
+      
+      const celticsGame = screen.getByText('vs Bulls').closest('div')
+      if (celticsGame) {
+        fireEvent.click(celticsGame)
+      }
+      
+      expect(mockOnMatchClick).toHaveBeenCalledWith(mockMatches[1])
+    })
+  })
+
+  describe('Data Handling', () => {
     it('handles empty data array', () => {
       render(<LastMatchesTable {...defaultProps} data={[]} />)
       
-      expect(screen.getByText('Last 5 Matches')).toBeInTheDocument()
-      expect(screen.getByTestId('data-table')).toBeInTheDocument()
+      expect(screen.getByText('Lakers')).toBeInTheDocument()
+    })
+
+    it('limits display to 5 games', () => {
+      const manyMatches: MatchDetails[] = Array.from({ length: 10 }, (_, i) => ({
+        match_id: `match-${i}`,
+        home_team_id: `team-${i}`,
+        away_team_id: `team-${i + 10}`,
+        home_score: 100,
+        away_score: 95,
+        match_date: '2025-10-20',
+        completed: true,
+        home_team: {
+          team_id: `team-${i}`,
+          team_name: i === 0 ? 'Lakers' : `Team ${i}`,
+          icon_url: `/logo-${i}.png`,
+          coach_id: `coach-${i}`,
+        },
+        away_team: {
+          team_id: `team-${i + 10}`,
+          team_name: `Opponent ${i}`,
+          icon_url: `/logo-opp-${i}.png`,
+          coach_id: `coach-${i + 10}`,
+        },
+      }))
+      
+      const { container } = render(<LastMatchesTable {...defaultProps} data={manyMatches} />)
+      
+      const gameCards = container.querySelectorAll('[class*="bg-orange-50"]')
+      expect(gameCards.length).toBeLessThanOrEqual(5)
     })
 
     it('handles single match', () => {
       render(<LastMatchesTable {...defaultProps} data={[mockMatches[0]]} />)
       
-      expect(screen.getByText('Lakers')).toBeInTheDocument()
-      expect(screen.getByText('Warriors')).toBeInTheDocument()
+      expect(screen.getByText('vs Warriors')).toBeInTheDocument()
+      expect(screen.getByText('105-98')).toBeInTheDocument()
     })
 
-    it('handles large number of matches', () => {
-      const manyMatches: MatchDetails[] = Array.from({ length: 20 }, (_, i) => ({
-        match_id: `match-${i}`,
-        home_team_name: `Home Team ${i}`,
-        away_team_name: `Away Team ${i}`,
-        home_icon_url: `/logo-home-${i}.png`,
-        away_icon_url: `/logo-away-${i}.png`,
-        home_score: 100 + i,
-        away_score: 95 + i,
-        match_date: '2025-10-20',
-        completed: true,
-      }))
+    it('handles matches without logos', () => {
+      const matchWithoutLogo: MatchDetails = {
+        ...mockMatches[0],
+        home_team: { ...mockMatches[0].home_team, icon_url: '' },
+        away_team: { ...mockMatches[0].away_team, icon_url: '' },
+      }
       
       expect(() => 
-        render(<LastMatchesTable {...defaultProps} data={manyMatches} />)
+        render(<LastMatchesTable {...defaultProps} data={[matchWithoutLogo]} />)
       ).not.toThrow()
     })
+  })
 
-    it('handles matches with high scores', () => {
+  describe('Layout and Styling', () => {
+    it('applies correct container styling', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} />)
+      
+      const mainContainer = container.querySelector('.bg-white.rounded-lg')
+      expect(mainContainer).toBeInTheDocument()
+    })
+
+    it('applies orange theme colors', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} />)
+      
+      const orangeElements = container.querySelectorAll('[class*="orange"]')
+      expect(orangeElements.length).toBeGreaterThan(0)
+    })
+
+    it('renders win/loss indicators with correct styling', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
+      
+      const indicator = container.querySelector('.rounded-full.text-white')
+      expect(indicator).toBeInTheDocument()
+    })
+
+    it('applies hover effects when clickable', () => {
+      const { container } = render(<LastMatchesTable {...defaultProps} onMatchClick={jest.fn()} />)
+      
+      const hoverCard = container.querySelector('.hover\\:bg-orange-100')
+      expect(hoverCard).toBeInTheDocument()
+    })
+
+    it('renders team title with correct styling', () => {
+      render(<LastMatchesTable {...defaultProps} />)
+      
+      const title = screen.getByText('Lakers')
+      expect(title).toHaveClass('text-xl', 'font-semibold', 'text-orange-600')
+    })
+  })
+
+  describe('Edge Cases', () => {
+    it('handles very high scores', () => {
       const highScoreMatch: MatchDetails = {
         ...mockMatches[0],
         home_score: 999,
         away_score: 888,
       }
       
-      render(<LastMatchesTable {...defaultProps} data={[highScoreMatch]} />)
+      render(<LastMatchesTable {...defaultProps} data={[highScoreMatch]} currentTeam="Lakers" />)
       
-      expect(screen.getByText('999 - 888')).toBeInTheDocument()
+      expect(screen.getByText('999-888')).toBeInTheDocument()
     })
 
-    it('handles invalid date strings gracefully', () => {
-      const matchWithInvalidDate: MatchDetails = {
+    it('handles tied scores', () => {
+      const tiedMatch: MatchDetails = {
         ...mockMatches[0],
-        match_date: 'invalid-date',
+        home_score: 100,
+        away_score: 100,
       }
       
-      expect(() => 
-        render(<LastMatchesTable {...defaultProps} data={[matchWithInvalidDate]} />)
-      ).not.toThrow()
+      render(<LastMatchesTable {...defaultProps} data={[tiedMatch]} currentTeam="Lakers" />)
+      
+      expect(screen.getByText('100-100')).toBeInTheDocument()
     })
 
-    it('handles missing icon URLs', () => {
-      const matchWithoutIcons: MatchDetails = {
+    it('handles long team names', () => {
+      const longNameMatch: MatchDetails = {
         ...mockMatches[0],
-        home_icon_url: '',
-        away_icon_url: '',
+        away_team: {
+          ...mockMatches[0].away_team,
+          team_name: 'Very Long Team Name That Should Not Break Layout',
+        },
       }
       
-      expect(() => 
-        render(<LastMatchesTable {...defaultProps} data={[matchWithoutIcons]} />)
-      ).not.toThrow()
+      render(<LastMatchesTable {...defaultProps} data={[longNameMatch]} currentTeam="Lakers" />)
+      
+      expect(screen.getByText('vs Very Long Team Name That Should Not Break Layout')).toBeInTheDocument()
     })
 
-    it('handles very long team names', () => {
-      const matchWithLongNames: MatchDetails = {
+    it('correctly identifies home vs away for current team', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Lakers" />)
+      
+      // Lakers is home team in first match
+      expect(screen.getByText('vs Warriors')).toBeInTheDocument()
+      expect(screen.getByText('105-98')).toBeInTheDocument() // Lakers score first
+    })
+
+    it('correctly identifies away vs home for current team', () => {
+      render(<LastMatchesTable {...defaultProps} currentTeam="Warriors" />)
+      
+      // Warriors is away team in first match
+      expect(screen.getByText('vs Lakers')).toBeInTheDocument()
+      expect(screen.getByText('98-105')).toBeInTheDocument() // Warriors score first
+    })
+
+    it('handles incomplete matches', () => {
+      const incompleteMatch: MatchDetails = {
         ...mockMatches[0],
-        home_team_name: 'Very Long Team Name That Should Not Break Layout',
-        away_team_name: 'Another Very Long Team Name',
+        completed: false,
+        home_score: 0,
+        away_score: 0,
       }
       
-      render(<LastMatchesTable {...defaultProps} data={[matchWithLongNames]} />)
+      render(<LastMatchesTable {...defaultProps} data={[incompleteMatch]} currentTeam="Lakers" />)
       
-      expect(screen.getByText('Very Long Team Name That Should Not Break Layout')).toBeInTheDocument()
+      expect(screen.getByText('0-0')).toBeInTheDocument()
     })
   })
 
-  describe('Layout and Styling', () => {
-    it('applies correct container classes', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
-      
-      const mainContainer = container.querySelector('.w-full')
-      expect(mainContainer).toBeInTheDocument()
+  describe('Props Validation', () => {
+    it('accepts all required props', () => {
+      expect(() => 
+        render(<LastMatchesTable {...defaultProps} />)
+      ).not.toThrow()
     })
 
-    it('applies correct title styling', () => {
-      render(<LastMatchesTable {...defaultProps} />)
-      
-      const title = screen.getByText('Last 5 Matches')
-      expect(title).toHaveClass('text-lg', 'font-semibold', 'text-white', 'mb-4', 'text-center')
-    })
-
-    it('renders team logos with correct size classes', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
-      
-      const logos = container.querySelectorAll('img.w-6.h-6')
-      expect(logos.length).toBeGreaterThan(0)
-    })
-
-    it('applies rounded-full class to logos', () => {
-      const { container } = render(<LastMatchesTable {...defaultProps} />)
-      
-      const logos = container.querySelectorAll('img.rounded-full')
-      expect(logos.length).toBeGreaterThan(0)
-    })
-  })
-
-  describe('Props Handling', () => {
-    it('accepts custom title', () => {
-      render(<LastMatchesTable {...defaultProps} title="Recent Games" />)
-      
-      expect(screen.getByText('Recent Games')).toBeInTheDocument()
-    })
-
-    it('works without onRowClick prop', () => {
-      const { onRowClick, ...propsWithoutClick } = defaultProps
+    it('works without onMatchClick', () => {
+      const { onMatchClick, ...propsWithoutClick } = defaultProps
       
       expect(() => 
         render(<LastMatchesTable {...propsWithoutClick} />)
       ).not.toThrow()
     })
 
-    it('passes columns correctly to DataTable', () => {
-      render(<LastMatchesTable {...defaultProps} />)
+    it('renders with different currentTeam values', () => {
+      const teams = ['Lakers', 'Warriors', 'Celtics', 'Bulls']
       
-      // Verify all column headers are rendered
-      expect(screen.getByText('Date')).toBeInTheDocument()
-      expect(screen.getByText('Home')).toBeInTheDocument()
-      expect(screen.getByText('Away')).toBeInTheDocument()
-      expect(screen.getByText('Score')).toBeInTheDocument()
+      teams.forEach(team => {
+        const { unmount } = render(<LastMatchesTable {...defaultProps} currentTeam={team} />)
+        expect(screen.getByText(team)).toBeInTheDocument()
+        unmount()
+      })
     })
   })
-})
+});

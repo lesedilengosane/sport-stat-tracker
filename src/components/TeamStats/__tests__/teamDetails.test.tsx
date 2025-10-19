@@ -25,14 +25,21 @@ describe("TeamDetails Component", () => {
       expect(screen.getByText("30")).toBeInTheDocument();
     });
 
-    it("should display Squad Size heading", () => {
-      render(<TeamDetails {...defaultProps} />);
-      expect(screen.getByText("Squad Size")).toBeInTheDocument();
-    });
-
     it("should display Active Players label", () => {
       render(<TeamDetails {...defaultProps} />);
       expect(screen.getByText("Active Players")).toBeInTheDocument();
+    });
+
+    it("should render team logo placeholder when no logo provided", () => {
+      render(<TeamDetails {...defaultProps} />);
+      const logoPlaceholder = screen.getByText("M");
+      expect(logoPlaceholder).toBeInTheDocument();
+      expect(logoPlaceholder).toHaveClass("text-4xl", "font-bold", "text-orange-500");
+    });
+
+    it("should render team initial as first letter of team name", () => {
+      render(<TeamDetails teamName="Arsenal" numPlayers={25} />);
+      expect(screen.getByText("A")).toBeInTheDocument();
     });
   });
 
@@ -64,74 +71,110 @@ describe("TeamDetails Component", () => {
       render(<TeamDetails teamName="" numPlayers={25} />);
       expect(screen.getByText("25")).toBeInTheDocument();
     });
+
+    it("should handle team logo prop", () => {
+      render(<TeamDetails {...defaultProps} teamLogo="/test-logo.png" />);
+      const logoImage = screen.getByAltText("Manchester United");
+      expect(logoImage).toBeInTheDocument();
+      expect(logoImage).toHaveAttribute("src");
+    });
+
+    it("should not render logo placeholder when logo is provided", () => {
+      render(<TeamDetails {...defaultProps} teamLogo="/test-logo.png" />);
+      expect(screen.queryByText("M")).not.toBeInTheDocument();
+    });
   });
 
   describe("Hover Interactions", () => {
-    it("should handle mouse enter and leave on team name box", () => {
+    it("should handle mouse enter and leave on main container", () => {
       render(<TeamDetails {...defaultProps} />);
-      const teamBox = screen.getByText("Manchester United").closest("div");
+      const container = screen.getByText("Manchester United").closest("div");
 
-      expect(teamBox).toBeInTheDocument();
+      expect(container).toBeInTheDocument();
       
-      fireEvent.mouseEnter(teamBox!);
-      // Verify hover state is triggered
-      expect(teamBox).toBeInTheDocument();
+      fireEvent.mouseEnter(container!);
+      expect(container).toBeInTheDocument();
       
-      fireEvent.mouseLeave(teamBox!);
-      // Verify hover state is removed
-      expect(teamBox).toBeInTheDocument();
+      fireEvent.mouseLeave(container!);
+      expect(container).toBeInTheDocument();
     });
 
-    it("should handle mouse enter and leave on players box", () => {
+    it("should handle mouse enter and leave on player count section", () => {
       render(<TeamDetails {...defaultProps} />);
-      const playersBox = screen.getByText("Squad Size").closest("div");
+      const playersSection = screen.getByText("Active Players").closest("div");
 
-      expect(playersBox).toBeInTheDocument();
+      expect(playersSection).toBeInTheDocument();
       
-      fireEvent.mouseEnter(playersBox!);
-      expect(playersBox).toBeInTheDocument();
+      fireEvent.mouseEnter(playersSection!);
+      expect(playersSection).toBeInTheDocument();
       
-      fireEvent.mouseLeave(playersBox!);
-      expect(playersBox).toBeInTheDocument();
+      fireEvent.mouseLeave(playersSection!);
+      expect(playersSection).toBeInTheDocument();
     });
   });
 
   describe("Styling", () => {
     it("should apply container styles", () => {
-      render(<TeamDetails {...defaultProps} />);
-      const mainContainer = screen.getByText("Manchester United").closest("div")?.parentElement;
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      const mainContainer = container.querySelector('.bg-white\\/80');
       
       expect(mainContainer).toBeInTheDocument();
-      expect(mainContainer).toHaveStyle({
-        display: "flex",
-      });
+      expect(mainContainer).toHaveClass('backdrop-blur-md', 'rounded-2xl', 'border', 'shadow-lg');
     });
 
-    it("should render style tag for animations", () => {
+    it("should render pulsing animation divs", () => {
       const { container } = render(<TeamDetails {...defaultProps} />);
-      const styleTag = container.querySelector("style");
+      const animatedDivs = container.querySelectorAll('.animate-ping');
       
-      expect(styleTag).toBeInTheDocument();
-      expect(styleTag?.textContent).toContain("@keyframes pulse");
-      expect(styleTag?.textContent).toContain("@keyframes borderGlow");
+      expect(animatedDivs.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("should apply proper gradient to logo container", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      const logoContainer = container.querySelector('.bg-gradient-to-br');
+      
+      expect(logoContainer).toBeInTheDocument();
+      expect(logoContainer).toHaveClass('from-orange-500', 'to-orange-600');
+    });
+
+    it("should have responsive flex layout", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      const flexContainer = container.querySelector('.flex-col');
+      
+      expect(flexContainer).toBeInTheDocument();
+      expect(flexContainer).toHaveClass('md:flex-row');
     });
   });
 
   describe("Accessibility", () => {
     it("should render semantic HTML structure", () => {
       const { container } = render(<TeamDetails {...defaultProps} />);
-      const paragraphs = container.querySelectorAll("p");
-      const headings = container.querySelectorAll("h2");
+      const heading = container.querySelector("h1");
       
-      expect(paragraphs.length).toBeGreaterThan(0);
-      expect(headings.length).toBe(1);
+      expect(heading).toBeInTheDocument();
+      expect(heading).toHaveTextContent("Manchester United");
     });
 
     it("should have proper heading hierarchy", () => {
       render(<TeamDetails {...defaultProps} />);
-      const heading = screen.getByText("Squad Size");
+      const heading = screen.getByRole('heading', { level: 1 });
       
-      expect(heading.tagName).toBe("H2");
+      expect(heading).toHaveTextContent("Manchester United");
+    });
+
+    it("should have alt text for team logo when provided", () => {
+      render(<TeamDetails {...defaultProps} teamLogo="/test-logo.png" />);
+      const logoImage = screen.getByAltText("Manchester United");
+      
+      expect(logoImage).toBeInTheDocument();
+    });
+
+    it("should render Users icon for accessibility", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      const usersIcon = container.querySelector('svg');
+      
+      expect(usersIcon).toBeInTheDocument();
+      expect(usersIcon).toHaveClass('lucide-users');
     });
   });
 
@@ -157,26 +200,51 @@ describe("TeamDetails Component", () => {
       render(<TeamDetails teamName={specialName} numPlayers={25} />);
       expect(screen.getByText(specialName)).toBeInTheDocument();
     });
+
+    it("should handle single character team name", () => {
+      render(<TeamDetails teamName="A" numPlayers={25} />);
+      // "A" appears twice - in heading and logo placeholder
+      const elements = screen.getAllByText("A");
+      expect(elements.length).toBe(2);
+      expect(elements[0]).toBeInTheDocument();
+    });
+
+    it("should handle team name with only spaces", () => {
+      const { container } = render(<TeamDetails teamName="   " numPlayers={25} />);
+      // Check that the heading exists (even if empty/whitespace)
+      const heading = container.querySelector('h1');
+      expect(heading).toBeInTheDocument();
+      // Check that logo placeholder exists (even if empty/whitespace)
+      const logoPlaceholder = container.querySelector('.text-4xl.font-bold.text-orange-500');
+      expect(logoPlaceholder).toBeInTheDocument();
+    });
   });
 
   describe("Component Structure", () => {
-    it("should render two main boxes", () => {
-      render(<TeamDetails {...defaultProps} />);
+    it("should render logo container with pulsing effects", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
       
-      // Find the team name box
-      const teamBox = screen.getByText("Manchester United").closest("div");
-      // Find the players box
-      const playersBox = screen.getByText("Squad Size").closest("div");
+      const logoSection = container.querySelector('.relative.flex-shrink-0');
+      expect(logoSection).toBeInTheDocument();
       
-      expect(teamBox).toBeInTheDocument();
-      expect(playersBox).toBeInTheDocument();
+      const pulsingDivs = logoSection?.querySelectorAll('.animate-ping');
+      expect(pulsingDivs?.length).toBe(2);
     });
 
-    it("should render glow effect divs", () => {
+    it("should render team info section", () => {
       const { container } = render(<TeamDetails {...defaultProps} />);
-      const glowDivs = container.querySelectorAll('[style*="position: absolute"]');
       
-      expect(glowDivs.length).toBeGreaterThanOrEqual(2);
+      const infoSection = container.querySelector('.flex-1');
+      expect(infoSection).toBeInTheDocument();
+      expect(infoSection).toHaveClass('text-center', 'md:text-left');
+    });
+
+    it("should have proper z-index stacking for logo", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const logoContainer = container.querySelector('.z-10');
+      expect(logoContainer).toBeInTheDocument();
+      expect(logoContainer).toHaveClass('w-24', 'h-24', 'rounded-full');
     });
   });
 
@@ -191,6 +259,86 @@ describe("TeamDetails Component", () => {
       expect(() => {
         render(<TeamDetails teamName="Team" numPlayers="25" />);
       }).not.toThrow();
+    });
+
+    it("should work without optional teamLogo prop", () => {
+      expect(() => {
+        render(<TeamDetails teamName="Team" numPlayers={25} />);
+      }).not.toThrow();
+    });
+
+    it("should work with optional teamLogo prop", () => {
+      expect(() => {
+        render(<TeamDetails teamName="Team" numPlayers={25} teamLogo="/logo.png" />);
+      }).not.toThrow();
+    });
+  });
+
+  describe("Visual Elements", () => {
+    it("should render circular logo container", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const logoCircle = container.querySelector('.rounded-full.bg-gradient-to-br');
+      expect(logoCircle).toBeInTheDocument();
+      expect(logoCircle).toHaveClass('w-24', 'h-24');
+    });
+
+    it("should display orange theme colors", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const orangeElements = container.querySelectorAll('[class*="orange"]');
+      expect(orangeElements.length).toBeGreaterThan(0);
+    });
+
+    it("should have shadow effects", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const shadowElement = container.querySelector('.shadow-xl');
+      expect(shadowElement).toBeInTheDocument();
+    });
+
+    it("should have backdrop blur effect", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const blurElement = container.querySelector('.backdrop-blur-md');
+      expect(blurElement).toBeInTheDocument();
+    });
+  });
+
+  describe("Animation Properties", () => {
+    it("should have custom animation durations on pulsing effects", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const animatedDivs = container.querySelectorAll('.animate-ping');
+      const firstDiv = animatedDivs[0] as HTMLElement;
+      const secondDiv = animatedDivs[1] as HTMLElement;
+      
+      expect(firstDiv.style.animationDuration).toBe('3s');
+      expect(secondDiv.style.animationDuration).toBe('4s');
+      expect(secondDiv.style.animationDelay).toBe('0.5s');
+    });
+  });
+
+  describe("Layout Responsiveness", () => {
+    it("should have responsive text alignment", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const infoSection = container.querySelector('.text-center.md\\:text-left');
+      expect(infoSection).toBeInTheDocument();
+    });
+
+    it("should have responsive flex direction", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const flexContainer = container.querySelector('.flex-col.md\\:flex-row');
+      expect(flexContainer).toBeInTheDocument();
+    });
+
+    it("should have responsive gap spacing", () => {
+      const { container } = render(<TeamDetails {...defaultProps} />);
+      
+      const containerWithGap = container.querySelector('.gap-8');
+      expect(containerWithGap).toBeInTheDocument();
     });
   });
 });
