@@ -29,20 +29,27 @@ export const apiClient = {
     return response.json();
   },
 
-  getMatchesByCoachId: async (coachId: string) => {
-    console.log(`[apiClient] Fetching matches for coachId: ${coachId}`);
-    try {
-      const response = await fetch(`/api/matches_by_coachID?coachId=${coachId}`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error("Failed to fetch matches for coach");
-      }
-      const data = await response.json();
-      return data;
-    } catch (err) {
-      throw err;
+ getMatchesByCoachId: async (coachId: string) => {
+  console.log(`[apiClient] Fetching matches for coachId: ${coachId}`);
+  try {
+    const response = await fetch(`/api/matches_by_coachID?coachId=${coachId}`);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
     }
-  },
+    
+    const data = await response.json();
+    
+
+    console.log(`Found ${data.length} matches for coach`);
+    return data; 
+    
+  } catch (err) {
+    console.error('Error fetching matches:', err);
+    throw err; // Only re-throw for actual network/database errors
+  }
+},
 
   createMatch: async (matchData: any) => {
     const response = await fetch('/api/matches', {
