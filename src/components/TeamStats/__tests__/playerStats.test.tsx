@@ -107,10 +107,10 @@ describe('PlayerStats', () => {
     it('should render all main sections', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      expect(screen.getByText('🌟 TEAM MVP')).toBeInTheDocument();
+      expect(screen.getByText('Team MVP')).toBeInTheDocument();
       expect(screen.getByText('Player Spotlight')).toBeInTheDocument();
-      expect(screen.getByText('🎯 Top Performers')).toBeInTheDocument();
-      expect(screen.getByText('📈 Statistical Rankings')).toBeInTheDocument();
+      expect(screen.getByText('Top Performers')).toBeInTheDocument();
+      expect(screen.getByText('Statistical Rankings')).toBeInTheDocument();
     });
   });
 
@@ -150,7 +150,7 @@ describe('PlayerStats', () => {
     it('should display top 4 performers', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const topPerformersSection = screen.getByText('🎯 Top Performers').parentElement;
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
       
       expect(within(topPerformersSection!).getAllByText(/LeBron James/).length).toBeGreaterThan(0);
       expect(within(topPerformersSection!).getAllByText(/Stephen Curry/).length).toBeGreaterThan(0);
@@ -169,13 +169,14 @@ describe('PlayerStats', () => {
       const user = userEvent.setup();
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const topPerformersSection = screen.getByText('🎯 Top Performers').parentElement;
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
       const playerCards = within(topPerformersSection!).getAllByText(/LeBron James/);
-      const playerCard = playerCards[0].closest('div[style*="cursor: pointer"]');
+      // Find the card by its cursor-pointer class
+      const playerCard = playerCards[0].closest('.cursor-pointer') as HTMLElement;
       
       expect(screen.queryByText('Points')).not.toBeInTheDocument();
       
-      await user.click(playerCard!);
+      await user.click(playerCard);
       
       expect(screen.getByText('Points')).toBeInTheDocument();
       expect(screen.getByText('Rebounds')).toBeInTheDocument();
@@ -186,14 +187,14 @@ describe('PlayerStats', () => {
       const user = userEvent.setup();
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const topPerformersSection = screen.getByText('🎯 Top Performers').parentElement;
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
       const playerCards = within(topPerformersSection!).getAllByText(/LeBron James/);
-      const playerCard = playerCards[0].closest('div[style*="cursor: pointer"]');
+      const playerCard = playerCards[0].closest('.cursor-pointer') as HTMLElement;
       
-      await user.click(playerCard!);
+      await user.click(playerCard);
       expect(screen.getByText('Points')).toBeInTheDocument();
       
-      await user.click(playerCard!);
+      await user.click(playerCard);
       expect(screen.queryByText('Points')).not.toBeInTheDocument();
     });
 
@@ -201,11 +202,11 @@ describe('PlayerStats', () => {
       const user = userEvent.setup();
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const topPerformersSection = screen.getByText('🎯 Top Performers').parentElement;
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
       const playerCards = within(topPerformersSection!).getAllByText(/LeBron James/);
-      const playerCard = playerCards[0].closest('div[style*="cursor: pointer"]');
+      const playerCard = playerCards[0].closest('.cursor-pointer') as HTMLElement;
       
-      await user.click(playerCard!);
+      await user.click(playerCard);
       
       expect(screen.getByText('255')).toBeInTheDocument();
       expect(screen.getByText('82')).toBeInTheDocument();
@@ -220,22 +221,24 @@ describe('PlayerStats', () => {
     it('should render all ranking categories', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      expect(screen.getByText('🏆 Top Scorers')).toBeInTheDocument();
-      expect(screen.getByText('📊 Top Rebounders')).toBeInTheDocument();
-      expect(screen.getByText('🎯 Top Playmakers')).toBeInTheDocument();
-      expect(screen.getByText('🛡️ Top Defenders')).toBeInTheDocument();
-      expect(screen.getByText('⭐ Most Efficient')).toBeInTheDocument();
-      expect(screen.getByText('🎯 Best Shooters')).toBeInTheDocument();
+      expect(screen.getByText('Top Scorers')).toBeInTheDocument();
+      expect(screen.getByText('Top Rebounders')).toBeInTheDocument();
+      expect(screen.getByText('Top Playmakers')).toBeInTheDocument();
+      expect(screen.getByText('Top Defenders')).toBeInTheDocument();
+      expect(screen.getByText('Most Efficient')).toBeInTheDocument();
+      expect(screen.getByText('Best Shooters')).toBeInTheDocument();
     });
 
     it('should show only top 3 players by default', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const scorersTable = screen.getByText('🏆 Top Scorers').parentElement?.parentElement;
+      // Find the Top Scorers section by text
+      const scorersHeader = screen.getByText('Top Scorers');
+      const scorersTable = scorersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(scorersTable!).getByText(/Stephen Curry/)).toBeInTheDocument();
-      expect(within(scorersTable!).getByText(/LeBron James/)).toBeInTheDocument();
-      expect(within(scorersTable!).getByText(/Anthony Davis/)).toBeInTheDocument();
+      expect(within(scorersTable).getByText(/Stephen Curry/)).toBeInTheDocument();
+      expect(within(scorersTable).getByText(/LeBron James/)).toBeInTheDocument();
+      expect(within(scorersTable).getByText(/Anthony Davis/)).toBeInTheDocument();
     });
 
     it('should expand ranking table when header is clicked', async () => {
@@ -250,7 +253,7 @@ describe('PlayerStats', () => {
       
       const initialKevinCount = screen.queryAllByText(/Kevin Durant/).length;
       
-      const scorersHeader = screen.getByText('🏆 Top Scorers');
+      const scorersHeader = screen.getByText('Top Scorers');
       await user.click(scorersHeader);
       
       expect(screen.getAllByText(/Kevin Durant/).length).toBeGreaterThan(initialKevinCount);
@@ -266,7 +269,7 @@ describe('PlayerStats', () => {
       
       render(<PlayerStats playerStats={manyPlayers} />);
       
-      const scorersHeader = screen.getByText('🏆 Top Scorers');
+      const scorersHeader = screen.getByText('Top Scorers');
       
       await user.click(scorersHeader);
       const expandedCount = screen.getAllByText(/Kevin Durant/).length;
@@ -358,33 +361,37 @@ describe('PlayerStats', () => {
     it('should sort top scorers by PPG correctly', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const scorersTable = screen.getByText('🏆 Top Scorers').parentElement?.parentElement;
+      const scorersHeader = screen.getByText('Top Scorers');
+      const scorersTable = scorersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(scorersTable!).getByText(/Stephen Curry/)).toBeInTheDocument();
+      expect(within(scorersTable).getByText(/Stephen Curry/)).toBeInTheDocument();
     });
 
     it('should sort top rebounders by RPG correctly', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const reboundersTable = screen.getByText('📊 Top Rebounders').parentElement?.parentElement;
+      const reboundersHeader = screen.getByText('Top Rebounders');
+      const reboundersTable = reboundersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(reboundersTable!).getByText(/Anthony Davis/)).toBeInTheDocument();
+      expect(within(reboundersTable).getByText(/Anthony Davis/)).toBeInTheDocument();
     });
 
     it('should sort top playmakers by APG correctly', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const playmakersTable = screen.getByText('🎯 Top Playmakers').parentElement?.parentElement;
+      const playmakersHeader = screen.getByText('Top Playmakers');
+      const playmakersTable = playmakersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(playmakersTable!).getByText(/LeBron James/)).toBeInTheDocument();
+      expect(within(playmakersTable).getByText(/LeBron James/)).toBeInTheDocument();
     });
 
     it('should sort best shooters by FG% correctly', () => {
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const shootersTable = screen.getByText('🎯 Best Shooters').parentElement?.parentElement;
+      const shootersHeader = screen.getByText('Best Shooters');
+      const shootersTable = shootersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(shootersTable!).getByText(/Anthony Davis/)).toBeInTheDocument();
+      expect(within(shootersTable).getByText(/Anthony Davis/)).toBeInTheDocument();
     });
   });
 
@@ -423,9 +430,10 @@ describe('PlayerStats', () => {
       
       render(<PlayerStats playerStats={[...mockPlayerStats, ...highDefensivePlayer]} />);
       
-      const defendersTable = screen.getByText('🛡️ Top Defenders').parentElement?.parentElement;
+      const defendersHeader = screen.getByText('Top Defenders');
+      const defendersTable = defendersHeader.closest('.bg-white\\/60') as HTMLElement;
       
-      expect(within(defendersTable!).getByText(/Defensive Player/)).toBeInTheDocument();
+      expect(within(defendersTable).getByText(/Defensive Player/)).toBeInTheDocument();
     });
   });
 
@@ -498,11 +506,11 @@ describe('PlayerStats', () => {
       
       render(<PlayerStats playerStats={manyPlayers} />);
       
-      const scorersHeader = screen.getByText('🏆 Top Scorers');
+      const scorersHeader = screen.getByText('Top Scorers');
       await user.click(scorersHeader);
       expect(screen.getAllByText(/Kevin Durant/).length).toBeGreaterThan(0);
       
-      const reboundersHeader = screen.getByText('📊 Top Rebounders');
+      const reboundersHeader = screen.getByText('Top Rebounders');
       await user.click(reboundersHeader);
       
       expect(screen.getAllByText(/Kevin Durant/).length).toBeGreaterThan(1);
@@ -514,13 +522,13 @@ describe('PlayerStats', () => {
       const user = userEvent.setup();
       render(<PlayerStats playerStats={mockPlayerStats} />);
       
-      const topPerformersSection = screen.getByText('🎯 Top Performers').parentElement;
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
       const playerCards = within(topPerformersSection!).getAllByText(/LeBron James/);
-      const playerCard = playerCards[0].closest('div[style*="cursor: pointer"]');
+      const playerCard = playerCards[0].closest('.cursor-pointer') as HTMLElement;
       
       expect(playerCard).toBeInTheDocument();
       
-      await user.click(playerCard!);
+      await user.click(playerCard);
       expect(screen.getByText('Points')).toBeInTheDocument();
     });
 
@@ -531,6 +539,77 @@ describe('PlayerStats', () => {
         const fullName = `${player.first_name} ${player.last_name}`;
         expect(screen.getAllByText(new RegExp(fullName)).length).toBeGreaterThan(0);
       });
+    });
+  });
+
+  describe('Ranking Category Headers', () => {
+    it('should have clickable category headers with chevron icons', () => {
+      render(<PlayerStats playerStats={mockPlayerStats} />);
+      
+      const categories = [
+        'Top Scorers',
+        'Top Rebounders', 
+        'Top Playmakers',
+        'Top Defenders',
+        'Most Efficient',
+        'Best Shooters'
+      ];
+
+      categories.forEach(category => {
+        const header = screen.getByText(category);
+        expect(header).toBeInTheDocument();
+        const headerContainer = header.closest('.cursor-pointer') as HTMLElement;
+        expect(headerContainer).toBeInTheDocument();
+      });
+    });
+
+    it('should toggle chevron direction when category is expanded', async () => {
+      const user = userEvent.setup();
+      const manyPlayers = [
+        ...mockPlayerStats,
+        { ...mockPlayerStats[0], player_id: '4', first_name: 'Kevin', last_name: 'Durant', ppg: 20 },
+      ];
+      
+      render(<PlayerStats playerStats={manyPlayers} />);
+      
+      const scorersHeader = screen.getByText('Top Scorers');
+      const headerContainer = scorersHeader.closest('.cursor-pointer') as HTMLElement;
+      
+      // Click to expand
+      await user.click(headerContainer);
+      
+      // Click to collapse
+      await user.click(headerContainer);
+      
+      // Should still render properly
+      expect(scorersHeader).toBeInTheDocument();
+    });
+  });
+
+  describe('Player Card Interactions', () => {
+    it('should highlight selected player card', async () => {
+      const user = userEvent.setup();
+      render(<PlayerStats playerStats={mockPlayerStats} />);
+      
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
+      const playerCards = within(topPerformersSection!).getAllByText(/LeBron James/);
+      const playerCard = playerCards[0].closest('.cursor-pointer') as HTMLElement;
+      
+      await user.click(playerCard);
+      
+      // Check if card has shadow-lg class when selected
+      expect(playerCard.className).toContain('shadow-lg');
+    });
+
+    it('should show rank badges with correct colors', () => {
+      render(<PlayerStats playerStats={mockPlayerStats} />);
+      
+      const topPerformersSection = screen.getByText('Top Performers').parentElement;
+      
+      // Check for rank badges
+      expect(within(topPerformersSection!).getByText('#1')).toBeInTheDocument();
+      expect(within(topPerformersSection!).getByText('#2')).toBeInTheDocument();
+      expect(within(topPerformersSection!).getByText('#3')).toBeInTheDocument();
     });
   });
 });

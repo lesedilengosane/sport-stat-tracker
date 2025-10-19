@@ -31,13 +31,6 @@ const customJestConfig = {
     '!src/components/coach-game-card.tsx',
     '!src/components/completed-game-card.tsx',
 
-    // NOW INCLUDING these folders in coverage:
-    // - src/components/Line-up-table/**
-    // - src/components/TeamStats/**
-    // - src/components/coachComponents/**
-    // - src/components/header/**
-    // - src/components/fanComponents/**
-
     // Exclude only untested ui files, keep NavBar + TabBar
     '!src/components/ui/action-buttons.tsx',
     '!src/components/ui/badge.tsx',
@@ -61,8 +54,6 @@ const customJestConfig = {
     '!src/app/coach.tsx',
     '!src/app/coach/coach-call/**',
     '!src/app/contact.tsx',
-    '!src/app/fan.tsx',
-    '!src/app/fan/page.tsx',
     '!src/app/players.tsx',
     '!src/app/players/(id)/**',
     '!src/app/players/[id]/page.tsx',
@@ -72,7 +63,10 @@ const customJestConfig = {
     '!src/app/signup.tsx',
 
     // Keep excluding specific sideNav file with low coverage
-    '!src/components/sideNav/fansideNav.tsx',
+
+    // ✅ Explicitly include fan and player folders for coverage
+    'src/app/fan/**/*.{jsx,tsx}',
+    'src/app/player/**/*.{jsx,tsx}',
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   coverageDirectory: 'coverage',
