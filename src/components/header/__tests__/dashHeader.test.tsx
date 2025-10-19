@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 // Mock the dependencies BEFORE imports
@@ -94,7 +94,7 @@ describe('DashboardHeader', () => {
 
       render(<DashboardHeader />);
 
-      expect(screen.getByText('Hello, John Doe')).toBeInTheDocument();
+      expect(screen.getByText('WELCOME, John Doe.')).toBeInTheDocument();
     });
 
     it('should display user initial in badge', () => {
@@ -108,16 +108,14 @@ describe('DashboardHeader', () => {
       expect(badge).toHaveTextContent('J');
     });
 
-    it('should display default values when user is null', () => {
+    it('should display loading state when user is null', () => {
       mockUseAuth.mockReturnValue({
         user: null,
       } as any);
 
       render(<DashboardHeader />);
 
-      // Text is split: "Hello, " and "undefined undefined"
-      expect(screen.getByText(/Hello,/)).toBeInTheDocument();
-      expect(screen.getByText(/undefined undefined/)).toBeInTheDocument();
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
       const badge = screen.getByTestId('badge');
       expect(badge).toHaveTextContent('U');
     });
@@ -129,11 +127,22 @@ describe('DashboardHeader', () => {
 
       render(<DashboardHeader />);
 
-      // Text is split: "Hello, " and "undefined undefined"
-      expect(screen.getByText(/Hello,/)).toBeInTheDocument();
-      expect(screen.getByText(/undefined undefined/)).toBeInTheDocument();
+      expect(screen.getByText('WELCOME, undefined undefined.')).toBeInTheDocument();
       const badge = screen.getByTestId('badge');
       expect(badge).toHaveTextContent('U');
+    });
+
+    it('should transition from loading to user display', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      // Wait for loading to finish and user to display
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, John Doe.')).toBeInTheDocument();
+      });
     });
   });
 
@@ -279,6 +288,21 @@ describe('DashboardHeader', () => {
 
       expect(screen.queryByTestId('search-dropdown')).not.toBeInTheDocument();
     });
+
+    it('should handle rapid typing correctly', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const searchInput = screen.getByPlaceholderText('Search players and teams...');
+      
+      await userEvent.type(searchInput, 'LakersTeam', { delay: 1 });
+
+      expect(searchInput).toHaveValue('LakersTeam');
+      expect(screen.getByTestId('search-dropdown')).toBeInTheDocument();
+    });
   });
 
   describe('Profile Navigation', () => {
@@ -295,64 +319,137 @@ describe('DashboardHeader', () => {
       expect(mockPush).toHaveBeenCalledWith('/profile');
       expect(mockPush).toHaveBeenCalledTimes(1);
     });
+
+    it('should allow profile navigation even when loading', async () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const badge = screen.getByTestId('badge');
+      await userEvent.click(badge);
+
+      expect(mockPush).toHaveBeenCalledWith('/profile');
+    });
   });
 
   describe('User Role Display', () => {
-    it('should handle user with Admin role', () => {
+    it('should handle user with Admin role', async () => {
       mockUseAuth.mockReturnValue({
         user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
       } as any);
 
       render(<DashboardHeader />);
 
-      expect(screen.getByText('Hello, John Doe')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, John Doe.')).toBeInTheDocument();
+      });
     });
 
-    it('should handle user with Analyst role', () => {
+    it('should handle user with Analyst role', async () => {
       mockUseAuth.mockReturnValue({
         user: { first_name: 'Jane', last_name: 'Smith', user_role: 'Analyst' },
       } as any);
 
       render(<DashboardHeader />);
 
-      expect(screen.getByText('Hello, Jane Smith')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, Jane Smith.')).toBeInTheDocument();
+      });
     });
 
-    it('should handle user with Coach role', () => {
+    it('should handle user with Coach role', async () => {
       mockUseAuth.mockReturnValue({
         user: { first_name: 'Mike', last_name: 'Johnson', user_role: 'Coach' },
       } as any);
 
       render(<DashboardHeader />);
 
-      expect(screen.getByText('Hello, Mike Johnson')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, Mike Johnson.')).toBeInTheDocument();
+      });
+    });
+
+    it('should display correct initial for different roles', async () => {
+      const roles = [
+        { first_name: 'Admin', last_name: 'User', user_role: 'Admin', initial: 'A' },
+        { first_name: 'Coach', last_name: 'User', user_role: 'Coach', initial: 'C' },
+        { first_name: 'Analyst', last_name: 'User', user_role: 'Analyst', initial: 'A' },
+      ];
+
+      for (const role of roles) {
+        mockUseAuth.mockReturnValue({ user: role } as any);
+        const { unmount } = render(<DashboardHeader />);
+
+        await waitFor(() => {
+          const badge = screen.getByTestId('badge');
+          expect(badge).toHaveTextContent(role.initial);
+        });
+
+        unmount();
+      }
     });
   });
 
   describe('Edge Cases', () => {
-    it('should handle user with only first name', () => {
+    it('should handle user with only first name', async () => {
       mockUseAuth.mockReturnValue({
         user: { first_name: 'John', last_name: '', user_role: 'Admin' },
       } as any);
 
       render(<DashboardHeader />);
 
-      // Text is split across elements: "Hello, " and "John "
-      expect(screen.getByText(/Hello,/)).toBeInTheDocument();
-      expect(screen.getByText(/John/)).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, John .')).toBeInTheDocument();
+      });
+      
       const badge = screen.getByTestId('badge');
       expect(badge).toHaveTextContent('J');
     });
 
-    it('should handle user with lowercase first name', () => {
+    it('should handle user with only last name', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: '', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      await waitFor(() => {
+        // Use regex with \s+ to match one or more whitespace characters
+        expect(screen.getByText(/WELCOME,\s+Doe\./)).toBeInTheDocument();
+      });
+      
+      const badge = screen.getByTestId('badge');
+      expect(badge).toHaveTextContent('U'); // Empty string first character
+    });
+
+    it('should handle user with lowercase first name', async () => {
       mockUseAuth.mockReturnValue({
         user: { first_name: 'john', last_name: 'Doe', user_role: 'Admin' },
       } as any);
 
       render(<DashboardHeader />);
 
+      await waitFor(() => {
+        const badge = screen.getByTestId('badge');
+        expect(badge).toHaveTextContent('J');
+      });
+    });
+
+    it('should handle special characters in name', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: "O'Brien", last_name: 'Smith-Jones', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      await waitFor(() => {
+        expect(screen.getByText("WELCOME, O'Brien Smith-Jones.")).toBeInTheDocument();
+      });
+      
       const badge = screen.getByTestId('badge');
-      expect(badge).toHaveTextContent('J');
+      expect(badge).toHaveTextContent('O');
     });
 
     it('should handle special characters in search', async () => {
@@ -385,6 +482,38 @@ describe('DashboardHeader', () => {
       expect(searchInput).toHaveValue(longQuery);
       expect(screen.getByTestId('search-dropdown')).toBeInTheDocument();
     });
+
+    it('should handle user with very long name', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { 
+          first_name: 'VeryLongFirstName', 
+          last_name: 'VeryLongLastNameThatExceedsNormalLength', 
+          user_role: 'Admin' 
+        },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, VeryLongFirstName VeryLongLastNameThatExceedsNormalLength.')).toBeInTheDocument();
+      });
+    });
+
+    it('should handle empty string in search', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const searchInput = screen.getByPlaceholderText('Search players and teams...');
+      
+      await userEvent.type(searchInput, 'Test');
+      await userEvent.clear(searchInput);
+
+      expect(searchInput).toHaveValue('');
+      expect(screen.queryByTestId('search-dropdown')).not.toBeInTheDocument();
+    });
   });
 
   describe('Accessibility', () => {
@@ -415,6 +544,102 @@ describe('DashboardHeader', () => {
 
       await userEvent.type(searchInput, 'Test');
       expect(searchInput).toHaveValue('Test');
+    });
+
+    it('should have accessible badge with role information', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const badge = screen.getByTestId('badge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('J');
+    });
+
+    it('should maintain focus after typing in search', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const searchInput = screen.getByPlaceholderText('Search players and teams...');
+      
+      await userEvent.click(searchInput);
+      await userEvent.type(searchInput, 'Lakers');
+
+      expect(searchInput).toHaveFocus();
+    });
+  });
+
+  describe('Component Lifecycle', () => {
+    it('should clean up properly on unmount', () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      const { unmount } = render(<DashboardHeader />);
+      
+      expect(() => unmount()).not.toThrow();
+    });
+
+    it('should handle auth context changes', async () => {
+      mockUseAuth.mockReturnValue({
+        user: null,
+      } as any);
+
+      const { rerender } = render(<DashboardHeader />);
+      
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+      // Update auth context
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'Jane', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      rerender(<DashboardHeader />);
+
+      await waitFor(() => {
+        expect(screen.getByText('WELCOME, Jane Doe.')).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Search Dropdown Interaction', () => {
+    it('should keep dropdown open while typing after initial open', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const searchInput = screen.getByPlaceholderText('Search players and teams...');
+      
+      await userEvent.type(searchInput, 'La');
+      expect(screen.getByTestId('search-dropdown')).toBeInTheDocument();
+
+      await userEvent.type(searchInput, 'kers');
+      expect(screen.getByTestId('search-dropdown')).toBeInTheDocument();
+      expect(searchInput).toHaveValue('Lakers');
+    });
+
+    it('should update dropdown content as query changes', async () => {
+      mockUseAuth.mockReturnValue({
+        user: { first_name: 'John', last_name: 'Doe', user_role: 'Admin' },
+      } as any);
+
+      render(<DashboardHeader />);
+
+      const searchInput = screen.getByPlaceholderText('Search players and teams...');
+      
+      await userEvent.type(searchInput, 'Lakers');
+      expect(screen.getByText('Search results for: Lakers')).toBeInTheDocument();
+
+      await userEvent.clear(searchInput);
+      await userEvent.type(searchInput, 'Warriors');
+      expect(screen.getByText('Search results for: Warriors')).toBeInTheDocument();
     });
   });
 });

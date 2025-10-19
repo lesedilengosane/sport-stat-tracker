@@ -72,7 +72,7 @@ describe('CoachSideNav Component', () => {
       expect(screen.getByText('All Games')).toBeInTheDocument();
       expect(screen.getByText('Team Management')).toBeInTheDocument();
       expect(screen.getByText('Team Stats')).toBeInTheDocument();
-      expect(screen.getByText('Players')).toBeInTheDocument();
+      expect(screen.getByText('My Players')).toBeInTheDocument();
     });
 
     it('displays the coach dashboard title when open', () => {
@@ -172,7 +172,7 @@ describe('CoachSideNav Component', () => {
       fireEvent.click(screen.getByTestId('menu-icon'));
       expect(screen.getByTestId('x-icon')).toBeInTheDocument();
       
-      fireEvent.click(screen.getByText('Players'));
+      fireEvent.click(screen.getByText('My Players'));
       expect(screen.getByTestId('menu-icon')).toBeInTheDocument();
     });
 
@@ -187,7 +187,7 @@ describe('CoachSideNav Component', () => {
         { text: 'All Games', id: 'all-games' },
         { text: 'Team Management', id: 'team-management' },
         { text: 'Team Stats', id: 'team-stats' },
-        { text: 'Players', id: 'players' }
+        { text: 'My Players', id: 'My Players' }
       ];
       
       navItems.forEach(item => {
@@ -287,9 +287,9 @@ describe('CoachSideNav Component', () => {
       let scheduleButton = screen.getByText('Schedule').closest('button');
       expect(scheduleButton).toHaveClass('bg-white/15');
       
-      rerender(<CoachSideNav {...defaultProps} activeTab="players" />);
+      rerender(<CoachSideNav {...defaultProps} activeTab="My Players" />);
       
-      const playersButton = screen.getByText('Players').closest('button');
+      const playersButton = screen.getByText('My Players').closest('button');
       expect(playersButton).toHaveClass('bg-white/15');
       
       scheduleButton = screen.getByText('Schedule').closest('button');
