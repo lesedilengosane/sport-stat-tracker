@@ -5,78 +5,12 @@ import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
-import {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  memo,
-  useContext,
-  createContext,
-} from "react";
+import { useState, useCallback, memo } from "react";
 import { supabase } from "../app/api/DatabaseApi/supabaseClient";
 import { BookingApiClient } from "../app/utils/BookGames";
 import { useMatches } from "@/app/context/MatchesContext";
 import { toast } from "sonner";
-
-/* -------------------------------------------------------------
-   🧠 Context-based user cache (prevents duplicate Supabase calls)
-------------------------------------------------------------- */
-const UserContext = createContext<{
-  id?: string;
-  role?: string;
-  loading: boolean;
-}>({
-  id: undefined,
-  role: undefined,
-  loading: true,
-});
-
-export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [userData, setUserData] = useState<{
-    id?: string;
-    role?: string;
-    loading: boolean;
-  }>({
-    id: undefined,
-    role: undefined,
-    loading: true,
-  });
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const { data: authData } = await supabase.auth.getUser();
-        const user = authData?.user;
-        if (user) {
-          const { data: userRow } = await supabase
-            .from("users")
-            .select("role")
-            .eq("auth_user_id", user.id)
-            .maybeSingle();
-          if (mounted) {
-            setUserData({ id: user.id, role: userRow?.role, loading: false });
-          }
-        } else {
-          setUserData({ id: undefined, role: undefined, loading: false });
-        }
-      } catch (err) {
-        console.error("Error fetching user:", err);
-        setUserData((prev) => ({ ...prev, loading: false }));
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  return (
-    <UserContext.Provider value={userData}>{children}</UserContext.Provider>
-  );
-};
-
-const useUserData = () => useContext(UserContext);
+import { useAuth } from "../app/context/AuthContext";
 
 /* -------------------------------------------------------------
    📦 Interfaces
@@ -234,133 +168,84 @@ const LocationDisplay = memo(({ location }: { location: string }) => (
 LocationDisplay.displayName = "LocationDisplay";
 
 /* -------------------------------------------------------------
-   🎮 Analyst and Coach Cards
+   🎮 Game Card Component
 ------------------------------------------------------------- */
-const AnalystGameCard = memo(
-  ({
-    match_id,
-    date,
-    time,
-    homeTeam,
-    awayTeam,
-    location,
-    booked,
-  }: GameCardProps) => {
-    const router = useRouter();
-    const { id: analystId } = useUserData();
-    const [isBooked, setIsBooked] = useState(booked);
-    const [booking, setBooking] = useState(false);
-    const {triggerRefetch}=useMatches()
+export function GameCard({
+  match_id,
+  date,
+  time,
+  homeTeam,
+  awayTeam,
+  location,
+  booked,
+}: GameCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [isBooked, setIsBooked] = useState(booked);
+  const [booking, setBooking] = useState(false);
+  const { triggerRefetch } = useMatches();
 
-    const handleBookClick = useCallback(
-      async (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (!analystId || isBooked) return;
+  const handleBookClick = useCallback(
+    async (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (!user?.auth_user_id || isBooked) return;
 
-        setBooking(true);
-        try {
-          const result = await BookingApiClient.bookGame(match_id, analystId);
-          if (result.success) {
-            setIsBooked(true);
-            triggerRefetch();
-            toast.success("Game Booked Successfully.", {
-        description: "Refreshing...",
-      });
-        
-
-          }
-          alert(result.message || "Booking status updated.");
-        } catch {
-          alert("Booking failed. Please try again.");
-        } finally {
-          setBooking(false);
+      setBooking(true);
+      try {
+        const result = await BookingApiClient.bookGame(
+          match_id,
+          user.auth_user_id
+        );
+        if (result.success) {
+          setIsBooked(true);
+          triggerRefetch();
+          toast.success("Game Booked Successfully.", {
+            description: "Refreshing...",
+          });
+        } else {
+          alert(result.message || "Booking failed.");
         }
-      },
-      [analystId, isBooked, match_id]
-    );
+      } catch {
+        alert("Booking failed. Please try again.");
+      } finally {
+        setBooking(false);
+      }
+    },
+    [user?.auth_user_id, isBooked, match_id, triggerRefetch]
+  );
 
-    const handleView = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        router.push(`/analyst/${match_id}`);
-      },
-      [router, match_id]
-    );
+  const handleView = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      router.push(`/analyst/${match_id}`);
+    },
+    [router, match_id]
+  );
 
-    return (
-      <BaseGameCard isBooked={isBooked} onClick={handleView}>
-        <DateTimeDisplay date={date} time={time} />
-        <TeamsDisplay homeTeam={homeTeam} awayTeam={awayTeam} />
-        <LocationDisplay location={location} />
-        <div className="flex items-center justify-between text-xs font-medium mt-3">
+  return (
+    <BaseGameCard isBooked={isBooked} onClick={handleView}>
+      <DateTimeDisplay date={date} time={time} />
+      <TeamsDisplay homeTeam={homeTeam} awayTeam={awayTeam} />
+      <LocationDisplay location={location} />
+      <div className="flex items-center justify-between text-xs font-medium mt-3">
+        <button onClick={handleView} className="text-blue-400 hover:underline">
+          View Details
+        </button>
+        {isBooked ? (
+          <div className="flex items-center gap-1 text-green-500">
+            <Check size={14} />
+            <span>Booked</span>
+          </div>
+        ) : (
           <button
-            onClick={handleView}
-            className="text-blue-400 hover:underline"
+            onClick={handleBookClick}
+            disabled={booking || !user?.auth_user_id}
+            className="text-yellow-500 hover:underline disabled:opacity-50"
           >
-            View Details
+            {booking ? "Booking..." : "Book for Analysis"}
           </button>
-          {isBooked ? (
-            <div className="flex items-center gap-1 text-green-500">
-              <Check size={14} />
-              <span>Booked</span>
-            </div>
-          ) : (
-            <button
-              onClick={handleBookClick}
-              disabled={booking}
-              className="text-yellow-500 hover:underline disabled:opacity-50"
-            >
-              {booking ? "Booking..." : "Book for Analysis"}
-            </button>
-          )}
-        </div>
-      </BaseGameCard>
-    );
-  }
-);
-AnalystGameCard.displayName = "AnalystGameCard";
-
-const CoachGameCard = memo(
-  ({ match_id, date, time, homeTeam, awayTeam, location }: GameCardProps) => {
-    const router = useRouter();
-    const handleView = useCallback(
-      (e: React.MouseEvent) => {
-        e.stopPropagation();
-        router.push(`/coach/${match_id}`);
-      },
-      [router, match_id]
-    );
-
-    return (
-      <BaseGameCard isBooked={false} onClick={handleView}>
-        <DateTimeDisplay date={date} time={time} />
-        <TeamsDisplay homeTeam={homeTeam} awayTeam={awayTeam} />
-        <LocationDisplay location={location} />
-        <div className="flex justify-center mt-3">
-          <button
-            className="text-blue-400 hover:underline"
-            onClick={handleView}
-          >
-            View Details
-          </button>
-        </div>
-      </BaseGameCard>
-    );
-  }
-);
-CoachGameCard.displayName = "CoachGameCard";
-
-/* -------------------------------------------------------------
-   🎯 Main GameCard Wrapper (lightweight)
-------------------------------------------------------------- */
-export function GameCard(props: GameCardProps) {
-  const { role, loading } = useUserData();
-
-  if (loading) return <GameCardSkeleton />;
-
-  return role === "Coach" ? (
-    <CoachGameCard {...props} />
-  ) : (
-    <AnalystGameCard {...props} />
+        )}
+      </div>
+    </BaseGameCard>
   );
 }
