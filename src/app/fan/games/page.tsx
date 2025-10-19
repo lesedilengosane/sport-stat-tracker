@@ -42,8 +42,7 @@ const convertToPlayerDetails = (lineup: any[], team: "home" | "away") => {
 export default function FanGames() {
   const router = useRouter()
 
-  const { allGames, matches, isLoading, error, triggerRefetch } = useMatches() // ✅ get everything from context
-
+  const { allGames, matches, isLoading, error, triggerRefetch } = useMatches()
   const [activeTab, setActiveTab] = useState("completed-games")
   const { user } = useAuth()
 
