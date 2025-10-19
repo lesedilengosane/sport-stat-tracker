@@ -19,19 +19,19 @@ interface Props {
 }
 
 const starterSlotsHome = [
-  { left: "15%", top: "20%" }, // Top left corner
-  { left: "25%", top: "40%" }, // Mid-left high
-  { left: "35%", top: "50%" }, // Center-left
-  { left: "25%", top: "60%" }, // Mid-left low
-  { left: "15%", top: "80%" }, // Bottom left corner
+  { left: "25%", top: "15%" },  // PG - Point Guard (top of key)
+  { left: "15%", top: "50%" },  // SG - Shooting Guard (left wing)
+  { left: "40%", top: "35%" },  // SF - Small Forward (right wing)
+  { left: "25%", top: "85%" },  // PF - Power Forward (left corner/low post)
+  { left: "40%", top: "65%" },  // C - Center (right corner/low post)
 ]
 
 const starterSlotsAway = [
-  { left: "85%", top: "20%" }, // Top right corner
-  { left: "75%", top: "40%" }, // Mid-right high
-  { left: "65%", top: "50%" }, // Center-right
-  { left: "75%", top: "60%" }, // Mid-right low
-  { left: "85%", top: "80%" }, // Bottom right corner
+  { left: "75%", top: "15%" },  // PG - Point Guard (top of key)
+  { left: "85%", top: "50%" },  // SG - Shooting Guard (right wing)
+  { left: "60%", top: "35%" },  // SF - Small Forward (left wing)
+  { left: "75%", top: "85%" },  // PF - Power Forward (right corner/low post)
+  { left: "60%", top: "65%" },  // C - Center (left corner/low post)
 ]
 
 export default function BasketballCourtLineup({
@@ -49,44 +49,105 @@ export default function BasketballCourtLineup({
   const awayStarters = awayLineup.slice(0, 5)
   const awaySubs = awayLineup.slice(5)
 
-  const renderPlayerChip = (p: PlayerDetails) => (
-    <div
-      className="flex flex-col items-center cursor-pointer select-none"
-      onClick={() => onPlayerClick?.(p.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter") onPlayerClick?.(p.id)
-      }}
-    >
-      {p.avatarUrl ? (
-        <Image
-          src={p.avatarUrl || "/placeholder.svg"}
-          alt={p.name}
-          width={80}
-          height={80}
-          className="rounded-full border-2 border-white shadow-lg"
-        />
-      ) : (
-        <div className="w-20 h-20 rounded-full bg-orange-500 flex items-center justify-center text-base font-bold text-black border-2 border-white shadow-lg">
-          {p.name?.slice(0, 2).toUpperCase()}
+  const formatPlayerName = (name: string, surname: string) => {
+    const firstName = name?.split(' ')[0] || name
+    const lastName = surname || name?.split(' ').slice(1).join(' ') || ''
+    return { firstName, lastName }
+  }
+
+  const renderPlayerChip = (p: PlayerDetails) => {
+    const { firstName, lastName } = formatPlayerName(p.name, p.surname)
+    const displayName = lastName ? `${firstName} ${lastName.charAt(0)}.` : firstName
+
+    return (
+      <div
+        className="flex flex-col items-center cursor-pointer select-none group"
+        onClick={() => onPlayerClick?.(p.id)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") onPlayerClick?.(p.id)
+        }}
+      >
+        <div className="relative">
+          {p.avatarUrl ? (
+            <div className="relative">
+              <Image
+                src={p.avatarUrl || "/placeholder.svg"}
+                alt={p.name}
+                width={80}
+                height={80}
+                className="rounded-full border-3 border-orange-500 shadow-lg group-hover:border-orange-600 transition-all duration-200"
+              />
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full border border-white shadow-sm">
+                {p.position}
+              </div>
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-lg border-3 border-orange-500 shadow-lg group-hover:border-orange-600 transition-all duration-200">
+                {firstName?.charAt(0)}{lastName?.charAt(0)}
+              </div>
+              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full border border-white shadow-sm">
+                {p.position}
+              </div>
+            </div>
+          )}
         </div>
-      )}
-      <div className="mt-1.5 text-xs text-black text-center drop-shadow-lg">
-        <div className="font-bold leading-tight">{p.name}</div>
-        {p.surname && <div className="text-[10px] text-black/90">{p.surname}</div>}
+        <div className="mt-2 text-center max-w-[100px]">
+          <div className="font-bold text-black text-sm leading-tight bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg border border-orange-200 shadow-sm">
+            {displayName}
+          </div>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
+
+  const renderSubPlayer = (p: PlayerDetails) => {
+    const { firstName, lastName } = formatPlayerName(p.name, p.surname)
+    const displayName = lastName ? `${firstName} ${lastName.charAt(0)}.` : firstName
+
+    return (
+      <div
+        key={p.id}
+        onClick={() => onPlayerClick?.(p.id)}
+        className="cursor-pointer bg-white/95 backdrop-blur-sm px-3 py-2 rounded-lg flex items-center gap-3 border-2 border-orange-300 hover:border-orange-500 hover:bg-orange-50 transition-all duration-200 hover:scale-105 shadow-sm group"
+      >
+        {p.avatarUrl ? (
+          <Image
+            src={p.avatarUrl || "/placeholder.svg"}
+            alt={p.name}
+            width={48}
+            height={48}
+            className="rounded-full border-2 border-orange-500 group-hover:border-orange-600 transition-all duration-200"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold border-2 border-orange-500 group-hover:border-orange-600 transition-all duration-200">
+            {firstName?.charAt(0)}{lastName?.charAt(0)}
+          </div>
+        )}
+        <div className="text-black">
+          <div className="font-semibold text-sm">{displayName}</div>
+          <div className="text-xs text-gray-600 bg-orange-100 px-1.5 py-0.5 rounded-full border border-orange-200">
+            {p.position}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-black">{homeTeam}</h3>
-        <h3 className="text-lg font-bold text-black">{awayTeam}</h3>
+      <div className="flex justify-between items-center mb-6">
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-black bg-orange-500/10 px-4 py-2 rounded-lg border border-orange-200">{homeTeam}</h3>
+        </div>
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-black bg-orange-500/10 px-4 py-2 rounded-lg border border-orange-200">{awayTeam}</h3>
+        </div>
       </div>
 
-      <div className="relative w-full h-[500px] rounded-xl overflow-hidden border-2 border-gray-800 shadow-2xl">
+      <div className="relative w-full h-[500px] rounded-xl overflow-hidden border-3 border-orange-400 shadow-2xl">
         <Image
           src="/court/court3.jpg"
           alt="Basketball court"
@@ -96,7 +157,7 @@ export default function BasketballCourtLineup({
         />
 
         {/* Subtle overlay for better player visibility */}
-        <div className="absolute inset-0 bg-black/10 z-10 " />
+        <div className="absolute inset-0 bg-black/5 z-10" />
 
         {/* Home half starters (left) */}
         <div className="absolute inset-0 z-20">
@@ -106,7 +167,7 @@ export default function BasketballCourtLineup({
               <div
                 key={player.id}
                 style={{ left: slot.left, top: slot.top }}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110"
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 hover:z-30"
               >
                 {renderPlayerChip(player)}
               </div>
@@ -120,7 +181,7 @@ export default function BasketballCourtLineup({
               <div
                 key={player.id}
                 style={{ left: slot.left, top: slot.top }}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-transform hover:scale-110"
+                className="absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 hover:z-30"
               >
                 {renderPlayerChip(player)}
               </div>
@@ -131,71 +192,31 @@ export default function BasketballCourtLineup({
 
       <div className="mt-8 grid grid-cols-2 gap-8">
         <div>
-          <h4 className="text-sm font-bold text-black mb-3 uppercase tracking-wide">Home Subs</h4>
-          <div className="flex flex-wrap gap-3">
+          <h4 className="text-sm font-bold text-black mb-4 uppercase tracking-wide bg-orange-500/10 px-3 py-2 rounded-lg border border-orange-200 inline-block">
+            Home Subs
+          </h4>
+          <div className="flex flex-wrap gap-3 mt-2">
             {homeSubs.length === 0 ? (
-              <div className="text-sm text-black/60 italic">No substitutes</div>
+              <div className="text-sm text-black/60 italic bg-white/80 px-3 py-2 rounded-lg border border-orange-200">
+                No substitutes
+              </div>
             ) : (
-              homeSubs.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => onPlayerClick?.(p.id)}
-                  className="cursor-pointer bg-white/10 backdrop-blur-sm px-3 py-2.5 rounded-lg flex items-center gap-3 border border-white/20 hover:bg-white/20 transition-all hover:scale-105"
-                >
-                  {p.avatarUrl ? (
-                    <Image
-                      src={p.avatarUrl || "/placeholder.svg"}
-                      alt={p.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full border border-white/30"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold text-black">
-                      {p.name?.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="text-sm text-black">
-                    <div className="font-semibold">{p.name}</div>
-                    {p.surname && <div className="text-xs text-black/70">{p.surname}</div>}
-                  </div>
-                </div>
-              ))
+              homeSubs.map(renderSubPlayer)
             )}
           </div>
         </div>
 
         <div>
-          <h4 className="text-sm font-bold text-black mb-3 uppercase tracking-wide text-right">Away Subs</h4>
-          <div className="flex flex-wrap gap-3 justify-end">
+          <h4 className="text-sm font-bold text-black mb-4 uppercase tracking-wide bg-orange-500/10 px-3 py-2 rounded-lg border border-orange-200 inline-block float-right">
+            Away Subs
+          </h4>
+          <div className="flex flex-wrap gap-3 mt-2 justify-end clear-both">
             {awaySubs.length === 0 ? (
-              <div className="text-sm text-white/60 italic">No substitutes</div>
+              <div className="text-sm text-black/60 italic bg-white/80 px-3 py-2 rounded-lg border border-orange-200">
+                No substitutes
+              </div>
             ) : (
-              awaySubs.map((p) => (
-                <div
-                  key={p.id}
-                  onClick={() => onPlayerClick?.(p.id)}
-                  className="cursor-pointer bg-white/10 backdrop-blur-sm px-3 py-2.5 rounded-lg flex items-center gap-3 border border-white/20 hover:bg-white/20 transition-all hover:scale-105"
-                >
-                  {p.avatarUrl ? (
-                    <Image
-                      src={p.avatarUrl || "/placeholder.svg"}
-                      alt={p.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full border border-white/30"
-                    />
-                  ) : (
-                    <div className="w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center text-sm font-bold text-white">
-                      {p.name?.slice(0, 2).toUpperCase()}
-                    </div>
-                  )}
-                  <div className="text-sm text-black">
-                    <div className="font-semibold">{p.name}</div>
-                    {p.surname && <div className="text-xs text-black/70">{p.surname}</div>}
-                  </div>
-                </div>
-              ))
+              awaySubs.map(renderSubPlayer)
             )}
           </div>
         </div>
