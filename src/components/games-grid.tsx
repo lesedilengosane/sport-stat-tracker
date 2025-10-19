@@ -1,3 +1,4 @@
+// sport-stat-tracker\src\components\games-grid.tsx
 "use client";
 
 import { GameCard, GameCardSkeleton } from "./game-card";
@@ -15,7 +16,7 @@ export const GamesGrid = memo(({ games }: GamesGridProps) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {games.map((game, index) => (
           <GameCard
-            key={game.match_id || `game-${index}`} 
+            key={game.match_id || `game-${index}`}
             match_id={game.match_id}
             date={game.date}
             time={game.time}
