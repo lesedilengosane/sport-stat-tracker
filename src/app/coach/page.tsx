@@ -250,7 +250,7 @@ export default function CoachDashboard() {
       case "team-stats":
         return <TeamStats />;
 
-      case "players":
+      case "My Players":
         return (
           <div>
             <h1 className="text-2xl font-bold mb-6 text-center">Team Players</h1>

@@ -1,55 +1,77 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextResponse } from "next/server";
+import { supabase } from "../DatabaseApi/supabaseClient";
 
-// Make sure these are in your .env.local
-// NEXT_PUBLIC_SUPABASE_URL=...
-// SUPABASE_SERVICE_ROLE_KEY=...
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-export async function GET(req: Request) {
+export async function GET() {
   try {
-    const { searchParams } = new URL(req.url);
+    // 🟠 1. Fetch all teams
+    const { data: teams, error: teamError } = await supabase
+      .from("teams")
+      .select("team_id, team_name, coach_id, icon_url, lineup, created_at");
 
-    const team = searchParams.get('team');
-    const team_home = searchParams.get('team_home');
-    const team_away = searchParams.get('team_away');
-    const league = searchParams.get('league');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
-    const limit = parseInt(searchParams.get('limit') || '5', 10);
+    if (teamError) throw teamError;
 
-    // --- Build query ---
-    let query = supabase
-      .from('basketball_history') // ✅ Make sure this matches your table name
-      .select('*', { count: 'exact' })
-      .order('game_date', { ascending: false })
-      .limit(limit);
+    // 🟢 2. Fetch all players
+    const { data: players, error: playerError } = await supabase
+      .from("players")
+      .select(
+        "player_id, first_name, last_name, position, jersey_number, team_id, points, image"
+      );
 
-    if (team) query = query.eq('team', team);
-    if (team_home) query = query.eq('team_home', team_home);
-    if (team_away) query = query.eq('team_away', team_away);
-    if (league) query = query.eq('league', league);
-    if (startDate) query = query.gte('game_date', startDate);
-    if (endDate) query = query.lte('game_date', endDate);
+    if (playerError) throw playerError;
 
-    const { data, error, count } = await query;
+    // 🔵 3. Fetch all matches
+    const { data: matches, error: matchError } = await supabase
+      .from("matches")
+      .select(
+        "match_id, match_date, home_team_id, away_team_id, home_score, away_score, location, season, completed"
+      );
 
-    if (error) {
-      console.error('❌ Supabase query failed:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      });
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    if (matchError) throw matchError;
 
-    return NextResponse.json({ data, total: count });
-  } catch (err: any) {
-    console.error('❌ API crashed:', err);
-    return NextResponse.json({ error: err.message || 'Unknown error' }, { status: 500 });
+    // 🔗 4. Link players to their teams and compute total points
+    const teamsWithPlayers = teams.map((team) => {
+      const teamPlayers = players.filter((p) => p.team_id === team.team_id);
+      const total_points = teamPlayers.reduce(
+        (sum, p) => sum + (p.points || 0),
+        0
+      );
+      return {
+        ...team,
+        total_points,
+        players: teamPlayers,
+      };
+    });
+
+    // 🔗 5. Link matches to actual team names
+    const matchesWithTeams = matches.map((m) => {
+      const homeTeam = teams.find((t) => t.team_id === m.home_team_id);
+      const awayTeam = teams.find((t) => t.team_id === m.away_team_id);
+
+      return {
+        ...m,
+        home_team_name: homeTeam?.team_name || "Unknown",
+        away_team_name: awayTeam?.team_name || "Unknown",
+      };
+    });
+
+    // 📦 6. Combine everything into one response
+    const result = {
+      teams: teamsWithPlayers,
+      players,
+      matches: matchesWithTeams,
+      summary: {
+        totalTeams: teams.length,
+        totalPlayers: players.length,
+        totalMatches: matches.length,
+      },
+    };
+
+    return NextResponse.json(result, { status: 200 });
+  } catch (error: any) {
+    console.error("Error in /api/history:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
