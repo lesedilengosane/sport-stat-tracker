@@ -1,46 +1,55 @@
-"use client"
+//sport-stat-tracker\src\components\coach-game-card.tsx
 
-import type React from "react"
+"use client";
 
-import { Card } from "@/components/ui/card"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { Calendar, Clock } from "lucide-react"
+import type React from "react";
+
+import { Card } from "@/components/ui/card";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Calendar, Clock } from "lucide-react";
 
 interface Team {
-  team_id: string
-  name: string
-  logo: string
+  team_id: string;
+  name: string;
+  logo: string;
 }
 
 interface Player {
-  player_id: string
-  name: string
-  position?: string
+  player_id: string;
+  name: string;
+  position?: string;
 }
 
 interface CoachGameCardProps {
-  match_id: string
-  date: string
-  time: string
-  homeTeam: Team
-  awayTeam: Team
-  location: string
-  homeLineup?: Player[]
-  awayLineup?: Player[]
+  match_id: string;
+  date: string;
+  time: string;
+  homeTeam: Team;
+  awayTeam: Team;
+  location: string;
+  homeLineup?: Player[];
+  awayLineup?: Player[];
 }
 
-export function CoachGameCard({ match_id, date, time, homeTeam, awayTeam, location }: CoachGameCardProps) {
-  const router = useRouter()
+export function CoachGameCard({
+  match_id,
+  date,
+  time,
+  homeTeam,
+  awayTeam,
+  location,
+}: CoachGameCardProps) {
+  const router = useRouter();
 
   const handleCardClick = () => {
-    router.push(`/analyst/${match_id}`)
-  }
+    router.push(`/coach/${match_id}`);
+  };
 
   const handleViewDetails = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    router.push(`/analyst/${match_id}`)
-  }
+    e.stopPropagation();
+    router.push(`/coach/${match_id}`);
+  };
 
   return (
     <Card
@@ -70,7 +79,9 @@ export function CoachGameCard({ match_id, date, time, homeTeam, awayTeam, locati
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium text-center">{homeTeam.name}</span>
+          <span className="text-xs text-black font-medium text-center">
+            {homeTeam.name}
+          </span>
         </div>
 
         <div className="text-slate-400 font-bold text-sm mx-2">vs</div>
@@ -84,7 +95,9 @@ export function CoachGameCard({ match_id, date, time, homeTeam, awayTeam, locati
               className="object-contain"
             />
           </div>
-          <span className="text-xs text-black font-medium text-center">{awayTeam.name}</span>
+          <span className="text-xs text-black font-medium text-center">
+            {awayTeam.name}
+          </span>
         </div>
       </div>
 
@@ -94,10 +107,13 @@ export function CoachGameCard({ match_id, date, time, homeTeam, awayTeam, locati
       </div>
 
       <div className="flex items-center justify-center text-xs font-medium mt-3">
-        <button onClick={handleViewDetails} className="text-blue-400 hover:underline">
+        <button
+          onClick={handleViewDetails}
+          className="text-blue-400 hover:underline"
+        >
           View Details
         </button>
       </div>
     </Card>
-  )
+  );
 }

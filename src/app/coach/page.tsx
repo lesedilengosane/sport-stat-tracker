@@ -8,7 +8,7 @@ import { useAuth } from "@/app/context/AuthContext";
 import { CoachSideNav } from "@/components/sideNav/coachSideNav";
 import { DashboardHeader } from "@/components/header/header";
 import UnassignedPlayersDialog from "@/components/coachComponents/teamManagement";
-import { GamesGrid } from "@/components/games-grid";
+import { CoachGamesGrid } from "@/components/coach-games-grid";
 import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
 import { apiClient } from "../utils/apiClient";
 import TeamStats from "@/components/TeamStats/teamstats";
@@ -238,7 +238,7 @@ export default function CoachDashboard() {
             ))}
           </div>
         ) : (
-          <GamesGrid games={matches} />
+          <CoachGamesGrid games={matches} />
         );
 
       case "all-games":
@@ -249,7 +249,7 @@ export default function CoachDashboard() {
             ))}
           </div>
         ) : (
-          <GamesGrid games={allGames} />
+          <CoachGamesGrid games={allGames} />
         );
 
       case "team-management":
