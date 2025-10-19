@@ -28,6 +28,17 @@ jest.mock('../../../context/AuthContext', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Mock MatchesContext
+jest.mock('../../../context/MatchesContext', () => ({
+  useMatches: jest.fn(() => ({
+    allGames: [],
+    loading: false,
+    error: null,
+    refetch: jest.fn(),
+  })),
+  MatchesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 // Mock Next.js modules
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
