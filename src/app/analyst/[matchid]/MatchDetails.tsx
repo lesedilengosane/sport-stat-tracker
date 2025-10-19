@@ -72,6 +72,7 @@ export default function MatchDetails({
   (game) => game.match_id === matchId
 );
 
+
  
 
   return (
@@ -191,7 +192,7 @@ export default function MatchDetails({
   awayLogo={awayTeam.icon_url}
   homePrevMatches={homePrevMatches}
   awayPrevMatches={awayPrevMatches}
-  eventsData={MatchEvents}
+  MatchEvents={MatchEvents}
   metadata={metadata}
 />
         </div>
