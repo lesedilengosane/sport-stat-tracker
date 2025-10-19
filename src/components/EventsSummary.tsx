@@ -68,7 +68,7 @@ const formatTimestamp = (timestamp: string) => {
 };
 
 interface TimelineProps {
-  events: BasketballEvent[];
+  MatchEvents: BasketballEvent[];
   homeTeamID: string;
   awayTeamID: string;
   homeTeamName?: string;
@@ -77,14 +77,14 @@ interface TimelineProps {
 }
 
 export default function BasketballTimeline({
-  events,
+  MatchEvents,
   homeTeamName,
   awayTeamName,
   homeTeamID,
   awayTeamID,
   metadata,
 }: TimelineProps) {
-  const sortedEvents = events.sort(
+  const sortedEvents = MatchEvents.sort(
     (a, b) =>
       new Date(`1970/01/01 ${b.timestamp}`).getTime() -
       new Date(`1970/01/01 ${a.timestamp}`).getTime()
