@@ -72,24 +72,22 @@ export function Tabspage({
 
 
         {/* Last Games Tab */}
-        <TabsContent value="lastgames" className="w-full">
-  <div className="flex flex-col md:flex-row gap-8 mt-6">
-    <div className="w-full md:w-1/2">
-      <LastMatchesCards
-        data={homePrevMatches}
-        title={`Last 5 games - ${homeTeam}`}
-        currentTeam={homeTeam}
-        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
-      />
-    </div>
-    <div className="w-full md:w-1/2">
-      <LastMatchesCards
-        data={awayPrevMatches}
-        title={`Last 5 games - ${awayTeam}`}
-        currentTeam={awayTeam}
-        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
-      />
-    </div>
+
+{/* Last Games Tab */}
+<TabsContent value="lastgames" className="w-full">
+  <div className="flex flex-row gap-8 mt-6">
+    <LastMatchesTable
+      data={homePrevMatches}
+      title="Last 5 Games"
+      currentTeam={homeTeam}
+      onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+    />
+    <LastMatchesTable
+      data={awayPrevMatches}
+      title="Last 5 Games"
+      currentTeam={awayTeam}
+      onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+    />
   </div>
 </TabsContent>
        
