@@ -62,7 +62,7 @@ console.log(`The 1st fetch has been perfomed\n The match metaData is : ${matchMe
       first_name,
       last_name,
       player_id,
-      team_id
+      team_id,image
     )
   `)
   .in("team_id", [awayTeamId, homeTeamId]);  // only filter by team_id
