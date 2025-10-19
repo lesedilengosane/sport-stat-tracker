@@ -152,7 +152,9 @@ describe('FanSideNav Component', () => {
       fireEvent.click(menuButton);
 
       expect(screen.getByTestId('home-icon')).toBeInTheDocument();
-      expect(screen.getByTestId('users-icon')).toBeInTheDocument();
+      // Use getAllByTestId for icons that appear multiple times (Users icon for both Players and Teams)
+      const usersIcons = screen.getAllByTestId('users-icon');
+      expect(usersIcons.length).toBeGreaterThanOrEqual(1);
       expect(screen.getByTestId('calendar-icon')).toBeInTheDocument();
       expect(screen.getByTestId('trophy-icon')).toBeInTheDocument();
     });

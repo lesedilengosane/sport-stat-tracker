@@ -216,6 +216,7 @@ describe("UserProfile Component", () => {
             body: JSON.stringify({
               team_name: "Warriors",
               coach_id: "coach-123",
+              icon_url: null,
             }),
           })
         );
