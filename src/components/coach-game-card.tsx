@@ -69,36 +69,13 @@ export function GameCard({
   }, []);
 
   const handleCardClick = () => {
-    if (isBooked) return;
-    router.push(`/analyst/${match_id}`);
-  };
+    router.push(`/analyst/${match_id}`)
+  }
 
-  const handleBookClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!analystId) {
-      alert("You must be logged in as an analyst to book.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const result = await BookingApiClient.bookGame(match_id, analystId);
-      if (result.success) {
-        setIsBooked(true);
-        alert(result.message);
-      } else {
-        if (
-          result.message === "This match already has an analyst assigned ❌"
-        ) {
-          setIsBooked(true);
-        }
-        alert(result.message || "Booking failed");
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleViewDetails = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    router.push(`/analyst/${match_id}`)
+  }
 
   return (
     <Card
