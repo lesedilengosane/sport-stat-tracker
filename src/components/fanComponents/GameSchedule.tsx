@@ -1,5 +1,5 @@
 "use client"
-
+import {  useRouter } from "next/navigation"
 interface Game {
   home_team: string
   away_team: string
@@ -15,6 +15,7 @@ interface GameScheduleProps {
 export function GameSchedule({ games, compact = false }: GameScheduleProps) {
   // Use the provided games data or empty array if none provided
   const displayGames = games || []
+  const router=useRouter()
 
   // If no games provided, show nothing or a message
   if (displayGames.length === 0) {
@@ -81,7 +82,7 @@ export function GameSchedule({ games, compact = false }: GameScheduleProps) {
         </div>
         {compact && (
           <div className="border-t-2 border-orange-200 p-4 text-center bg-orange-50">
-            <button className="text-orange-600 hover:text-orange-700 font-semibold text-sm">View All Games</button>
+            <button className="text-orange-600 hover:text-orange-700 font-semibold text-sm" onClick={()=>router.push("/fan/games")}>View All Games</button>
           </div>
         )}
       </div>

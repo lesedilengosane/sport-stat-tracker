@@ -34,12 +34,12 @@ export function CoachGameCard({ match_id, date, time, homeTeam, awayTeam, locati
   const router = useRouter()
 
   const handleCardClick = () => {
-    router.push(`/analyst/${match_id}`)
+    router.push(`/coach/${match_id}`)
   }
 
   const handleViewDetails = (e: React.MouseEvent) => {
     e.stopPropagation()
-    router.push(`/analyst/${match_id}`)
+    router.push(`/coach/${match_id}`)
   }
 
   return (
