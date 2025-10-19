@@ -37,11 +37,11 @@ type MatchPagePropsCustom = {
 
 async function getMatchData(matchid: string): Promise<MatchData> {
   
-  const baseUrl ='https://sport-stat-tracker-syg3-git-dev-phutheho-mtls-projects.vercel.app/';
-  
-  const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
-    cache: 'no-store', // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
-  });
+ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
+  cache: 'no-store',
+});
   
   
   if (!res.ok) throw new Error("Failed to fetch match data");
