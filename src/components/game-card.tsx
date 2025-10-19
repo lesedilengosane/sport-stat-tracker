@@ -316,7 +316,7 @@ const CoachGameCard = memo(
     const handleView = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
-        router.push(`/analyst/${match_id}`);
+        router.push(`/coach/${match_id}`);
       },
       [router, match_id]
     );
