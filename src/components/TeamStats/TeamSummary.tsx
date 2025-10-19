@@ -15,9 +15,10 @@ interface Match {
 
 interface TeamSummaryProps {
   lastFiveGames: Match[];
+  teamName: string;
 }
 
-const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames }) => {
+const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames, teamName }) => {
   if (!lastFiveGames || lastFiveGames.length === 0) {
     return (
       <div style={containerStyle}>
@@ -36,12 +37,12 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames }) => {
   
   // Calculate average points
   const totalPointsFor = lastFiveGames.reduce((total, game) => {
-    const isHome = game.home_team_name === 'Test Team A';
+    const isHome = game.home_team_name === teamName;
     return total + (isHome ? game.home_score : game.away_score);
   }, 0);
   
   const totalPointsAgainst = lastFiveGames.reduce((total, game) => {
-    const isHome = game.home_team_name === 'Test Team A';
+    const isHome = game.home_team_name === teamName;
     return total + (isHome ? game.away_score : game.home_score);
   }, 0);
   
@@ -69,7 +70,7 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames }) => {
         transform: `scale(${0.9 + (index * 0.02)})`,
         zIndex: lastFiveGames.length - index,
       }}
-      title={`${game.result} vs ${game.home_team_name === 'Test Team A' ? game.away_team_name : game.home_team_name}`}
+      title={`${game.result} vs ${game.home_team_name === teamName ? game.away_team_name : game.home_team_name}`}
     >
       <span style={gameBarText}>{game.result.charAt(0)}</span>
     </div>
@@ -155,12 +156,12 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames }) => {
                     {game.result}
                   </span>
                   <span style={gameScoreStyle}>
-                    {game.home_team_name === 'Test Team A' ? game.home_score : game.away_score} - 
-                    {game.home_team_name === 'Test Team A' ? game.away_score : game.home_score}
+                    {game.home_team_name === teamName ? game.home_score : game.away_score} - 
+                    {game.home_team_name === teamName ? game.away_score : game.home_score}
                   </span>
                 </div>
                 <div style={gameOpponentStyle}>
-                  vs {game.home_team_name === 'Test Team A' ? game.away_team_name : game.home_team_name}
+                  vs {game.home_team_name === teamName ? game.away_team_name : game.home_team_name}
                 </div>
                 <div style={gameDateStyle}>
                   {new Date(game.match_date).toLocaleDateString()}
@@ -194,15 +195,15 @@ const TeamSummary: React.FC<TeamSummaryProps> = ({ lastFiveGames }) => {
   );
 };
 
-// Styles
+// Styles - Orange & Light Peach/White Theme
 const containerStyle: React.CSSProperties = {
-  backgroundColor: '#f8f9fa',
-  border: '3px solid #ff6b35',
+  backgroundColor: '#fff9f5', // Light peach background
+  border: '3px solid #ff6b35', // Orange border
   borderRadius: '20px',
   padding: '30px',
   marginTop: '20px',
-  boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+  boxShadow: '0 8px 32px rgba(255, 107, 53, 0.15)',
+  background: 'linear-gradient(135deg, #fff9f5 0%, #fff0e6 100%)',
 };
 
 const headerStyle: React.CSSProperties = {
@@ -234,17 +235,18 @@ const statsGridStyle: React.CSSProperties = {
 };
 
 const statCardStyle: React.CSSProperties = {
-  backgroundColor: '#1a1a1a',
-  border: '2px solid #ff6b35',
+  backgroundColor: '#ffffff', // White background
+  border: '2px solid #ff6b35', // Orange border
   borderRadius: '15px',
   padding: '20px',
   textAlign: 'center',
-  boxShadow: '0 4px 15px rgba(255, 107, 53, 0.2)',
+  boxShadow: '0 4px 15px rgba(255, 107, 53, 0.1)',
   transition: 'transform 0.3s ease',
+  background: 'linear-gradient(135deg, #ffffff 0%, #fff9f5 100%)',
 };
 
 const statHeaderStyle: React.CSSProperties = {
-  color: '#ff6b35',
+  color: '#ff6b35', // Orange text
   fontSize: '1.1rem',
   fontWeight: '600',
   marginBottom: '15px',
@@ -267,22 +269,22 @@ const winLossStyle: React.CSSProperties = {
 };
 
 const winStyle: React.CSSProperties = {
-  color: '#10b981',
-  textShadow: '0 0 10px rgba(16, 185, 129, 0.5)',
+  color: '#10b981', // Green for wins
+  textShadow: '0 0 10px rgba(16, 185, 129, 0.3)',
 };
 
 const lossStyle: React.CSSProperties = {
-  color: '#ef4444',
-  textShadow: '0 0 10px rgba(239, 68, 68, 0.5)',
+  color: '#ef4444', // Red for losses
+  textShadow: '0 0 10px rgba(239, 68, 68, 0.3)',
 };
 
 const drawStyle: React.CSSProperties = {
-  color: '#f59e0b',
-  textShadow: '0 0 10px rgba(245, 158, 11, 0.5)',
+  color: '#f59e0b', // Orange for draws
+  textShadow: '0 0 10px rgba(245, 158, 11, 0.3)',
 };
 
 const winRateStyle: React.CSSProperties = {
-  color: '#ffffff',
+  color: '#ff6b35', // Orange text
   fontSize: '1.5rem',
   fontWeight: 'bold',
   background: 'linear-gradient(45deg, #ff6b35, #ff8c42)',
@@ -323,12 +325,12 @@ const pointsAgainstStyle: React.CSSProperties = {
 };
 
 const pointsLabel: React.CSSProperties = {
-  color: '#adb5bd',
+  color: '#666', // Gray text
   fontSize: '0.9rem',
 };
 
 const pointsValue: React.CSSProperties = {
-  color: '#ffffff',
+  color: '#1a1a1a', // Dark text
   fontSize: '1.3rem',
   fontWeight: 'bold',
 };
@@ -381,10 +383,11 @@ const gamesListStyle: React.CSSProperties = {
 const gameItemStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
-  backgroundColor: '#2d2d2d',
+  backgroundColor: '#ffffff', // White background
   borderRadius: '10px',
   padding: '15px',
-  border: '1px solid #444',
+  border: '2px solid #ffd8c9', // Light orange border
+  boxShadow: '0 2px 8px rgba(255, 107, 53, 0.1)',
 };
 
 const resultIndicatorStyle: React.CSSProperties = {
@@ -406,31 +409,32 @@ const gameResultStyle: React.CSSProperties = {
 };
 
 const gameScoreStyle: React.CSSProperties = {
-  color: '#ffffff',
+  color: '#1a1a1a', // Dark text
   fontWeight: 'bold',
   fontSize: '1.1rem',
 };
 
 const gameOpponentStyle: React.CSSProperties = {
-  color: '#adb5bd',
+  color: '#666', // Gray text
   fontSize: '0.9rem',
 };
 
 const gameDateStyle: React.CSSProperties = {
-  color: '#6b7280',
+  color: '#888', // Light gray
   fontSize: '0.8rem',
   fontStyle: 'italic',
 };
 
 const performanceMeterStyle: React.CSSProperties = {
-  backgroundColor: '#1a1a1a',
-  border: '2px solid #ff6b35',
+  backgroundColor: '#ffffff', // White background
+  border: '2px solid #ff6b35', // Orange border
   borderRadius: '15px',
   padding: '20px',
+  background: 'linear-gradient(135deg, #ffffff 0%, #fff9f5 100%)',
 };
 
 const meterHeaderStyle: React.CSSProperties = {
-  color: '#ff6b35',
+  color: '#ff6b35', // Orange text
   fontSize: '1.1rem',
   fontWeight: '600',
   marginBottom: '15px',
@@ -440,10 +444,11 @@ const meterHeaderStyle: React.CSSProperties = {
 const meterBarStyle: React.CSSProperties = {
   width: '100%',
   height: '20px',
-  backgroundColor: '#374151',
+  backgroundColor: '#ffd8c9', // Light orange background
   borderRadius: '10px',
   overflow: 'hidden',
   marginBottom: '10px',
+  border: '1px solid #ffb399',
 };
 
 const meterFillStyle: React.CSSProperties = {
@@ -456,7 +461,7 @@ const meterFillStyle: React.CSSProperties = {
 const meterLabelsStyle: React.CSSProperties = {
   display: 'flex',
   justifyContent: 'space-between',
-  color: '#adb5bd',
+  color: '#666', // Gray text
   fontSize: '0.8rem',
 };
 

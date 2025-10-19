@@ -50,14 +50,17 @@ export default function TeamStats({ authUserId, teamId }: TeamStatsProps) {
     
   <div className="team-stats-root">
     <TeamDetails 
-      teamName={teamStats?.team_name || "Unknown Team"} 
+      teamName={teamStats?.team_name || "loading"} 
       numPlayers={teamStats?.num_players ?? "-"} 
     />
 
       {/* child component for team summary stats */}
     <div id="team-summary" className="team-summary" style={{ marginTop: "20px" }}>
-        <TeamSummary lastFiveGames={teamStats?.last_5_matches || []} />
-    </div>
+  <TeamSummary 
+    lastFiveGames={teamStats?.last_5_matches || []} 
+    teamName ={teamStats?.team_name || "loading"} 
+  />
+</div>
 
     <div id="player-stats" className="player-stats" style={{ marginTop: "20px" }}>
         <PlayerStats playerStats={teamStats?.player_stats || []} />
