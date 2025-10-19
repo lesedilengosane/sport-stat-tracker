@@ -1,5 +1,4 @@
-// src/app/coach/[matchid]/page.tsx
-
+// src\app\coach\[matchid]\page.tsx
 import MatchDetails from "./MatchDetails";
 import { MatchMetaData } from "@/types/basketball";
 
@@ -34,18 +33,17 @@ interface MatchData {
 }
 
 type MatchPagePropsCustom = {
-  params: { matchid: string };
+  params: Promise<{ matchid: string }>;
 };
 
 async function getMatchData(matchid: string): Promise<MatchData> {
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ||
-    (process.env.VERCEL_URL
+    process.env.NEXT_PUBLIC_API_URL || process.env.VERCEL_URL
       ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
+      : "http://localhost:3000";
 
   const res = await fetch(`${baseUrl}/api/coach/${matchid}`, {
-    cache: "no-store",
+    cache: "no-store", // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
   });
 
   if (!res.ok) throw new Error("Failed to fetch match data");
@@ -53,7 +51,7 @@ async function getMatchData(matchid: string): Promise<MatchData> {
 }
 
 export default async function MatchPage({ params }: MatchPagePropsCustom) {
-  const { matchid } = params; // ✅ no await
+  const { matchid } = await params;
 
   let matchData: MatchData;
 
@@ -76,6 +74,7 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
     );
   }
 
+  // ---------------- Map Lineups ----------------
   const homeTeamId = matchData.Teams[0]?.team_id;
   const awayTeamId = matchData.Teams.find(
     (t) => t.team_id !== homeTeamId
@@ -93,6 +92,7 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
   const homePlayers = mapLineup(matchData.lineups.homeLineup || [], "home");
   const awayPlayers = mapLineup(matchData.lineups.awayLineup || [], "away");
 
+  // ---------------- Render MatchDetails ----------------
   return (
     <MatchDetails
       matchId={matchid}

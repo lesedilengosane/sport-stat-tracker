@@ -1,3 +1,4 @@
+//src\components\game-card.tsx
 "use client";
 
 import { Card } from "@/components/ui/card";
