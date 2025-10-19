@@ -1,91 +1,86 @@
-"use client";
+"use client"
 
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { supabase } from "../api/DatabaseApi/supabaseClient";
-import { useAuth } from "@/app/context/AuthContext";
-import { CoachSideNav } from "@/components/sideNav/coachSideNav";
-import { DashboardHeader } from "@/components/header/header";
-import UnassignedPlayersDialog from "@/components/coachComponents/teamManagement";
-import { GamesGrid } from "@/components/games-grid";
-import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton";
-import { apiClient } from "../utils/apiClient";
-import TeamStats from "@/components/TeamStats/teamstats";
-import PlayersList from "@/app/players/PlayersList";
-import { Game } from "@/types/basketball";
+import Image from "next/image"
+import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { supabase } from "../api/DatabaseApi/supabaseClient"
+import { useAuth } from "@/app/context/AuthContext"
+import { CoachSideNav } from "@/components/sideNav/coachSideNav"
+import { DashboardHeader } from "@/components/header/header"
+import UnassignedPlayersDialog from "@/components/coachComponents/teamManagement"
+import { CoachGamesGrid } from "@/components/coach-games-grid"
+import { GameCardSkeleton } from "@/components/Loading-Card/game-card-skeleton"
+import { apiClient } from "../utils/apiClient"
+import TeamStats from "@/components/TeamStats/teamstats"
+import PlayersList from "@/app/players/PlayersList"
+import type { Game } from "@/types/basketball"
 
 // Types
 interface Team {
-  team_id: string;
-  name: string;
-  logo: string;
+  team_id: string
+  name: string
+  logo: string
 }
 
 interface Player {
-  player_id: string;
-  name: string;
-  position?: string;
+  player_id: string
+  name: string
+  position?: string
 }
 
-
-
 export default function CoachDashboard() {
-  const router = useRouter();
-  const { user } = useAuth();
+  const router = useRouter()
+  const { user } = useAuth()
 
-  const [matches, setMatches] = useState<Game[]>([]); // schedule tab
-  const [allGames, setAllGames] = useState<Game[]>([]); // all-games tab
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("schedule");
-  const [teamID, setTeamID] = useState<string>("");
+  const [matches, setMatches] = useState<Game[]>([]) // schedule tab
+  const [allGames, setAllGames] = useState<Game[]>([]) // all-games tab
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("schedule")
+  const [teamID, setTeamID] = useState<string>("")
 
-  const name = (user?.first_name || "") + " " + (user?.last_name || "") || "User";
-  const user_ID = user?.user_id || "No ID";
+  const name = (user?.first_name || "") + " " + (user?.last_name || "") || "User"
+  const user_ID = user?.user_id || "No ID"
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-  };
+    await supabase.auth.signOut()
+    router.push("/")
+  }
 
   const convertToPlayerDetails = (lineup: any[], team: "home" | "away") =>
     lineup.map((player, index) => ({
       player_id: `${team}-player-${index}`,
       name: player.player || "Unknown",
       position: player.position || "Unknown",
-    }));
+    }))
 
   // Fetch coach-specific matches
   const fetchCoachMatches = async () => {
-    if (!user) return;
-    setIsLoading(true);
-    setError(null);
+    if (!user) return
+    setIsLoading(true)
+    setError(null)
 
     try {
-      const matchesData = await apiClient.getMatchesByCoachId(user.user_id);
+      const matchesData = await apiClient.getMatchesByCoachId(user.user_id)
 
       if (!matchesData || matchesData.length === 0) {
-        setMatches([]);
-        return;
+        setMatches([])
+        return
       }
 
       const teamIds = [
-        ...new Set([
-          ...matchesData.map((m: any) => m.home_team_id),
-          ...matchesData.map((m: any) => m.away_team_id),
-        ]),
-      ];
+        ...new Set([...matchesData.map((m: any) => m.home_team_id), ...matchesData.map((m: any) => m.away_team_id)]),
+      ]
 
-      const teamsData = await apiClient.getTeamsByIds(teamIds);
-      const teamsMap = new Map<string, Team>();
+      const teamsData = await apiClient.getTeamsByIds(teamIds)
+      const teamsMap = new Map<string, Team>()
       teamsData.forEach((team: any) => {
         teamsMap.set(team.team_id, {
           team_id: team.team_id,
           name: team.team_name,
           logo: team.icon_url || "/default_team.svg",
-        });
-      });
+        })
+      })
 
       const formattedGames: Game[] = matchesData.map((match: any) => ({
         id: match.match_id,
@@ -112,45 +107,42 @@ export default function CoachDashboard() {
         },
         homeLineup: convertToPlayerDetails(match.homeLineup || [], "home"),
         awayLineup: convertToPlayerDetails(match.awayLineup || [], "away"),
-      }));
+      }))
 
-      setMatches(formattedGames);
+      setMatches(formattedGames)
     } catch (err) {
-      console.error("[CoachDashboard] Error fetching coach matches:", err);
-      setError("Failed to load matches.");
-      setMatches([]);
+      console.error("[CoachDashboard] Error fetching coach matches:", err)
+      setError("Failed to load matches.")
+      setMatches([])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Fetch all matches (analyst-style)
   const fetchAllGames = async () => {
-    setIsLoading(true);
-    setError(null);
+    setIsLoading(true)
+    setError(null)
     try {
-      const matchesData = await apiClient.getMatches();
+      const matchesData = await apiClient.getMatches()
       if (!matchesData || matchesData.length === 0) {
-        setAllGames([]);
-        return;
+        setAllGames([])
+        return
       }
 
       const teamIds = [
-        ...new Set([
-          ...matchesData.map((m: any) => m.home_team_id),
-          ...matchesData.map((m: any) => m.away_team_id),
-        ]),
-      ];
+        ...new Set([...matchesData.map((m: any) => m.home_team_id), ...matchesData.map((m: any) => m.away_team_id)]),
+      ]
 
-      const teamsData = await apiClient.getTeamsByIds(teamIds);
-      const teamsMap = new Map<string, Team>();
+      const teamsData = await apiClient.getTeamsByIds(teamIds)
+      const teamsMap = new Map<string, Team>()
       teamsData.forEach((team: any) => {
         teamsMap.set(team.team_id, {
           team_id: team.team_id,
           name: team.team_name,
           logo: team.icon_url || "/default_team.svg",
-        });
-      });
+        })
+      })
 
       const formattedGames: Game[] = matchesData.map((match: any) => ({
         id: match.match_id,
@@ -174,47 +166,47 @@ export default function CoachDashboard() {
           name: "Unknown Team",
           logo: "/default_team.svg",
         },
-      }));
+      }))
 
-      setAllGames(formattedGames);
+      setAllGames(formattedGames)
     } catch (err) {
-      console.error("[CoachDashboard] Error fetching all matches:", err);
-      setError("Failed to load all matches.");
-      setAllGames([]);
+      console.error("[CoachDashboard] Error fetching all matches:", err)
+      setError("Failed to load all matches.")
+      setAllGames([])
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   // Fetch coach's team
   useEffect(() => {
     const fetchCoachTeam = async () => {
-      if (!user) return;
+      if (!user) return
       try {
-        const userId = user.user_id;
+        const userId = user.user_id
         const { data: teamData, error } = await supabase
           .from("teams")
           .select("team_id")
           .eq("coach_id", userId)
-          .maybeSingle();
+          .maybeSingle()
 
-        if (error) throw error;
-        if (teamData) setTeamID(teamData.team_id);
-        else console.warn("No team found for this coach");
+        if (error) throw error
+        if (teamData) setTeamID(teamData.team_id)
+        else console.warn("No team found for this coach")
       } catch (err) {
-        console.error("Failed to fetch coach team:", err);
+        console.error("Failed to fetch coach team:", err)
       }
-    };
+    }
 
-    fetchCoachTeam();
-  }, [user]);
+    fetchCoachTeam()
+  }, [user])
 
   // Fetch matches based on active tab
   useEffect(() => {
-    if (activeTab === "schedule") fetchCoachMatches();
-    else if (activeTab === "all-games") fetchAllGames();
+    if (activeTab === "schedule") fetchCoachMatches()
+    else if (activeTab === "all-games") fetchAllGames()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, user]);
+  }, [activeTab, user])
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -226,8 +218,8 @@ export default function CoachDashboard() {
             ))}
           </div>
         ) : (
-          <GamesGrid games={matches} />
-        );
+          <CoachGamesGrid games={matches} />
+        )
 
       case "all-games":
         return isLoading ? (
@@ -237,20 +229,20 @@ export default function CoachDashboard() {
             ))}
           </div>
         ) : (
-          <GamesGrid games={allGames} />
-        );
+          <CoachGamesGrid games={allGames} />
+        )
 
       case "team-management":
         return teamID ? (
           <UnassignedPlayersDialog coachTeamId={teamID} />
         ) : (
           <p className="text-gray-300 text-center mt-4">Loading team info...</p>
-        );
+        )
 
       case "team-stats":
-        return <TeamStats />;
+        return <TeamStats />
 
-      case "My Players":
+      case "players":
         return (
           <div>
             <h1 className="text-2xl font-bold mb-6 text-center">Team Players</h1>
@@ -260,12 +252,12 @@ export default function CoachDashboard() {
               <p className="text-gray-300 text-center mt-4">Loading team info...</p>
             )}
           </div>
-        );
+        )
 
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   return (
     <div className="relative min-h-screen">
@@ -273,13 +265,7 @@ export default function CoachDashboard() {
 
       {/* Background image + overlay (frosted blur like analyst dashboard) */}
       <div className="fixed inset-0 z-0">
-        <Image
-          src="/background/ballBG.jpeg"
-          alt="Background"
-          fill
-          priority
-          className="object-cover"
-        />
+        <Image src="/background/ballBG.jpeg" alt="Background" fill priority className="object-cover" />
 
         {/* Overlay that creates the frosted blur effect */}
         <div className="absolute inset-0 bg-white/40 backdrop-blur-lg" />
@@ -293,14 +279,12 @@ export default function CoachDashboard() {
 
         {error && (
           <div className="max-w-6xl mx-auto mb-6 pt-6">
-            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">
-              {error}
-            </div>
+            <div className="bg-red-500/20 border border-red-500 text-red-200 px-4 py-3 rounded-lg">{error}</div>
           </div>
         )}
 
         {renderTabContent()}
       </div>
     </div>
-  );
+  )
 }
