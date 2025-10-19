@@ -10,7 +10,6 @@ import { BarChart } from "lucide-react";
 const analystNavItems = [
   { id: "upcoming-games", label: "Upcoming Games", icon: Clock },
   { id: "booked-games", label: "Booked Games", icon: BookOpen },
-  { id: "live", label: "Live", icon: Play },
   { id: "completed", label: "Completed", icon: CheckCircle },
   { id: "player-insights", label: "Player Insights", icon: BarChart },
 ]

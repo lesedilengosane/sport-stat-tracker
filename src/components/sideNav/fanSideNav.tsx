@@ -8,7 +8,6 @@ import { supabase } from "@/app/api/DatabaseApi/supabaseClient"
 const fanNavItems = [
   { id: "overview", label: "Overview", icon: Home },
   { id: "players", label: "Players", icon: Users },
-  { id: "schedule", label: "Schedule", icon: Calendar },
   { id: "standings", label: "Standings", icon: Trophy },
   {id: "teams", label: "Teams", icon: Users}
 ]
