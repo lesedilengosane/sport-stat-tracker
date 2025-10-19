@@ -95,31 +95,33 @@ export default function SignInCallback() {
   }, [router]);
 
   return (
-  <div className="flex items-center justify-center min-h-screen bg-black">
-    <div className="text-center">
-      {/* Bouncing basketball */}
-      <div className="mx-auto mb-6 w-12 h-12 rounded-full bg-orange-500 relative animate-bounce-ball"></div>
-
-      <h1 className="text-2xl font-bold text-orange-500 mb-2">
-        Just checking your shot...
-      </h1>
-      <p className="text-gray-300">
-        Getting you in the game — hold tight, we’re setting up your court.
-      </p>
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundImage: "url('/loader/loader.gif')", 
+        backgroundSize: "200px 200px",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        backgroundColor: "#f6f6f6", 
+      }}
+      role="status"
+      aria-live="polite"
+    >
+  
+      <div className="relative z-10 text-center px-6">
+        <h1 className="text-2xl font-bold text-black mb-2">
+          Just checking your shot...
+        </h1>
+        <p className="text-gray-300">
+          Getting you in the game — we’re setting up your court.
+        </p>
+      </div>
+  
+      {/* For accessibility: hidden image element so screen readers can pick up an `img` alt if you prefer.
+          You can remove it if not needed. */}
+      <img src="/loader/loader.gif" alt="Loading..." className="sr-only" />
     </div>
-
-    {/* Animation styling */}
-    <style jsx>{`
-      @keyframes bounce-ball {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-40px); }
-      }
-      .animate-bounce-ball {
-        animation: bounce-ball 0.6s ease-in-out infinite;
-      }
-    `}</style>
-  </div>
-);
-
+  );
+  
 }
 

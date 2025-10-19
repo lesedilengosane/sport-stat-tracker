@@ -1,51 +1,50 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Users, SortAsc, ArrowLeft } from "lucide-react"
-import TeamDetails from "./TeamDetails"
-import type { Team, SortOption } from "@/types/team"
-
+import { useEffect, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import TeamDetails from "./TeamDetails";
+import type { Team, SortOption } from "@/types/team";
 
 export default function TeamCards() {
-  const [teams, setTeams] = useState<Team[]>([])
-  const [filteredTeams, setFilteredTeams] = useState<Team[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortOption, setSortOption] = useState<SortOption>("name-asc")
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null)
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOption, setSortOption] = useState<SortOption>("name-asc");
+  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAllTeams = async () => {
       try {
-        setError(null)
-        const response = await fetch("/api/teams")
-        if (!response.ok) throw new Error(`Failed to fetch teams: ${response.status}`)
-        const data = await response.json()
+        setError(null);
+        const response = await fetch("/api/teams");
+        if (!response.ok) throw new Error(`Failed to fetch teams: ${response.status}`);
+        const data = await response.json();
 
-        const teamsArray = Array.isArray(data) ? data : data.teams || data.data || []
+        const teamsArray: Team[] = Array.isArray(data)
+          ? data
+          : data.teams || data.data || [];
 
-        setTeams(teamsArray)
-        setFilteredTeams(teamsArray)
+        setTeams(teamsArray);
+        setFilteredTeams(teamsArray);
       } catch (err: any) {
-        setError(err.message || "Failed to load teams")
+        setError(err.message || "Failed to load teams");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchAllTeams()
-  }, [])
+    fetchAllTeams();
+  }, []);
 
   useEffect(() => {
-    let result = teams
+    let result = teams;
 
     if (searchTerm) {
-      const lower = searchTerm.toLowerCase()
+      const lower = searchTerm.toLowerCase();
       result = result.filter(
         (t) =>
           t.team_name.toLowerCase().includes(lower) ||
@@ -55,40 +54,35 @@ export default function TeamCards() {
               (p) =>
                 p.first_name.toLowerCase().includes(lower) ||
                 p.last_name.toLowerCase().includes(lower) ||
-                p.position.toLowerCase().includes(lower),
-            )),
-      )
+                p.position.toLowerCase().includes(lower)
+            ))
+      );
     }
 
     result = [...result].sort((a, b) => {
       switch (sortOption) {
         case "name-asc":
-          return a.team_name.localeCompare(b.team_name)
+          return a.team_name.localeCompare(b.team_name);
         case "name-desc":
-          return b.team_name.localeCompare(a.team_name)
+          return b.team_name.localeCompare(a.team_name);
         case "players-asc":
-          return (a.players?.length || 0) - (b.players?.length || 0)
+          return (a.players?.length || 0) - (b.players?.length || 0);
         case "players-desc":
-          return (b.players?.length || 0) - (a.players?.length || 0)
+          return (b.players?.length || 0) - (a.players?.length || 0);
         case "coach-asc":
-          return (a.coach_id || "").localeCompare(b.coach_id || "")
+          return (a.coach_id || "").localeCompare(b.coach_id || "");
         case "coach-desc":
-          return (b.coach_id || "").localeCompare(a.coach_id || "")
+          return (b.coach_id || "").localeCompare(a.coach_id || "");
         default:
-          return 0
+          return 0;
       }
-    })
+    });
 
-    setFilteredTeams(result)
-  }, [teams, searchTerm, sortOption])
+    setFilteredTeams(result);
+  }, [teams, searchTerm, sortOption]);
 
-  const handleTeamClick = (teamId: string) => {
-    setSelectedTeamId(teamId)
-  }
-
-  const handleBackToList = () => {
-    setSelectedTeamId(null)
-  }
+  const handleTeamClick = (teamId: string) => setSelectedTeamId(teamId);
+  const handleBackToList = () => setSelectedTeamId(null);
 
   if (selectedTeamId) {
     return (
@@ -103,20 +97,24 @@ export default function TeamCards() {
         </Button>
         <TeamDetails teamId={selectedTeamId} />
       </div>
-    )
+    );
   }
 
-  if (loading) return <div className="text-center text-gray-700 mt-10">Loading teams...</div>
+  if (loading)
+    return <div className="text-center text-gray-700 mt-10">Loading teams...</div>;
 
   if (error)
     return (
       <div className="text-center text-red-500 mt-10">
         <p>{error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4 bg-orange-500 hover:bg-orange-600 text-white">
+        <Button
+          onClick={() => window.location.reload()}
+          className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+        >
           Reload
         </Button>
       </div>
-    )
+    );
 
   return (
     <div className="relative z-10">
@@ -128,31 +126,6 @@ export default function TeamCards() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-8 max-w-4xl mx-auto">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-            <Input
-              placeholder="Search teams, coaches, or players..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white border-2 border-orange-500 text-gray-900 placeholder:text-gray-600 focus:ring-2 focus:ring-orange-400"
-            />
-          </div>
-
-          <div className="w-full sm:w-64">
-            <Select value={sortOption} onValueChange={(v) => setSortOption(v as SortOption)}>
-              <SelectTrigger className="bg-black/10 border border-white text-gray-900">
-                <SortAsc className="h-4 w-4 mr-2 text-gray-600" />
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-gray-300 text-gray-900">
-                <SelectItem value="name-asc">Team Name (A-Z)</SelectItem>
-                <SelectItem value="name-desc">Team Name (Z-A)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredTeams.map((team) => (
             <Card
@@ -160,6 +133,13 @@ export default function TeamCards() {
               className="cursor-pointer hover:scale-105 transition-all duration-300 bg-black/10 border border-white shadow-lg"
             >
               <CardContent className="p-6 text-center space-y-4">
+                {team.icon_url && (
+                  <img
+                    src={team.icon_url}
+                    alt={team.team_name}
+                    className="w-24 h-24 object-contain mx-auto rounded-lg bg-white/10 p-2"
+                  />
+                )}
                 <h2 className="text-xl font-semibold text-gray-900">
                   {team.team_name}
                 </h2>
@@ -175,5 +155,5 @@ export default function TeamCards() {
         </div>
       </div>
     </div>
-  )
+  );
 }

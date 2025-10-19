@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../api/DatabaseApi/supabaseClient";
+import { Mirage } from "ldrs/react";
+import "ldrs/react/Mirage.css";
 
 export default function CallbackPage() {
   const router = useRouter();
@@ -71,44 +73,23 @@ export default function CallbackPage() {
     })();
   }, [router, roleParam]);
 
-return (
-  <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-    <div className="bg-gray-900 rounded-2xl shadow-2xl p-8 max-w-md w-full text-center border-4 border-orange-500">
-      
-      {/* Basketball spinner */}
-      <div className="flex justify-center mb-8 relative">
-        <div className="relative h-24 w-24">
-          <div className="absolute inset-0 rounded-full bg-orange-600 flex items-center justify-center shadow-lg">
-            {/* Lines */}
-            <div className="absolute w-full h-full rounded-full border-2 border-black"></div>
-            <div className="absolute w-full h-full rounded-full border-2 border-black rotate-45"></div>
-            {/* Center dot */}
-            <div className="absolute w-4 h-4 rounded-full bg-black top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"></div>
-          </div>
-          {/* Spinning effect */}
-          <div className="absolute inset-0 animate-spin-slow">
-            <div className="w-full h-0.5 bg-black opacity-30"></div>
-          </div>
-        </div>
+  return (
+    <div className="relative flex items-center justify-center min-h-screen bg-[#f6f6f6] overflow-hidden">
+      {/* Loader as background */}
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <Mirage size="600" speed="6" color="orange" /> {/* change size/color here */}
       </div>
-      
-      <h1 className="text-3xl font-extrabold text-orange-500 mb-3">
-        Finalizing Your Sign-In...
-      </h1>
-      <p className="text-gray-300 mb-8">
-        Getting you on the court – almost there!
-      </p>
-      
-      {/* Basketball bounce animation */}
-      <div className="flex justify-center mb-6">
-        <div className="h-10 w-10 bg-orange-500 rounded-full animate-bounce shadow-lg border-2 border-black"></div>
+  
+      {/* Text on top */}
+      <div className="relative z-10 text-center px-6">
+        <h1 className="text-3xl font-extrabold text-black mb-3">
+          Setting things up...
+        </h1>
+        <p className="text-gray-600 mb-2">
+          Getting you on the court – almost there!
+        </p>
       </div>
-      
-      <p className="mt-4 text-sm text-gray-400 italic">
-        Just checking your shot – almost in the game!
-      </p>
     </div>
-  </div>
-);
-
+  );
+  
 }

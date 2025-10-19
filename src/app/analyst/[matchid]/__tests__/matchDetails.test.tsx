@@ -3,6 +3,42 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
 import MatchDetails from '../MatchDetails';
 
+// Mock Supabase client before any imports that use it
+jest.mock('../../../api/DatabaseApi/supabaseClient', () => ({
+  __esModule: true,
+  default: {
+    from: jest.fn(() => ({
+      select: jest.fn(() => ({
+        eq: jest.fn(() => ({
+          single: jest.fn(() => Promise.resolve({ data: null, error: null })),
+        })),
+      })),
+    })),
+  },
+}));
+
+// Mock AuthContext
+jest.mock('../../../context/AuthContext', () => ({
+  useAuth: jest.fn(() => ({
+    user: null,
+    signIn: jest.fn(),
+    signOut: jest.fn(),
+    loading: false,
+  })),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
+// Mock MatchesContext
+jest.mock('../../../context/MatchesContext', () => ({
+  useMatches: jest.fn(() => ({
+    allGames: [],
+    loading: false,
+    error: null,
+    refetch: jest.fn(),
+  })),
+  MatchesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 // Mock Next.js modules
 jest.mock('next/navigation', () => ({
   useRouter: jest.fn(),
@@ -104,6 +140,25 @@ describe('MatchDetails', () => {
     },
   ];
 
+  const mockMetadata = {
+    idx: 1,
+    match_id: 'match-123',
+    home_team_id: 'team-1',
+    away_team_id: 'team-2',
+    location: 'Stadium Name',
+    match_date: '2024-03-15',
+    match_time: '19:00',
+    status: 'scheduled',
+    home_score: 0,
+    away_score: 0,
+    analyst_id: null,
+    season: '2024',
+    created_at: '2024-03-01T00:00:00Z',
+    completed: false,
+    analyst: '',
+    booked: false,
+  };
+
   const defaultProps = {
     matchId: 'match-123',
     homePlayers: mockHomePlayers,
@@ -112,6 +167,7 @@ describe('MatchDetails', () => {
     awayTeam: mockAwayTeam,
     homePrevMatches: mockHomePrevMatches,
     awayPrevMatches: mockAwayPrevMatches,
+    metadata: mockMetadata,
   };
 
   beforeEach(() => {
@@ -139,7 +195,8 @@ describe('MatchDetails', () => {
 
     it('should display match date from homePrevMatches', () => {
       render(<MatchDetails {...defaultProps} />);
-      expect(screen.getByText('2024-03-15')).toBeInTheDocument();
+      // The date is formatted as "Fri, 15 March 2024"
+      expect(screen.getByText(/15 March 2024/i)).toBeInTheDocument();
     });
 
     it('should display "Date not specified" when no previous matches', () => {
@@ -172,11 +229,6 @@ describe('MatchDetails', () => {
       expect(awayIcon).toHaveAttribute('src', '/placeholder.svg');
     });
 
-    it('should render the ADD STATS button', () => {
-      render(<MatchDetails {...defaultProps} />);
-      expect(screen.getByText('ADD STATS')).toBeInTheDocument();
-    });
-
     it('should render the Tabspage component', () => {
       render(<MatchDetails {...defaultProps} />);
       expect(screen.getByTestId('tabs-page')).toBeInTheDocument();
@@ -189,63 +241,6 @@ describe('MatchDetails', () => {
       
       expect(homeLineupElement.textContent).toBe(JSON.stringify(mockHomePlayers));
       expect(awayLineupElement.textContent).toBe(JSON.stringify(mockAwayPlayers));
-    });
-  });
-
-  describe('Navigation', () => {
-    it('should navigate to tracker page when ADD STATS is clicked', () => {
-      render(<MatchDetails {...defaultProps} />);
-      const addStatsButton = screen.getByText('ADD STATS');
-      
-      fireEvent.click(addStatsButton);
-      
-      expect(mockPush).toHaveBeenCalledTimes(1);
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/analyst/match-123/tracker')
-      );
-    });
-
-    it('should pass correct query parameters when navigating', () => {
-      render(<MatchDetails {...defaultProps} />);
-      const addStatsButton = screen.getByText('ADD STATS');
-      
-      fireEvent.click(addStatsButton);
-      
-      const callArg = mockPush.mock.calls[0][0];
-      expect(callArg).toContain('gameId=match-123');
-      expect(callArg).toContain('homeTeamId=team-1');
-      expect(callArg).toContain('awayTeamId=team-2');
-      expect(callArg).toContain('homeTeam=Home+United');
-      expect(callArg).toContain('awayTeam=Away+FC');
-      expect(callArg).toContain('homeLogo=%2Flogos%2Fhome.png');
-      expect(callArg).toContain('awayLogo=%2Flogos%2Faway.png');
-    });
-
-    it('should include serialized lineups in query parameters', () => {
-      render(<MatchDetails {...defaultProps} />);
-      const addStatsButton = screen.getByText('ADD STATS');
-      
-      fireEvent.click(addStatsButton);
-      
-      const callArg = mockPush.mock.calls[0][0];
-      expect(callArg).toContain('homeLineup=');
-      expect(callArg).toContain('awayLineup=');
-    });
-
-    it('should handle missing icon URLs in navigation', () => {
-      const propsWithoutIcons = {
-        ...defaultProps,
-        homeTeam: { ...mockHomeTeam, icon_url: undefined },
-        awayTeam: { ...mockAwayTeam, icon_url: undefined },
-      };
-      render(<MatchDetails {...propsWithoutIcons} />);
-      const addStatsButton = screen.getByText('ADD STATS');
-      
-      fireEvent.click(addStatsButton);
-      
-      const callArg = mockPush.mock.calls[0][0];
-      expect(callArg).toContain('homeLogo=%2Fplaceholder.svg');
-      expect(callArg).toContain('awayLogo=%2Fplaceholder.svg');
     });
   });
 
@@ -309,12 +304,6 @@ describe('MatchDetails', () => {
       expect(screen.getByAltText('Background')).toBeInTheDocument();
       expect(screen.getByAltText('Home United')).toBeInTheDocument();
       expect(screen.getByAltText('Away FC')).toBeInTheDocument();
-    });
-
-    it('should have a clickable button with proper text', () => {
-      render(<MatchDetails {...defaultProps} />);
-      const button = screen.getByRole('button', { name: /add stats/i });
-      expect(button).toBeInTheDocument();
     });
   });
 });

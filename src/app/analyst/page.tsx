@@ -68,18 +68,16 @@ export default function Dashboard() {
 
 
 
-const upcomingGames = allGames.filter(game => game.completed === false);
+const upcomingGames = allGames.filter(game => !game.completed);
 const completedGames = allGames.filter(
-  game => game.completed === true && game.analyst === user?.auth_user_id
-);
-const bookedGames = allGames.filter(
-  game => game.booked === true && game.completed === false && game.analyst === user?.auth_user_id
+  (game) => game.completed === true && game.analyst === user?.auth_user_id
 );
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-  }
+// Booked (upcoming) games for this analyst
+const bookedGames = allGames.filter(
+  (game) => game.booked === true && game.completed === false && game.analyst === user?.auth_user_id
+);
+
 
   const renderTabContent = () => {
     switch (activeTab) {

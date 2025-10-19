@@ -1,12 +1,86 @@
+//src\components\game-card.tsx
+"use client";
+
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, Check } from "lucide-react";
-import { useState, useEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  memo,
+  useContext,
+  createContext,
+} from "react";
 import { supabase } from "../app/api/DatabaseApi/supabaseClient";
 import { BookingApiClient } from "../app/utils/BookGames";
+import { useMatches } from "@/app/context/MatchesContext";
+import { toast } from "sonner";
 
+/* -------------------------------------------------------------
+   🧠 Context-based user cache (prevents duplicate Supabase calls)
+------------------------------------------------------------- */
+const UserContext = createContext<{
+  id?: string;
+  role?: string;
+  loading: boolean;
+}>({
+  id: undefined,
+  role: undefined,
+  loading: true,
+});
 
+export const UserProvider = ({ children }: { children: React.ReactNode }) => {
+  const [userData, setUserData] = useState<{
+    id?: string;
+    role?: string;
+    loading: boolean;
+  }>({
+    id: undefined,
+    role: undefined,
+    loading: true,
+  });
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const user = authData?.user;
+        if (user) {
+          const { data: userRow } = await supabase
+            .from("users")
+            .select("role")
+            .eq("auth_user_id", user.id)
+            .maybeSingle();
+          if (mounted) {
+            setUserData({ id: user.id, role: userRow?.role, loading: false });
+          }
+        } else {
+          setUserData({ id: undefined, role: undefined, loading: false });
+        }
+      } catch (err) {
+        console.error("Error fetching user:", err);
+        setUserData((prev) => ({ ...prev, loading: false }));
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return (
+    <UserContext.Provider value={userData}>{children}</UserContext.Provider>
+  );
+};
+
+const useUserData = () => useContext(UserContext);
+
+/* -------------------------------------------------------------
+   📦 Interfaces
+------------------------------------------------------------- */
 interface Team {
   team_id: string;
   name: string;
@@ -31,193 +105,262 @@ interface GameCardProps {
   awayLineup?: Player[];
 }
 
-export function GameCard({
-  match_id,
-  date,
-  time,
-  homeTeam,
-  awayTeam,
-  location,
-  booked: initialBooked = false,
-}: GameCardProps) {
-  const router = useRouter();
-  const [analystId, setAnalystId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [isBooked, setIsBooked] = useState<boolean>(initialBooked);
-  const [loading, setLoading] = useState<boolean>(false);
+/* -------------------------------------------------------------
+   💨 Shimmer Loader (shared)
+------------------------------------------------------------- */
+const shimmerStyles = `
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.375rem;
+}
+`;
 
-  // Fetch current user + role
-  useEffect(() => {
-    async function fetchUser() {
-      try {
-        const { data } = await supabase.auth.getUser();
-        if (data.user) {
-          setAnalystId(data.user.id);
-
-          // Fetch role from 'users' table
-          const { data: userData, error } = await supabase
-            .from("users")
-            .select("role")
-            .eq("auth_user_id", data.user.id)
-            .maybeSingle();
-
-          if (!error && userData) {
-            setUserRole(userData.role);
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      }
-    }
-
-    fetchUser();
-  }, []);
-
-  // Sync prop changes with state
-  useEffect(() => {
-    setIsBooked(initialBooked);
-  }, [initialBooked]);
-
-  const handleCardClick = () => {
-    // Navigate to details page
-    router.push(`/analyst/${match_id}`);
-  };
-
-  const handleBookClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    if (!analystId) {
-      alert("You must be logged in as an analyst to book.");
-      return;
-    }
-
-    if (isBooked) {
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const result = await BookingApiClient.bookGame(match_id, analystId);
-      if (result.success) {
-        setIsBooked(true);
-        alert(result.message || "Game booked successfully!");
-      } else {
-        if (
-          result.message === "This match already has an analyst assigned ❌"
-        ) {
-          setIsBooked(true);
-        }
-        alert(result.message || "Booking failed");
-      }
-    } catch (err) {
-      console.error("Booking error:", err);
-      alert("An error occurred while booking. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewDetails = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    router.push(`/analyst/${match_id}`);
-  };
-
-  return (
-    <Card
-      onClick={handleCardClick}
-      className={`bg-white border-[#FE563F] p-3 text-black transition-all duration-300 ease-in-out ${
-        isBooked
-          ? "opacity-80 cursor-pointer hover:scale-[1.02] hover:shadow-lg"
-          : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20 cursor-pointer"
-      }`}
-    >
-      {/* Date and Time */}
-      <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
-        <div className="flex items-center gap-1">
-          <Calendar size={12} />
-          <span>{date}</span>
+export const GameCardSkeleton = memo(() => (
+  <>
+    <style>{shimmerStyles}</style>
+    <Card className="bg-white border-[#FE563F] p-3 overflow-hidden animate-pulse">
+      <div className="mb-2 flex justify-between">
+        <div className="skeleton h-3 w-16"></div>
+        <div className="skeleton h-3 w-10"></div>
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex flex-col items-center flex-1 gap-1">
+          <div className="skeleton rounded-full h-12 w-12"></div>
+          <div className="skeleton h-2.5 w-16"></div>
         </div>
-        <div className="flex items-center gap-1">
-          <Clock size={12} />
-          <span>{time}</span>
+        <div className="skeleton h-2 w-6"></div>
+        <div className="flex flex-col items-center flex-1 gap-1">
+          <div className="skeleton rounded-full h-12 w-12"></div>
+          <div className="skeleton h-2.5 w-16"></div>
         </div>
       </div>
-
-      {/* Teams */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-18 h-18 relative mb-0.5">
-            <Image
-              src={homeTeam.logo || "/placeholder.svg"}
-              alt={`${homeTeam.name} logo`}
-              fill
-              className="object-contain"
-            />
-          </div>
-          <span className="text-xs text-black font-medium text-center">
-            {homeTeam.name}
-          </span>
-        </div>
-
-        <div className="text-slate-400 font-bold text-sm mx-2">vs</div>
-
-        <div className="flex flex-col items-center flex-1">
-          <div className="w-18 h-18 relative mb-0.5">
-            <Image
-              src={awayTeam.logo || "/placeholder.svg"}
-              alt={`${awayTeam.name} logo`}
-              fill
-              className="object-contain"
-            />
-          </div>
-          <span className="text-xs text-black font-medium text-center">
-            {awayTeam.name}
-          </span>
-        </div>
+      <div className="mt-3 flex justify-center">
+        <div className="skeleton h-3 w-24"></div>
       </div>
-
-      {/* Location */}
-      <div className="flex items-center justify-center text-slate-400 text-xs mt-2">
-        <span>{location}</span>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between text-xs font-medium mt-3">
-        {userRole === "Coach" ? (
-          <div className="flex justify-center w-full">
-            <button
-              onClick={handleViewDetails}
-              className="text-blue-400 hover:underline"
-            >
-              View Details
-            </button>
-          </div>
-        ) : (
-          <>
-            <button
-              onClick={handleViewDetails}
-              className="text-blue-400 hover:underline"
-            >
-              View Details
-            </button>
-
-            {isBooked ? (
-              <div className="flex items-center gap-1 text-green-500">
-                <Check size={14} />
-                <span>Booked</span>
-              </div>
-            ) : (
-              <button
-                onClick={handleBookClick}
-                disabled={loading}
-                className="text-yellow-500 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? "Booking..." : "Book for Analysis"}
-              </button>
-            )}
-          </>
-        )}
+      <div className="mt-3 flex justify-between">
+        <div className="skeleton h-3 w-16"></div>
+        <div className="skeleton h-3 w-20"></div>
       </div>
     </Card>
+  </>
+));
+GameCardSkeleton.displayName = "GameCardSkeleton";
+
+/* -------------------------------------------------------------
+   🧩 Memoized Subcomponents (pure + lightweight)
+------------------------------------------------------------- */
+const BaseGameCard = memo(
+  ({
+    children,
+    isBooked,
+    onClick,
+  }: {
+    children: React.ReactNode;
+    isBooked: boolean;
+    onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  }) => (
+    <Card
+      onClick={onClick}
+      className={`bg-white border-[#FE563F] p-3 text-black transition-transform duration-200 ease-in-out ${
+        isBooked
+          ? "opacity-80 hover:scale-[1.02] hover:shadow-lg"
+          : "hover:scale-105 hover:shadow-xl hover:shadow-slate-900/20"
+      } cursor-pointer`}
+    >
+      {children}
+    </Card>
+  )
+);
+BaseGameCard.displayName = "BaseGameCard";
+
+const TeamsDisplay = memo(
+  ({ homeTeam, awayTeam }: { homeTeam: Team; awayTeam: Team }) => (
+    <div className="flex items-center justify-between relative">
+      {[homeTeam, awayTeam].map((team, i) => (
+        <div
+          key={team.team_id || i}
+          className="flex flex-col items-center flex-1"
+        >
+          <div className="relative w-16 h-16 mb-1">
+            <Image
+              src={team.logo || "/placeholder.svg"}
+              alt={`${team.name} logo`}
+              fill
+              loading="lazy"
+              sizes="64px"
+              className="object-contain"
+            />
+          </div>
+          <span className="text-xs text-black font-medium text-center">
+            {team.name}
+          </span>
+        </div>
+      ))}
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-slate-400 font-bold text-sm">
+        vs
+      </div>
+    </div>
+  )
+);
+TeamsDisplay.displayName = "TeamsDisplay";
+
+const DateTimeDisplay = memo(
+  ({ date, time }: { date: string; time: string }) => (
+    <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
+      <div className="flex items-center gap-1">
+        <Calendar size={12} />
+        <span>{date}</span>
+      </div>
+      <div className="flex items-center gap-1">
+        <Clock size={12} />
+        <span>{time}</span>
+      </div>
+    </div>
+  )
+);
+DateTimeDisplay.displayName = "DateTimeDisplay";
+
+const LocationDisplay = memo(({ location }: { location: string }) => (
+  <div className="flex items-center justify-center text-slate-400 text-xs mt-2">
+    <span>{location}</span>
+  </div>
+));
+LocationDisplay.displayName = "LocationDisplay";
+
+/* -------------------------------------------------------------
+   🎮 Analyst and Coach Cards
+------------------------------------------------------------- */
+const AnalystGameCard = memo(
+  ({
+    match_id,
+    date,
+    time,
+    homeTeam,
+    awayTeam,
+    location,
+    booked,
+  }: GameCardProps) => {
+    const router = useRouter();
+    const { id: analystId } = useUserData();
+    const [isBooked, setIsBooked] = useState(booked);
+    const [booking, setBooking] = useState(false);
+    const {triggerRefetch}=useMatches()
+
+    const handleBookClick = useCallback(
+      async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!analystId || isBooked) return;
+
+        setBooking(true);
+        try {
+          const result = await BookingApiClient.bookGame(match_id, analystId);
+          if (result.success) {
+            setIsBooked(true);
+            triggerRefetch();
+            toast.success("Game Booked Successfully.", {
+        description: "Refreshing...",
+      });
+        
+
+          }
+          alert(result.message || "Booking status updated.");
+        } catch {
+          alert("Booking failed. Please try again.");
+        } finally {
+          setBooking(false);
+        }
+      },
+      [analystId, isBooked, match_id]
+    );
+
+    const handleView = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        router.push(`/analyst/${match_id}`);
+      },
+      [router, match_id]
+    );
+
+    return (
+      <BaseGameCard isBooked={isBooked} onClick={handleView}>
+        <DateTimeDisplay date={date} time={time} />
+        <TeamsDisplay homeTeam={homeTeam} awayTeam={awayTeam} />
+        <LocationDisplay location={location} />
+        <div className="flex items-center justify-between text-xs font-medium mt-3">
+          <button
+            onClick={handleView}
+            className="text-blue-400 hover:underline"
+          >
+            View Details
+          </button>
+          {isBooked ? (
+            <div className="flex items-center gap-1 text-green-500">
+              <Check size={14} />
+              <span>Booked</span>
+            </div>
+          ) : (
+            <button
+              onClick={handleBookClick}
+              disabled={booking}
+              className="text-yellow-500 hover:underline disabled:opacity-50"
+            >
+              {booking ? "Booking..." : "Book for Analysis"}
+            </button>
+          )}
+        </div>
+      </BaseGameCard>
+    );
+  }
+);
+AnalystGameCard.displayName = "AnalystGameCard";
+
+const CoachGameCard = memo(
+  ({ match_id, date, time, homeTeam, awayTeam, location }: GameCardProps) => {
+    const router = useRouter();
+    const handleView = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        router.push(`/coach/${match_id}`);
+      },
+      [router, match_id]
+    );
+
+    return (
+      <BaseGameCard isBooked={false} onClick={handleView}>
+        <DateTimeDisplay date={date} time={time} />
+        <TeamsDisplay homeTeam={homeTeam} awayTeam={awayTeam} />
+        <LocationDisplay location={location} />
+        <div className="flex justify-center mt-3">
+          <button
+            className="text-blue-400 hover:underline"
+            onClick={handleView}
+          >
+            View Details
+          </button>
+        </div>
+      </BaseGameCard>
+    );
+  }
+);
+CoachGameCard.displayName = "CoachGameCard";
+
+/* -------------------------------------------------------------
+   🎯 Main GameCard Wrapper (lightweight)
+------------------------------------------------------------- */
+export function GameCard(props: GameCardProps) {
+  const { role, loading } = useUserData();
+
+  if (loading) return <GameCardSkeleton />;
+
+  return role === "Coach" ? (
+    <CoachGameCard {...props} />
+  ) : (
+    <AnalystGameCard {...props} />
   );
 }

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Tabspage } from "@/components/line-up-page";
 import { MatchMetaData } from "@/types/basketball";
 import { useAuth } from "@/app/context/AuthContext";
+import { useMatches } from "@/app/context/MatchesContext";
 
 
 
@@ -66,6 +67,12 @@ export default function MatchDetails({
   const [awayLineup, setAwayLineup] = useState<PlayerDetails[]>(awayPlayers);
   const {user}=useAuth()
   const [isLoading,setIsLoading]=useState(true)
+  const {allGames}=useMatches()
+  const currGame = allGames.find(
+  (game) => game.match_id === matchId
+);
+
+
  
 
   return (
@@ -146,8 +153,8 @@ export default function MatchDetails({
             </div>
           </div>
 
-          {/* Add Stats Button */}
-          {metadata.analyst === user?.auth_user_id && !metadata.completed && (
+          {/* Add Stats Button renders when the game is booked by You and not completed */}
+          { currGame?.booked==true && currGame.analyst==user?.auth_user_id && !currGame.completed&&(
   <button
     onClick={() => {
       const queryParams = new URLSearchParams({
@@ -185,7 +192,7 @@ export default function MatchDetails({
   awayLogo={awayTeam.icon_url}
   homePrevMatches={homePrevMatches}
   awayPrevMatches={awayPrevMatches}
-  eventsData={MatchEvents}
+  MatchEvents={MatchEvents}
   metadata={metadata}
 />
         </div>
