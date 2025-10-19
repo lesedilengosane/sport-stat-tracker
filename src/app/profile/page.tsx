@@ -175,7 +175,7 @@ export default function ProfilePage() {
         {/* Extra components */}
         <div className="space-y-8">
           <Historicaldata  />
-          <ExtApi />
+          {/*<ExtApi />*/}
         </div>
       </div>
     </div>
