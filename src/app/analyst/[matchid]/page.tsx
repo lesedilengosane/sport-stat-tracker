@@ -87,7 +87,7 @@ export default async function MatchPage({ params }: MatchPagePropsCustom) {
       name: l.player?.first_name || "Player",
       surname: l.player?.last_name || "Unknown",
       position: l.position || "Unknown",
-      avatarUrl: l.player?.avatar_url || "/avatars/player3.jpg",
+      avatarUrl: l.player?.image || "/avatars/player3.jpg",
     }));
 
   const homePlayers = mapLineup(matchData.lineups.homeLineup || [], "home");
