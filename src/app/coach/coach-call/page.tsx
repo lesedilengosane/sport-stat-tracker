@@ -171,7 +171,7 @@ export default function UserProfile() {
         const fileName = `${userInfo.user_id}-${Date.now()}.${fileExt}`
         const filePath = `${fileName}`
 
-        console.log("[v0] Uploading team logo to Supabase storage...")
+        console.log("Uploading team logo to Supabase storage...")
 
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from("teamLogos")
@@ -181,11 +181,11 @@ export default function UserProfile() {
           })
 
         if (uploadError) {
-          console.error("[v0] Upload error:", uploadError)
+          console.error("Upload error:", uploadError)
           throw new Error(`Failed to upload logo: ${uploadError.message}`)
         }
 
-        console.log("[v0] Upload successful:", uploadData)
+        console.log("Upload successful:", uploadData)
 
         // Get public URL for the uploaded file
         const {
@@ -193,7 +193,7 @@ export default function UserProfile() {
         } = supabase.storage.from("teamLogos").getPublicUrl(filePath)
 
         iconUrl = publicUrl
-        console.log("[v0] Public URL:", iconUrl)
+        console.log("Public URL:", iconUrl)
       }
 
       setUploading(false)
