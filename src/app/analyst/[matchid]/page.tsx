@@ -37,9 +37,7 @@ type MatchPagePropsCustom = {
 
 async function getMatchData(matchid: string): Promise<MatchData> {
   
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || 
-                  process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-                  'http://localhost:3000';
+  const baseUrl ='https://sport-stat-tracker-syg3-git-dev-phutheho-mtls-projects.vercel.app/';
   
   const res = await fetch(`${baseUrl}/api/analyst/${matchid}`, {
     cache: 'no-store', // This is the reason game events where not appearing for recently recorded games,I was caching responses here so stale data was persisiting
