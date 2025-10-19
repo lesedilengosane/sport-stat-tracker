@@ -205,7 +205,6 @@ export default function CoachDashboard() {
   useEffect(() => {
     if (activeTab === "schedule") fetchCoachMatches()
     else if (activeTab === "all-games") fetchAllGames()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, user])
 
   const renderTabContent = () => {
