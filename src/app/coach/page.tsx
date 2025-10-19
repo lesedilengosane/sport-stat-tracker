@@ -314,6 +314,7 @@ export default function CoachDashboard() {
             </div>
           </div>
         )}
+        
         {renderTabContent()}
       </div>
     </div>
