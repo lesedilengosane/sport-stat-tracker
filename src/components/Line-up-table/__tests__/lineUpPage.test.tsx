@@ -1,7 +1,7 @@
 // src/components/Line-up-table/__tests__/lineUpPage.test.tsx
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { Tabspage } from '../line-up-page';
+import { Tabspage } from '../line-up-page2';
 
 // Mock Next.js Image component
 jest.mock('next/image', () => ({

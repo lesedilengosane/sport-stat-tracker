@@ -12,7 +12,10 @@ export interface TeamPlayer {
     team_name: string
     coach_id: string
     players: TeamPlayer[]
+    icon_url?: string | null;
   }
+
+ 
   
   export interface TeamInfo {
     team_id?: string

@@ -66,7 +66,7 @@ export default function PlayersList({ teamId }: { teamId: string }) {
   return (
     <section className="max-w-5xl mx-auto px-4 py-10">
       {/* Search box */}
-      <div className="mb-8">
+     {/* <div className="mb-8">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -74,6 +74,7 @@ export default function PlayersList({ teamId }: { teamId: string }) {
           className="w-full rounded-xl bg-black/30 backdrop-blur-md border border-white/20 px-4 py-3 text-base text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500"
         />
       </div>
+      */}
 
       {/* Player grid */}
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -82,7 +83,7 @@ export default function PlayersList({ teamId }: { teamId: string }) {
             key={`player-${p.player_id}-${idx}`}
             className="group rounded-2xl bg-white border-2 border-yellow-400 p-6 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl"
           >
-            <Link href={`/players/${p.player_id}`} className="block h-full">
+            <Link href={`/player/${p.player_id}`} className="block h-full">
               <div className="flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-200 hover:border-yellow-400 hover:shadow-md transition-all duration-200">
                 <div className="relative w-16 h-16 flex-shrink-0">
                   <Image

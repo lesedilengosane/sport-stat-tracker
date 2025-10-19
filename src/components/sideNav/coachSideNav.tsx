@@ -10,7 +10,7 @@ const coachNavItems = [
   { id: "all-games", label: "All Games", icon: Trophy },
   { id: "team-management", label: "Team Management", icon: Settings },
   { id: "team-stats", label: "Team Stats", icon: BarChart3 },
-  { id: "players", label: "Players", icon: Users },
+  { id: "My Players", label: "My Players", icon: Users },
 ];
 
 interface CoachSideNavProps {

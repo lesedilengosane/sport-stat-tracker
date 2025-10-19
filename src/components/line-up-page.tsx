@@ -23,7 +23,7 @@ interface LineupProps {
   date?: string;
   homePrevMatches?: PrevMatch[];
   awayPrevMatches?: PrevMatch[];
-  eventsData?:any[];
+  MatchEvents?:any[];
   metadata:MatchMetaData
 
 }
@@ -40,10 +40,19 @@ export function Tabspage({
   date,
   homePrevMatches = [],
   awayPrevMatches = [],
-  eventsData=[],
+  MatchEvents=[],
   metadata,
 }: LineupProps) {
   const router=useRouter()
+
+  console.log({
+  currMatchId: metadata.match_id,
+  hasEvents: !!MatchEvents,
+  eventsLength: MatchEvents.length,
+  sampleEvent: MatchEvents[0],
+});
+
+
 
   //console.log(`The metadata object inside Tabs page,this is before being passed to the summary component`,JSON.stringify(metadata, null, 2))
   return (
@@ -72,24 +81,22 @@ export function Tabspage({
 
 
         {/* Last Games Tab */}
-        <TabsContent value="lastgames" className="w-full">
-  <div className="flex flex-col md:flex-row gap-8 mt-6">
-    <div className="w-full md:w-1/2">
-      <LastMatchesCards
-        data={homePrevMatches}
-        title={`Last 5 games - ${homeTeam}`}
-        currentTeam={homeTeam}
-        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
-      />
-    </div>
-    <div className="w-full md:w-1/2">
-      <LastMatchesCards
-        data={awayPrevMatches}
-        title={`Last 5 games - ${awayTeam}`}
-        currentTeam={awayTeam}
-        onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
-      />
-    </div>
+
+{/* Last Games Tab */}
+<TabsContent value="lastgames" className="w-full">
+  <div className="flex flex-row gap-8 mt-6">
+    <LastMatchesTable
+      data={homePrevMatches}
+      title="Last 5 Games"
+      currentTeam={homeTeam}
+      onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+    />
+    <LastMatchesTable
+      data={awayPrevMatches}
+      title="Last 5 Games"
+      currentTeam={awayTeam}
+      onMatchClick={(match) => router.push(`/analyst/${match.match_id}`)}
+    />
   </div>
 </TabsContent>
        
@@ -98,8 +105,8 @@ export function Tabspage({
         <TabsContent value="summary">
   <div className="text-center text-white p-8">
     <h2 className="text-xl font-bold mb-4">Game Summary</h2>
-    {eventsData && eventsData.length > 0 ? (
-      <BasketballTimeline events={eventsData} homeTeamName={homeTeam} awayTeamName={awayTeam} homeTeamID={homeTeamID} awayTeamID={awayTeamID} metadata={metadata}/>
+    {MatchEvents && MatchEvents.length > 0 ? (
+      <BasketballTimeline MatchEvents={MatchEvents} homeTeamName={homeTeam} awayTeamName={awayTeam} homeTeamID={homeTeamID} awayTeamID={awayTeamID} metadata={metadata}/>
     ) : (
       <p>No events available for this match.</p>
     )}
